@@ -53,6 +53,9 @@
     .badge-pending { background: var(--warning); color: #000; }
     .badge-approved { background: var(--success); color: #000; }
     .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.85rem; }
+    
+    .user-list-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; }
+    .user-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -116,8 +119,8 @@
         </div>
 
         <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 0;">
-          <h4 style="color: var(--warning);">Set Completed!</h4>
-          <p>Waiting for admin approval to unlock the next set of 29 promotions.</p>
+          <h4 style="color: var(--warning);">Set Paused / Completed!</h4>
+          <p id="pause-reason-text">Waiting for admin approval to proceed or unlock the next set.</p>
         </div>
 
         <div id="movie-container" class="movie-box">
@@ -152,12 +155,26 @@
             <button class="nav-btn" onclick="logoutAdmin()">Logout</button>
           </div>
 
-          <!-- Set Progress & Approvals -->
+          <!-- All Registered Members -->
           <div class="admin-section">
-            <h4>Set Progress & Approvals</h4>
-            <p>Active Worker: <strong id="admin-user-name">None</strong></p>
-            <p>Active Set: <strong id="admin-active-set-text">Set 1</strong></p>
-            <button class="btn" id="approve-set-btn" onclick="approveNextSet()">Approve Current Set & Unlock Next</button>
+            <h4>All Registered Members</h4>
+            <div id="all-users-list" class="user-list-box"></div>
+          </div>
+
+          <!-- Manage Selected Member -->
+          <div class="admin-section">
+            <h4>Manage Selected Member</h4>
+            <label style="font-size: 0.8rem;">Select Member to Manage:</label>
+            <select id="admin-selected-user" onchange="loadAdminUserData()"></select>
+
+            <label style="font-size: 0.8rem;">Member Balance ($):</label>
+            <input type="number" id="admin-user-balance" step="0.01">
+
+            <label style="font-size: 0.8rem;">Stop Member At Work # (1 to 29):</label>
+            <input type="number" id="admin-stop-work-num" min="1" max="29" value="29">
+
+            <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
+            <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Unlock Next</button>
           </div>
 
           <!-- Upload Picture & Edit Settings -->
@@ -237,6 +254,7 @@
         password: p,
         currentSet: 1,
         completedInSet: 0,
+        stopLimit: 29,
         isSetApproved: true,
         balance: 0.00,
         withdrawalStatus: 'None'
@@ -289,6 +307,7 @@
       if (pass === 'admin1234') {
         document.getElementById('admin-login-card').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
+        populateAdminUsers();
         renderUI();
       } else {
         alert('Incorrect Admin Password!');
@@ -301,11 +320,80 @@
       document.getElementById('admin-dashboard').classList.add('hidden');
     }
 
+    function populateAdminUsers() {
+      const select = document.getElementById('admin-selected-user');
+      const userListContainer = document.getElementById('all-users-list');
+      select.innerHTML = '';
+      userListContainer.innerHTML = '';
+
+      const usernames = Object.keys(users);
+      if (usernames.length === 0) {
+        userListContainer.innerHTML = '<p style="font-size:0.8rem;">No registered members yet.</p>';
+        return;
+      }
+
+      usernames.forEach(u => {
+        const option = document.createElement('option');
+        option.value = u;
+        option.innerText = u;
+        select.appendChild(option);
+
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        item.innerHTML = `<span><strong>${u}</strong> (Set ${users[u].currentSet})</span> <span>$${users[u].balance.toFixed(2)}</span>`;
+        userListContainer.appendChild(item);
+      });
+
+      loadAdminUserData();
+    }
+
+    function loadAdminUserData() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !users[selectedUser]) return;
+
+      const user = users[selectedUser];
+      document.getElementById('admin-user-balance').value = user.balance;
+      document.getElementById('admin-stop-work-num').value = user.stopLimit || 29;
+
+      const wReqText = document.getElementById('admin-withdraw-request-text');
+      const wApproveBtn = document.getElementById('approve-withdraw-btn');
+
+      if (user.withdrawalStatus === 'Pending') {
+        wReqText.innerText = `${selectedUser} requested a withdrawal of $${user.balance.toFixed(2)}`;
+        wApproveBtn.style.display = 'block';
+      } else {
+        wReqText.innerText = 'No pending withdrawal requests for this member.';
+        wApproveBtn.style.display = 'none';
+      }
+    }
+
+    function saveAdminUserSettings() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !users[selectedUser]) return;
+
+      const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
+      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 29;
+
+      users[selectedUser].balance = newBal;
+      users[selectedUser].stopLimit = stopNum;
+
+      if (users[selectedUser].completedInSet < stopNum) {
+        users[selectedUser].isSetApproved = true;
+      }
+
+      saveUsers();
+      populateAdminUsers();
+      renderUI();
+      alert(`Updated settings for ${selectedUser}!`);
+    }
+
     function promoteMovie() {
       if (!currentUser || !users[currentUser]) return;
 
       const user = users[currentUser];
-      if (user.completedInSet >= 29) return;
+      const maxWork = user.stopLimit || 29;
+
+      if (user.completedInSet >= maxWork) return;
 
       const key = `${user.currentSet}-${user.completedInSet + 1}`;
       const reward = globalPictureData[key]?.reward || 0.50;
@@ -313,7 +401,7 @@
       user.completedInSet += 1;
       user.balance += parseFloat(reward);
 
-      if (user.completedInSet >= 29) {
+      if (user.completedInSet >= maxWork) {
         user.isSetApproved = false;
       }
 
@@ -322,20 +410,24 @@
     }
 
     function approveNextSet() {
-      if (!currentUser || !users[currentUser]) {
-        alert('No active user logged in to approve.');
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !users[selectedUser]) {
+        alert('Please select a member first.');
         return;
       }
-      const user = users[currentUser];
+
+      const user = users[selectedUser];
       if (user.currentSet < 3) {
         user.currentSet += 1;
         user.completedInSet = 0;
+        user.stopLimit = 29;
         user.isSetApproved = true;
         saveUsers();
+        populateAdminUsers();
         renderUI();
-        alert(`Approved Set for ${currentUser}! Moved to Set ${user.currentSet}.`);
+        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
       } else {
-        alert(`${currentUser} has completed all 3 sets!`);
+        alert(`${selectedUser} has already completed all 3 sets!`);
       }
     }
 
@@ -381,13 +473,16 @@
     }
 
     function approveWithdrawal() {
-      if (!currentUser || !users[currentUser]) return;
-      const user = users[currentUser];
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !users[selectedUser]) return;
+      
+      const user = users[selectedUser];
       user.withdrawalStatus = 'Approved';
       user.balance = 0;
       saveUsers();
+      populateAdminUsers();
       renderUI();
-      alert(`Withdrawal approved for ${currentUser}!`);
+      alert(`Withdrawal approved for ${selectedUser}!`);
     }
 
     function renderUI() {
@@ -404,6 +499,8 @@
       workerView.classList.remove('hidden');
 
       const user = users[currentUser];
+      const stopLimit = user.stopLimit || 29;
+
       document.getElementById('user-display-name').innerText = currentUser;
       document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
       document.getElementById('set-num-text').innerText = user.currentSet;
@@ -416,7 +513,7 @@
       const movieBox = document.getElementById('movie-container');
       const setCompletedMsg = document.getElementById('completed-set-message');
 
-      if (completed >= 29 && !user.isSetApproved) {
+      if (completed >= stopLimit || !user.isSetApproved) {
         movieBox.classList.add('hidden');
         setCompletedMsg.classList.remove('hidden');
       } else {
@@ -442,20 +539,6 @@
         wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved!</span>';
       } else {
         wStatus.innerText = '';
-      }
-
-      // Admin Section UI
-      document.getElementById('admin-user-name').innerText = currentUser;
-      document.getElementById('admin-active-set-text').innerText = `Set ${user.currentSet} (${completed}/29 Completed)`;
-      const wReqText = document.getElementById('admin-withdraw-request-text');
-      const wApproveBtn = document.getElementById('approve-withdraw-btn');
-
-      if (user.withdrawalStatus === 'Pending') {
-        wReqText.innerText = `${currentUser} requested a withdrawal of $${user.balance.toFixed(2)}`;
-        wApproveBtn.style.display = 'block';
-      } else {
-        wReqText.innerText = 'No pending withdrawal requests.';
-        wApproveBtn.style.display = 'none';
       }
     }
 
