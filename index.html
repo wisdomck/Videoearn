@@ -18,6 +18,7 @@
       --text-muted: #94a3b8;
       --success: #22c55e;
       --warning: #f59e0b;
+      --telegram: #0088cc;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -32,8 +33,9 @@
     h2, h3, h4 { margin-bottom: 12px; }
     p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--accent); cursor: pointer; text-align: center; margin-top: 8px; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--accent); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; }
     .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid var(--border); }
+    .btn-telegram { background: var(--telegram); color: #fff; }
     
     input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: var(--text); margin-bottom: 10px; }
 
@@ -140,6 +142,13 @@
         <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
         <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
       </div>
+
+      <!-- CUSTOMER SUPPORT CARD -->
+      <div class="card" style="text-align: center;">
+        <h3>Need Help?</h3>
+        <p>Contact our Official Support Team on Telegram for instant assistance.</p>
+        <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Chat with Support on Telegram</a>
+      </div>
     </div>
 
     <!-- ADMIN VIEW -->
@@ -186,6 +195,14 @@
             <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Move to Next</button>
           </div>
 
+          <!-- Manage Telegram Support Link -->
+          <div class="admin-section">
+            <h4>Telegram Support Settings</h4>
+            <label style="font-size: 0.8rem;">Telegram Support Link or Username:</label>
+            <input type="text" id="admin-telegram-link" placeholder="e.g. https://t.me/your_admin_username">
+            <button class="btn btn-secondary" onclick="saveTelegramLink()">Save Telegram Support Link</button>
+          </div>
+
           <!-- Upload Picture & Edit Settings -->
           <div class="admin-section">
             <h4>Upload & Edit Movie Pictures</h4>
@@ -226,6 +243,7 @@
   <script>
     let users = JSON.parse(localStorage.getItem('ve_users')) || {};
     let globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
+    let telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
 
     function saveUsers() {
@@ -318,6 +336,7 @@
       if (pass === 'admin1234') {
         document.getElementById('admin-login-card').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
+        document.getElementById('admin-telegram-link').value = telegramLink;
         populateAdminUsers();
         renderUI();
       } else {
@@ -329,6 +348,18 @@
       document.getElementById('admin-pass-input').value = '';
       document.getElementById('admin-login-card').classList.remove('hidden');
       document.getElementById('admin-dashboard').classList.add('hidden');
+    }
+
+    function saveTelegramLink() {
+      const link = document.getElementById('admin-telegram-link').value.trim();
+      if (!link) {
+        alert('Please enter a valid Telegram link.');
+        return;
+      }
+      telegramLink = link.startsWith('http') ? link : `https://${link}`;
+      localStorage.setItem('ve_telegram_link', telegramLink);
+      renderUI();
+      alert('Telegram Support Link updated successfully!');
     }
 
     function populateAdminUsers() {
@@ -521,6 +552,9 @@
     function renderUI() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
+
+      // Update Support Button Link
+      document.getElementById('telegram-support-btn').href = telegramLink;
 
       if (!currentUser || !users[currentUser]) {
         authView.classList.remove('hidden');
