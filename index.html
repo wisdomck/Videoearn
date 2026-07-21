@@ -135,6 +135,8 @@
       <div class="card">
         <h3>Withdraw Earnings</h3>
         <p>Request withdrawal once available balance is ready.</p>
+        <input type="text" id="withdraw-wallet-address" placeholder="Enter Crypto Wallet Address (e.g. USDT, BTC, ETH)">
+        <input type="number" id="withdraw-amount-input" placeholder="Enter Withdrawal Amount ($)" step="0.01">
         <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
         <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
       </div>
@@ -167,14 +169,21 @@
             <label style="font-size: 0.8rem;">Select Member to Manage:</label>
             <select id="admin-selected-user" onchange="loadAdminUserData()"></select>
 
-            <label style="font-size: 0.8rem;">Member Balance ($):</label>
-            <input type="number" id="admin-user-balance" step="0.01">
+            <label style="font-size: 0.8rem;">Select Set Number (Set 1, 2, or 3):</label>
+            <select id="admin-user-set-select">
+              <option value="1">Set 1</option>
+              <option value="2">Set 2</option>
+              <option value="3">Set 3</option>
+            </select>
 
             <label style="font-size: 0.8rem;">Stop Member At Work # (1 to 29):</label>
             <input type="number" id="admin-stop-work-num" min="1" max="29" value="29">
 
+            <label style="font-size: 0.8rem;">Edit Member Balance ($):</label>
+            <input type="number" id="admin-user-balance" step="0.01">
+
             <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
-            <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Unlock Next</button>
+            <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Move to Next</button>
           </div>
 
           <!-- Upload Picture & Edit Settings -->
@@ -257,7 +266,9 @@
         stopLimit: 29,
         isSetApproved: true,
         balance: 0.00,
-        withdrawalStatus: 'None'
+        withdrawalStatus: 'None',
+        withdrawalAmount: 0,
+        walletAddress: ''
       };
 
       saveUsers();
@@ -354,12 +365,13 @@
       const user = users[selectedUser];
       document.getElementById('admin-user-balance').value = user.balance;
       document.getElementById('admin-stop-work-num').value = user.stopLimit || 29;
+      document.getElementById('admin-user-set-select').value = user.currentSet || 1;
 
       const wReqText = document.getElementById('admin-withdraw-request-text');
       const wApproveBtn = document.getElementById('approve-withdraw-btn');
 
       if (user.withdrawalStatus === 'Pending') {
-        wReqText.innerText = `${selectedUser} requested a withdrawal of $${user.balance.toFixed(2)}`;
+        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${(user.withdrawalAmount || user.balance).toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
         wApproveBtn.style.display = 'block';
       } else {
         wReqText.innerText = 'No pending withdrawal requests for this member.';
@@ -373,9 +385,15 @@
 
       const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
       const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 29;
+      const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
 
       users[selectedUser].balance = newBal;
       users[selectedUser].stopLimit = stopNum;
+      
+      if (users[selectedUser].currentSet !== setNum) {
+        users[selectedUser].currentSet = setNum;
+        users[selectedUser].completedInSet = 0;
+      }
 
       if (users[selectedUser].completedInSet < stopNum) {
         users[selectedUser].isSetApproved = true;
@@ -463,13 +481,26 @@
     function requestWithdrawal() {
       if (!currentUser || !users[currentUser]) return;
       const user = users[currentUser];
-      if (user.balance <= 0) {
-        alert('Balance must be greater than $0 to withdraw.');
+
+      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value);
+
+      if (!wallet) {
+        alert('Please enter your Crypto Wallet Address.');
         return;
       }
+      if (!amount || amount <= 0 || amount > user.balance) {
+        alert('Please enter a valid withdrawal amount within your available balance.');
+        return;
+      }
+
       user.withdrawalStatus = 'Pending';
+      user.withdrawalAmount = amount;
+      user.walletAddress = wallet;
+
       saveUsers();
       renderUI();
+      alert('Withdrawal request submitted successfully!');
     }
 
     function approveWithdrawal() {
@@ -478,7 +509,9 @@
       
       const user = users[selectedUser];
       user.withdrawalStatus = 'Approved';
-      user.balance = 0;
+      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
+      user.withdrawalAmount = 0;
+      
       saveUsers();
       populateAdminUsers();
       renderUI();
@@ -534,9 +567,9 @@
 
       const wStatus = document.getElementById('withdraw-status');
       if (user.withdrawalStatus === 'Pending') {
-        wStatus.innerHTML = '<span class="badge badge-pending">Withdrawal Pending Admin Approval</span>';
+        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending Admin Approval ($${user.withdrawalAmount.toFixed(2)})</span>`;
       } else if (user.withdrawalStatus === 'Approved') {
-        wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved!</span>';
+        wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved & Sent!</span>';
       } else {
         wStatus.innerText = '';
       }
