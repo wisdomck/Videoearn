@@ -1,462 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VideoEarn</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VideoEarn Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0d0b21 0%, #17153a 100%);
-      --card-bg: rgba(255, 255, 255, 0.05);
-      --card-border: rgba(255, 255, 255, 0.1);
-      --accent-color: #6366f1;
-      --accent-hover: #4f46e5;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --input-bg: rgba(0, 0, 0, 0.25);
+      --bg: #0b0f17;
+      --card-bg: rgba(23, 31, 48, 0.85);
+      --border: rgba(255, 255, 255, 0.1);
+      --primary: #6366f1;
+      --accent: linear-gradient(135deg, #e11d48 0%, #a855f7 50%, #6366f1 100%);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; }
 
-    body {
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .logo { font-size: 1.5rem; font-weight: 800; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
 
-    .container {
-      width: 100%;
-      max-width: 440px;
-    }
+    .card { background: var(--card-bg); border: 1px solid var(--border); backdrop-filter: blur(12px); border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    h2, h3, h4 { margin-bottom: 12px; }
+    p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      border-radius: 20px;
-      padding: 28px 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--accent); cursor: pointer; text-align: center; margin-top: 8px; }
+    .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid var(--border); }
+    
+    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: var(--text); margin-bottom: 10px; }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: #fff;
-    }
+    .progress-bar { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
+    .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
+    .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: rgba(0,0,0,0.2); }
+    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #1a202c; }
+    
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .stat-card { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+    .stat-card span { font-size: 0.8rem; color: var(--text-muted); }
+    .stat-card div { font-size: 1.1rem; font-weight: 700; color: var(--success); }
 
-    .brand-icon {
-      background: var(--accent-color);
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    h2 {
-      font-size: 1.6rem;
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      color: var(--text-muted);
-      text-align: center;
-      font-size: 0.9rem;
-      margin-bottom: 24px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--input-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--accent-color);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent-color);
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-
-    .btn:hover {
-      background: var(--accent-hover);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-    }
-
-    .toggle-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .toggle-link a {
-      color: var(--accent-color);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    /* Dashboard UI */
-    .balance-box {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 18px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .balance-amount {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #10b981;
-      margin: 6px 0;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .user-list-item {
-      background: var(--input-bg);
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-size: 0.85rem;
-    }
+    .admin-section { border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px; }
+    .hidden { display: none !important; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .badge-pending { background: var(--warning); color: #000; }
+    .badge-approved { background: var(--success); color: #000; }
   </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="container">
+    <header>
+      <div class="logo">VideoEarn</div>
+      <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
+    </header>
 
-  <!-- BRAND HEADER -->
-  <div class="brand">
-    <div class="brand-icon">⚡</div>
-    <span>VideoEarn</span>
+    <!-- WORKER VIEW -->
+    <div id="worker-view">
+      <div class="card">
+        <h3>Worker Dashboard</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>Current Set</span>
+            <div id="current-set-display" style="color:var(--text)">Set 1 / 3</div>
+          </div>
+          <div class="stat-card">
+            <span>Total Earnings</span>
+            <div id="worker-balance">$0.00</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span>Progress (Set <span id="set-num-text">1</span>)</span>
+          <span id="progress-text">0 / 29 Completed</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 0;">
+          <h4 style="color: var(--warning);">Set Completed!</h4>
+          <p>Waiting for admin approval to unlock the next set of 29 promotions.</p>
+        </div>
+
+        <div id="movie-container" class="movie-box">
+          <img id="movie-img" src="" alt="Promo Movie">
+          <h4 id="movie-title">Movie Promotion #1</h4>
+          <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
+          <div style="font-weight: 700; color: var(--success); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
+          <button class="btn" onclick="promoteMovie()">Promote This Movie</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Withdraw Earnings</h3>
+        <p>Request withdrawal once available balance is ready.</p>
+        <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
+        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="admin-view" class="hidden">
+      <!-- Admin Login -->
+      <div class="card" id="admin-login-card">
+        <h3>Admin Access Required</h3>
+        <input type="password" id="admin-pass-input" placeholder="Enter Admin Password">
+        <button class="btn" onclick="loginAdmin()">Login to Admin Panel</button>
+      </div>
+
+      <!-- Admin Controls -->
+      <div id="admin-dashboard" class="hidden">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Admin Panel</h3>
+            <button class="nav-btn" onclick="logoutAdmin()">Logout</button>
+          </div>
+
+          <!-- Set Approval Section -->
+          <div class="admin-section">
+            <h4>Set Progress & Approvals</h4>
+            <p>Active Set: <strong id="admin-active-set-text">Set 1</strong></p>
+            <button class="btn" id="approve-set-btn" onclick="approveNextSet()">Approve Current Set & Unlock Next</button>
+          </div>
+
+          <!-- Upload Picture & Edit Settings Section -->
+          <div class="admin-section">
+            <h4>Upload & Edit Movie Pictures</h4>
+            
+            <label style="font-size: 0.8rem;">Select Set Number (1, 2, or 3):</label>
+            <select id="edit-set-num">
+              <option value="1">Set 1</option>
+              <option value="2">Set 2</option>
+              <option value="3">Set 3</option>
+            </select>
+
+            <label style="font-size: 0.8rem;">Picture Number (1 to 29):</label>
+            <input type="number" id="edit-img-index" min="1" max="29" value="1">
+
+            <label style="font-size: 0.8rem;">Upload Movie Picture:</label>
+            <input type="file" id="edit-img-file" accept="image/*">
+
+            <label style="font-size: 0.8rem;">Reward Amount ($):</label>
+            <input type="number" id="edit-img-reward" value="0.50" step="0.01">
+
+            <label style="font-size: 0.8rem;">Admin Comment:</label>
+            <input type="text" id="edit-img-comment" placeholder="Featured movie promo note...">
+
+            <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
+          </div>
+
+          <!-- Withdrawal Requests Section -->
+          <div class="admin-section">
+            <h4>Withdrawal Requests</h4>
+            <p id="admin-withdraw-request-text">No active withdrawal request.</p>
+            <button class="btn" id="approve-withdraw-btn" style="background: var(--success); display: none;" onclick="approveWithdrawal()">Approve Withdrawal Request</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- 1. REGISTER CARD -->
-  <div id="view-register" class="card">
-    <h2>Create Account 🚀</h2>
-    <p class="subtitle">Join us and start earning daily by watching videos.</p>
-
-    <div class="form-group">
-      <label>Full Name</label>
-      <input type="text" id="reg-name" placeholder="John Doe">
-    </div>
-
-    <div class="form-group">
-      <label>Email Address</label>
-      <input type="email" id="reg-email" placeholder="name@example.com">
-    </div>
-
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="reg-pass" placeholder="Minimum 6 characters">
-    </div>
-
-    <button class="btn" onclick="registerUser()">Start Earning</button>
-    
-    <div class="toggle-link">
-      Already have an account? <a href="#" onclick="switchView('login')">Log In</a>
-    </div>
-    
-    <div class="toggle-link" style="margin-top: 10px;">
-      <a href="#" onclick="switchView('admin')">Admin Portal</a>
-    </div>
-  </div>
-
-
-  <!-- 2. LOGIN CARD -->
-  <div id="view-login" class="card hidden">
-    <h2>Welcome Back! 👋</h2>
-    <p class="subtitle">Log in to access your account dashboard.</p>
-
-    <div class="form-group">
-      <label>Email Address</label>
-      <input type="email" id="login-email" placeholder="name@example.com">
-    </div>
-
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="login-pass" placeholder="Enter password">
-    </div>
-
-    <button class="btn" onclick="loginUser()">Log In</button>
-
-    <div class="toggle-link">
-      Don't have an account? <a href="#" onclick="switchView('register')">Create Account</a>
-    </div>
-  </div>
-
-
-  <!-- 3. DASHBOARD VIEW -->
-  <div id="view-dashboard" class="card hidden">
-    <h2 id="welcome-msg">Dashboard</h2>
-    <p class="subtitle">Watch videos and complete daily tasks.</p>
-
-    <div class="balance-box">
-      <small style="color: var(--text-muted)">Total Balance</small>
-      <div class="balance-amount" id="user-balance">$0.00</div>
-      <small style="color: #10b981;">+$5.00 Sign-up Bonus Included</small>
-    </div>
-
-    <button class="btn" onclick="switchView('withdraw')">Withdraw Funds 🪙</button>
-    <button class="btn btn-secondary" onclick="logout()" style="margin-top: 10px;">Log Out</button>
-  </div>
-
-
-  <!-- 4. WITHDRAW CARD -->
-  <div id="view-withdraw" class="card hidden">
-    <h2>Crypto Withdrawal 💸</h2>
-    <p class="subtitle">Select your network and wallet details.</p>
-
-    <div class="form-group">
-      <label>Crypto Network</label>
-      <select id="withdraw-network">
-        <option value="USDT (TRC20)">USDT (TRC20)</option>
-        <option value="USDT (BEP20)">USDT (BEP20)</option>
-        <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
-        <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
-        <option value="Solana (SOL)">Solana (SOL)</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Wallet Address</label>
-      <input type="text" id="withdraw-address" placeholder="Paste your wallet address here">
-    </div>
-
-    <div class="form-group">
-      <label>Amount ($)</label>
-      <input type="number" id="withdraw-amount" placeholder="0.00">
-    </div>
-
-    <button class="btn" onclick="processWithdrawal()">Submit Withdrawal</button>
-    <button class="btn btn-secondary" onclick="switchView('dashboard')" style="margin-top: 10px;">Back to Dashboard</button>
-  </div>
-
-
-  <!-- 5. ADMIN PORTAL -->
-  <div id="view-admin" class="card hidden">
-    <h2>Admin Portal ⚙️</h2>
-    <p class="subtitle">Manage member balances and users.</p>
-
-    <div class="form-group">
-      <label>User Email to Edit</label>
-      <input type="email" id="admin-target-email" placeholder="user@example.com">
-    </div>
-
-    <div class="form-group">
-      <label>New Balance ($)</label>
-      <input type="number" id="admin-new-balance" placeholder="100.00">
-    </div>
-
-    <button class="btn" onclick="adminUpdateBalance()">Update User Balance</button>
-
-    <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 1rem;">Registered Users:</h3>
-    <div id="user-list"></div>
-
-    <button class="btn btn-secondary" onclick="switchView('register')" style="margin-top: 15px;">Back to Main Page</button>
-  </div>
-
-</div>
-
-<script>
-  let currentUser = null;
-
-  // VIEW SWITCHER
-  function switchView(viewName) {
-    const views = ['register', 'login', 'dashboard', 'withdraw', 'admin'];
-    views.forEach(v => {
-      document.getElementById(`view-${v}`).classList.add('hidden');
-    });
-    document.getElementById(`view-${viewName}`).classList.remove('hidden');
-
-    if (viewName === 'admin') {
-      loadAdminUsers();
-    }
-  }
-
-  // REGISTER USER
-  function registerUser() {
-    const name = document.getElementById('reg-name').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const pass = document.getElementById('reg-pass').value.trim();
-
-    if (!name || !email || !pass) {
-      alert('Please complete all form fields.');
-      return;
-    }
-
-    if (localStorage.getItem(`user_${email}`)) {
-      alert('An account with this email already exists!');
-      return;
-    }
-
-    const userData = {
-      name: name,
-      email: email,
-      password: pass,
-      balance: 5.00
+  <script>
+    const defaultState = {
+      currentSet: 1,
+      completedInSet: 0,
+      isSetApproved: true,
+      balance: 0.00,
+      withdrawalStatus: 'None',
+      pictureData: {} // Stores custom uploaded image, reward, and comment key: "set-index"
     };
 
-    localStorage.setItem(`user_${email}`, JSON.stringify(userData));
-    currentUser = userData;
-    loadDashboard();
-  }
+    let appState = JSON.parse(localStorage.getItem('videoearn_state')) || defaultState;
 
-  // LOGIN USER
-  function loginUser() {
-    const email = document.getElementById('login-email').value.trim();
-    const pass = document.getElementById('login-pass').value.trim();
-
-    if (!email || !pass) {
-      alert('Please fill in both fields.');
-      return;
+    function saveState() {
+      localStorage.setItem('videoearn_state', JSON.stringify(appState));
+      renderUI();
     }
 
-    const savedData = localStorage.getItem(`user_${email}`);
-    if (savedData) {
-      const user = JSON.parse(savedData);
-      if (user.password === pass) {
-        currentUser = user;
-        loadDashboard();
+    function toggleView() {
+      const workerView = document.getElementById('worker-view');
+      const adminView = document.getElementById('admin-view');
+      const toggleBtn = document.getElementById('toggle-view-btn');
+
+      if (workerView.classList.contains('hidden')) {
+        workerView.classList.remove('hidden');
+        adminView.classList.add('hidden');
+        toggleBtn.innerText = 'Admin Login';
       } else {
-        alert('Incorrect password.');
-      }
-    } else {
-      alert('No account found with this email.');
-    }
-  }
-
-  // LOAD DASHBOARD
-  function loadDashboard() {
-    if (!currentUser) return;
-    document.getElementById('welcome-msg').innerText = `Welcome, ${currentUser.name}!`;
-    document.getElementById('user-balance').innerText = `$${parseFloat(currentUser.balance).toFixed(2)}`;
-    switchView('dashboard');
-  }
-
-  // LOGOUT
-  function logout() {
-    currentUser = null;
-    switchView('login');
-  }
-
-  // WITHDRAWAL
-  function processWithdrawal() {
-    const address = document.getElementById('withdraw-address').value.trim();
-    const amount = parseFloat(document.getElementById('withdraw-amount').value);
-
-    if (!address || isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid wallet address and amount.');
-      return;
-    }
-
-    if (amount > currentUser.balance) {
-      alert('Insufficient funds!');
-      return;
-    }
-
-    currentUser.balance -= amount;
-    localStorage.setItem(`user_${currentUser.email}`, JSON.stringify(currentUser));
-    loadDashboard();
-    alert('Withdrawal request submitted successfully!');
-  }
-
-  // ADMIN: LOAD USERS
-  function loadAdminUsers() {
-    const listContainer = document.getElementById('user-list');
-    listContainer.innerHTML = '';
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith('user_')) {
-        const user = JSON.parse(localStorage.getItem(key));
-        const item = document.createElement('div');
-        item.className = 'user-list-item';
-        item.innerHTML = `<strong>${user.name}</strong> (${user.email})<br>Balance: $${parseFloat(user.balance).toFixed(2)}`;
-        listContainer.appendChild(item);
+        workerView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        toggleBtn.innerText = 'Worker Area';
       }
     }
-  }
 
-  // ADMIN: UPDATE BALANCE
-  function adminUpdateBalance() {
-    const targetEmail = document.getElementById('admin-target-email').value.trim();
-    const newBalance = parseFloat(document.getElementById('admin-new-balance').value);
-
-    if (!targetEmail || isNaN(newBalance)) {
-      alert('Please provide a valid user email and balance amount.');
-      return;
+    function loginAdmin() {
+      const pass = document.getElementById('admin-pass-input').value;
+      if (pass === 'admin1234') {
+        document.getElementById('admin-login-card').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        renderUI();
+      } else {
+        alert('Incorrect Password!');
+      }
     }
 
-    const savedData = localStorage.getItem(`user_${targetEmail}`);
-    if (savedData) {
-      const user = JSON.parse(savedData);
-      user.balance = newBalance;
-      localStorage.setItem(`user_${targetEmail}`, JSON.stringify(user));
-      alert(`Updated balance for ${targetEmail} to $${newBalance.toFixed(2)}`);
-      loadAdminUsers();
-    } else {
-      alert('User not found!');
+    function logoutAdmin() {
+      document.getElementById('admin-pass-input').value = '';
+      document.getElementById('admin-login-card').classList.remove('hidden');
+      document.getElementById('admin-dashboard').classList.add('hidden');
     }
-  }
-</script>
 
+    function promoteMovie() {
+      if (appState.completedInSet >= 29) return;
+
+      const setNum = appState.currentSet;
+      const indexNum = appState.completedInSet + 1;
+      const key = `${setNum}-${indexNum}`;
+      
+      const currentReward = appState.pictureData[key]?.reward || 0.50;
+
+      appState.completedInSet += 1;
+      appState.balance += parseFloat(currentReward);
+
+      if (appState.completedInSet >= 29) {
+        appState.isSetApproved = false;
+      }
+
+      saveState();
+    }
+
+    function approveNextSet() {
+      if (appState.currentSet < 3) {
+        appState.currentSet += 1;
+        appState.completedInSet = 0;
+        appState.isSetApproved = true;
+        saveState();
+        alert('Set approved! Worker unblocked to start Set ' + appState.currentSet);
+      } else {
+        alert('Worker has already completed all 3 sets!');
+      }
+    }
+
+    function savePictureAndSettings() {
+      const setNum = document.getElementById('edit-set-num').value;
+      const imgIndex = document.getElementById('edit-img-index').value;
+      const reward = document.getElementById('edit-img-reward').value;
+      const comment = document.getElementById('edit-img-comment').value;
+      const fileInput = document.getElementById('edit-img-file');
+
+      const key = `${setNum}-${imgIndex}`;
+
+      if (!appState.pictureData[key]) {
+        appState.pictureData[key] = {};
+      }
+
+      appState.pictureData[key].reward = reward;
+      appState.pictureData[key].comment = comment;
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          appState.pictureData[key].image = e.target.result;
+          saveState();
+          alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        saveState();
+        alert(`Details saved for Set ${setNum}, Image #${imgIndex}!`);
+      }
+    }
+
+    function requestWithdrawal() {
+      if (appState.balance <= 0) {
+        alert('Balance must be greater than $0 to withdraw.');
+        return;
+      }
+      appState.withdrawalStatus = 'Pending';
+      saveState();
+    }
+
+    function approveWithdrawal() {
+      appState.withdrawalStatus = 'Approved';
+      appState.balance = 0;
+      saveState();
+      alert('Withdrawal approved!');
+    }
+
+    function renderUI() {
+      document.getElementById('current-set-display').innerText = `Set ${appState.currentSet} / 3`;
+      document.getElementById('set-num-text').innerText = appState.currentSet;
+      document.getElementById('worker-balance').innerText = `$${appState.balance.toFixed(2)}`;
+      
+      const completed = appState.completedInSet;
+      document.getElementById('progress-text').innerText = `${completed} / 29 Completed`;
+      document.getElementById('progress-fill').style.width = `${(completed / 29) * 100}%`;
+
+      const movieBox = document.getElementById('movie-container');
+      const setCompletedMsg = document.getElementById('completed-set-message');
+
+      if (completed >= 29 && !appState.isSetApproved) {
+        movieBox.classList.add('hidden');
+        setCompletedMsg.classList.remove('hidden');
+      } else {
+        movieBox.classList.remove('hidden');
+        setCompletedMsg.classList.add('hidden');
+      }
+
+      const currentImgIndex = completed + 1;
+      const currentKey = `${appState.currentSet}-${currentImgIndex}`;
+      const itemData = appState.pictureData[currentKey] || {};
+
+      document.getElementById('movie-title').innerText = `Set ${appState.currentSet} - Movie Promotion #${currentImgIndex}`;
+      document.getElementById('movie-reward').innerText = `$${itemData.reward || '0.50'}`;
+      document.getElementById('admin-comment').innerText = `Admin Comment: ${itemData.comment || 'Ready to promote!'}`;
+      
+      const defaultPlaceholder = `https://via.placeholder.com/400x250?text=Set+${appState.currentSet}+-+Picture+${currentImgIndex}`;
+      document.getElementById('movie-img').src = itemData.image || defaultPlaceholder;
+
+      const wStatus = document.getElementById('withdraw-status');
+      if (appState.withdrawalStatus === 'Pending') {
+        wStatus.innerHTML = '<span class="badge badge-pending">Withdrawal Pending Admin Approval</span>';
+      } else if (appState.withdrawalStatus === 'Approved') {
+        wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved!</span>';
+      } else {
+        wStatus.innerText = '';
+      }
+
+      document.getElementById('admin-active-set-text').innerText = `Set ${appState.currentSet} (${completed}/29 Completed)`;
+      const wReqText = document.getElementById('admin-withdraw-request-text');
+      const wApproveBtn = document.getElementById('approve-withdraw-btn');
+
+      if (appState.withdrawalStatus === 'Pending') {
+        wReqText.innerText = 'Worker requested a withdrawal of $' + appState.balance.toFixed(2);
+        wApproveBtn.style.display = 'block';
+      } else {
+        wReqText.innerText = 'No pending withdrawal requests.';
+        wApproveBtn.style.display = 'none';
+      }
+    }
+
+    renderUI();
+  </script>
 </body>
 </html>
