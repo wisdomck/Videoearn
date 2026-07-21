@@ -52,6 +52,7 @@
     .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
     .badge-pending { background: var(--warning); color: #000; }
     .badge-approved { background: var(--success); color: #000; }
+    .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -62,10 +63,39 @@
       <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
     </header>
 
+    <!-- AUTHENTICATION VIEW (LOGIN / SIGNUP) -->
+    <div id="auth-view" class="card">
+      <div id="login-box">
+        <h3>Welcome Back</h3>
+        <p>Log in to your VideoEarn account</p>
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button class="btn" onclick="userLogin()">Log In</button>
+        <p style="margin-top: 12px; text-align: center;">
+          Don't have an account? <span class="tab-link" onclick="showAuthTab('signup')">Sign Up</span>
+        </p>
+      </div>
+
+      <div id="signup-box" class="hidden">
+        <h3>Create Account</h3>
+        <p>Register as a new member to start earning</p>
+        <input type="text" id="signup-username" placeholder="Choose Username">
+        <input type="password" id="signup-password" placeholder="Create Password">
+        <button class="btn" onclick="userSignup()">Create Account</button>
+        <p style="margin-top: 12px; text-align: center;">
+          Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
+        </p>
+      </div>
+    </div>
+
     <!-- WORKER VIEW -->
-    <div id="worker-view">
+    <div id="worker-view" class="hidden">
       <div class="card">
-        <h3>Worker Dashboard</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3>Worker Dashboard</h3>
+          <button class="nav-btn" onclick="userLogout()">Logout (<span id="user-display-name">User</span>)</button>
+        </div>
+
         <div class="stats-grid">
           <div class="stat-card">
             <span>Current Set</span>
@@ -109,14 +139,12 @@
 
     <!-- ADMIN VIEW -->
     <div id="admin-view" class="hidden">
-      <!-- Admin Login -->
       <div class="card" id="admin-login-card">
         <h3>Admin Access Required</h3>
         <input type="password" id="admin-pass-input" placeholder="Enter Admin Password">
         <button class="btn" onclick="loginAdmin()">Login to Admin Panel</button>
       </div>
 
-      <!-- Admin Controls -->
       <div id="admin-dashboard" class="hidden">
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -124,17 +152,17 @@
             <button class="nav-btn" onclick="logoutAdmin()">Logout</button>
           </div>
 
-          <!-- Set Approval Section -->
+          <!-- Set Progress & Approvals -->
           <div class="admin-section">
             <h4>Set Progress & Approvals</h4>
+            <p>Active Worker: <strong id="admin-user-name">None</strong></p>
             <p>Active Set: <strong id="admin-active-set-text">Set 1</strong></p>
             <button class="btn" id="approve-set-btn" onclick="approveNextSet()">Approve Current Set & Unlock Next</button>
           </div>
 
-          <!-- Upload Picture & Edit Settings Section -->
+          <!-- Upload Picture & Edit Settings -->
           <div class="admin-section">
             <h4>Upload & Edit Movie Pictures</h4>
-            
             <label style="font-size: 0.8rem;">Select Set Number (1, 2, or 3):</label>
             <select id="edit-set-num">
               <option value="1">Set 1</option>
@@ -157,7 +185,7 @@
             <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
           </div>
 
-          <!-- Withdrawal Requests Section -->
+          <!-- Withdrawal Requests -->
           <div class="admin-section">
             <h4>Withdrawal Requests</h4>
             <p id="admin-withdraw-request-text">No active withdrawal request.</p>
@@ -170,35 +198,89 @@
   </div>
 
   <script>
-    const defaultState = {
-      currentSet: 1,
-      completedInSet: 0,
-      isSetApproved: true,
-      balance: 0.00,
-      withdrawalStatus: 'None',
-      pictureData: {} // Stores custom uploaded image, reward, and comment key: "set-index"
-    };
+    let users = JSON.parse(localStorage.getItem('ve_users')) || {};
+    let globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
+    let currentUser = localStorage.getItem('ve_current_user') || null;
 
-    let appState = JSON.parse(localStorage.getItem('videoearn_state')) || defaultState;
+    function saveUsers() {
+      localStorage.setItem('ve_users', JSON.stringify(users));
+    }
 
-    function saveState() {
-      localStorage.setItem('videoearn_state', JSON.stringify(appState));
+    function savePictures() {
+      localStorage.setItem('ve_pictures', JSON.stringify(globalPictureData));
+    }
+
+    function showAuthTab(tab) {
+      if (tab === 'signup') {
+        document.getElementById('login-box').classList.add('hidden');
+        document.getElementById('signup-box').classList.remove('hidden');
+      } else {
+        document.getElementById('signup-box').classList.add('hidden');
+        document.getElementById('login-box').classList.remove('hidden');
+      }
+    }
+
+    function userSignup() {
+      const u = document.getElementById('signup-username').value.trim();
+      const p = document.getElementById('signup-password').value.trim();
+
+      if (!u || !p) {
+        alert('Please fill in both fields.');
+        return;
+      }
+      if (users[u]) {
+        alert('Username already exists. Please choose another or log in.');
+        return;
+      }
+
+      users[u] = {
+        password: p,
+        currentSet: 1,
+        completedInSet: 0,
+        isSetApproved: true,
+        balance: 0.00,
+        withdrawalStatus: 'None'
+      };
+
+      saveUsers();
+      alert('Account created successfully! Please log in.');
+      showAuthTab('login');
+    }
+
+    function userLogin() {
+      const u = document.getElementById('login-username').value.trim();
+      const p = document.getElementById('login-password').value.trim();
+
+      if (users[u] && users[u].password === p) {
+        currentUser = u;
+        localStorage.setItem('ve_current_user', u);
+        renderUI();
+      } else {
+        alert('Invalid Username or Password!');
+      }
+    }
+
+    function userLogout() {
+      currentUser = null;
+      localStorage.removeItem('ve_current_user');
       renderUI();
     }
 
     function toggleView() {
+      const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
       const adminView = document.getElementById('admin-view');
       const toggleBtn = document.getElementById('toggle-view-btn');
 
-      if (workerView.classList.contains('hidden')) {
-        workerView.classList.remove('hidden');
-        adminView.classList.add('hidden');
-        toggleBtn.innerText = 'Admin Login';
-      } else {
+      if (adminView.classList.contains('hidden')) {
+        authView.classList.add('hidden');
         workerView.classList.add('hidden');
         adminView.classList.remove('hidden');
-        toggleBtn.innerText = 'Worker Area';
+        toggleBtn.innerText = 'User Area';
+      } else {
+        adminView.classList.add('hidden');
+        toggleBtn.innerText = 'Admin Login';
+        renderUI();
       }
     }
 
@@ -209,7 +291,7 @@
         document.getElementById('admin-dashboard').classList.remove('hidden');
         renderUI();
       } else {
-        alert('Incorrect Password!');
+        alert('Incorrect Admin Password!');
       }
     }
 
@@ -220,33 +302,40 @@
     }
 
     function promoteMovie() {
-      if (appState.completedInSet >= 29) return;
+      if (!currentUser || !users[currentUser]) return;
 
-      const setNum = appState.currentSet;
-      const indexNum = appState.completedInSet + 1;
-      const key = `${setNum}-${indexNum}`;
-      
-      const currentReward = appState.pictureData[key]?.reward || 0.50;
+      const user = users[currentUser];
+      if (user.completedInSet >= 29) return;
 
-      appState.completedInSet += 1;
-      appState.balance += parseFloat(currentReward);
+      const key = `${user.currentSet}-${user.completedInSet + 1}`;
+      const reward = globalPictureData[key]?.reward || 0.50;
 
-      if (appState.completedInSet >= 29) {
-        appState.isSetApproved = false;
+      user.completedInSet += 1;
+      user.balance += parseFloat(reward);
+
+      if (user.completedInSet >= 29) {
+        user.isSetApproved = false;
       }
 
-      saveState();
+      saveUsers();
+      renderUI();
     }
 
     function approveNextSet() {
-      if (appState.currentSet < 3) {
-        appState.currentSet += 1;
-        appState.completedInSet = 0;
-        appState.isSetApproved = true;
-        saveState();
-        alert('Set approved! Worker unblocked to start Set ' + appState.currentSet);
+      if (!currentUser || !users[currentUser]) {
+        alert('No active user logged in to approve.');
+        return;
+      }
+      const user = users[currentUser];
+      if (user.currentSet < 3) {
+        user.currentSet += 1;
+        user.completedInSet = 0;
+        user.isSetApproved = true;
+        saveUsers();
+        renderUI();
+        alert(`Approved Set for ${currentUser}! Moved to Set ${user.currentSet}.`);
       } else {
-        alert('Worker has already completed all 3 sets!');
+        alert(`${currentUser} has completed all 3 sets!`);
       }
     }
 
@@ -259,56 +348,75 @@
 
       const key = `${setNum}-${imgIndex}`;
 
-      if (!appState.pictureData[key]) {
-        appState.pictureData[key] = {};
-      }
-
-      appState.pictureData[key].reward = reward;
-      appState.pictureData[key].comment = comment;
+      if (!globalPictureData[key]) globalPictureData[key] = {};
+      globalPictureData[key].reward = reward;
+      globalPictureData[key].comment = comment;
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          appState.pictureData[key].image = e.target.result;
-          saveState();
+          globalPictureData[key].image = e.target.result;
+          savePictures();
+          renderUI();
           alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        saveState();
+        savePictures();
+        renderUI();
         alert(`Details saved for Set ${setNum}, Image #${imgIndex}!`);
       }
     }
 
     function requestWithdrawal() {
-      if (appState.balance <= 0) {
+      if (!currentUser || !users[currentUser]) return;
+      const user = users[currentUser];
+      if (user.balance <= 0) {
         alert('Balance must be greater than $0 to withdraw.');
         return;
       }
-      appState.withdrawalStatus = 'Pending';
-      saveState();
+      user.withdrawalStatus = 'Pending';
+      saveUsers();
+      renderUI();
     }
 
     function approveWithdrawal() {
-      appState.withdrawalStatus = 'Approved';
-      appState.balance = 0;
-      saveState();
-      alert('Withdrawal approved!');
+      if (!currentUser || !users[currentUser]) return;
+      const user = users[currentUser];
+      user.withdrawalStatus = 'Approved';
+      user.balance = 0;
+      saveUsers();
+      renderUI();
+      alert(`Withdrawal approved for ${currentUser}!`);
     }
 
     function renderUI() {
-      document.getElementById('current-set-display').innerText = `Set ${appState.currentSet} / 3`;
-      document.getElementById('set-num-text').innerText = appState.currentSet;
-      document.getElementById('worker-balance').innerText = `$${appState.balance.toFixed(2)}`;
-      
-      const completed = appState.completedInSet;
+      const authView = document.getElementById('auth-view');
+      const workerView = document.getElementById('worker-view');
+
+      if (!currentUser || !users[currentUser]) {
+        authView.classList.remove('hidden');
+        workerView.classList.add('hidden');
+        return;
+      }
+
+      authView.classList.add('hidden');
+      workerView.classList.remove('hidden');
+
+      const user = users[currentUser];
+      document.getElementById('user-display-name').innerText = currentUser;
+      document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
+      document.getElementById('set-num-text').innerText = user.currentSet;
+      document.getElementById('worker-balance').innerText = `$${user.balance.toFixed(2)}`;
+
+      const completed = user.completedInSet;
       document.getElementById('progress-text').innerText = `${completed} / 29 Completed`;
       document.getElementById('progress-fill').style.width = `${(completed / 29) * 100}%`;
 
       const movieBox = document.getElementById('movie-container');
       const setCompletedMsg = document.getElementById('completed-set-message');
 
-      if (completed >= 29 && !appState.isSetApproved) {
+      if (completed >= 29 && !user.isSetApproved) {
         movieBox.classList.add('hidden');
         setCompletedMsg.classList.remove('hidden');
       } else {
@@ -317,31 +425,33 @@
       }
 
       const currentImgIndex = completed + 1;
-      const currentKey = `${appState.currentSet}-${currentImgIndex}`;
-      const itemData = appState.pictureData[currentKey] || {};
+      const currentKey = `${user.currentSet}-${currentImgIndex}`;
+      const itemData = globalPictureData[currentKey] || {};
 
-      document.getElementById('movie-title').innerText = `Set ${appState.currentSet} - Movie Promotion #${currentImgIndex}`;
+      document.getElementById('movie-title').innerText = `Set ${user.currentSet} - Movie Promotion #${currentImgIndex}`;
       document.getElementById('movie-reward').innerText = `$${itemData.reward || '0.50'}`;
       document.getElementById('admin-comment').innerText = `Admin Comment: ${itemData.comment || 'Ready to promote!'}`;
       
-      const defaultPlaceholder = `https://via.placeholder.com/400x250?text=Set+${appState.currentSet}+-+Picture+${currentImgIndex}`;
+      const defaultPlaceholder = `https://via.placeholder.com/400x250?text=Set+${user.currentSet}+-+Picture+${currentImgIndex}`;
       document.getElementById('movie-img').src = itemData.image || defaultPlaceholder;
 
       const wStatus = document.getElementById('withdraw-status');
-      if (appState.withdrawalStatus === 'Pending') {
+      if (user.withdrawalStatus === 'Pending') {
         wStatus.innerHTML = '<span class="badge badge-pending">Withdrawal Pending Admin Approval</span>';
-      } else if (appState.withdrawalStatus === 'Approved') {
+      } else if (user.withdrawalStatus === 'Approved') {
         wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved!</span>';
       } else {
         wStatus.innerText = '';
       }
 
-      document.getElementById('admin-active-set-text').innerText = `Set ${appState.currentSet} (${completed}/29 Completed)`;
+      // Admin Section UI
+      document.getElementById('admin-user-name').innerText = currentUser;
+      document.getElementById('admin-active-set-text').innerText = `Set ${user.currentSet} (${completed}/29 Completed)`;
       const wReqText = document.getElementById('admin-withdraw-request-text');
       const wApproveBtn = document.getElementById('approve-withdraw-btn');
 
-      if (appState.withdrawalStatus === 'Pending') {
-        wReqText.innerText = 'Worker requested a withdrawal of $' + appState.balance.toFixed(2);
+      if (user.withdrawalStatus === 'Pending') {
+        wReqText.innerText = `${currentUser} requested a withdrawal of $${user.balance.toFixed(2)}`;
         wApproveBtn.style.display = 'block';
       } else {
         wReqText.innerText = 'No pending withdrawal requests.';
