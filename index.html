@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoEarn</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0d0b21 0%, #17153b 50%, #0a071b 100%);
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --input-bg: rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .brand-icon {
+      background: var(--accent-color);
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-name {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    h1 {
+      font-size: 28px;
+      text-align: center;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 14px 16px 14px 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-color);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--card-border);
+      padding: 16px;
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 700;
+      color: #10b981;
+      margin-top: 4px;
+    }
+
+    .video-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-badge {
+      display: inline-block;
+      background: #ef4444;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- BRAND HEADER -->
+    <div class="brand-header">
+      <div class="brand-icon">▶</div>
+      <div class="brand-name">VideoEarn</div>
+    </div>
+
+    <!-- SIGN UP VIEW -->
+    <div id="view-signup" class="card">
+      <h1>Create Account 🚀</h1>
+      <p class="subtitle">Join us and start earning daily by watching videos.</p>
+      
+      <div class="form-group">
+        <label>Full Name</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input type="text" id="reg-name" placeholder="John Doe">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="reg-email" placeholder="name@example.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="reg-pass" placeholder="Minimum 6 characters">
+        </div>
+      </div>
+
+      <button class="btn" onclick="registerUser()">Start Earning</button>
+      <button class="btn btn-secondary" onclick="switchView('admin-login')">Admin Portal</button>
+    </div>
+
+    <!-- WORKER DASHBOARD VIEW -->
+    <div id="view-worker" class="card hidden">
+      <h1 id="welcome-msg">Welcome! 👋</h1>
+      <p class="subtitle">Watch videos to increase your daily earnings</p>
+
+      <div class="dashboard-stats">
+        <div class="stat-box">
+          <label>Total Balance</label>
+          <div class="stat-val" id="user-balance">$0.00</div>
+        </div>
+        <div class="stat-box">
+          <label>Today's Earn</label>
+          <div class="stat-val" id="user-daily">$0.00</div>
+        </div>
+      </div>
+
+      <h3 style="margin-bottom: 12px; font-size: 16px;">Promoted Videos</h3>
+      
+      <div class="video-card">
+        <div>
+          <div style="font-weight:600;">Promo Video #1</div>
+          <div style="font-size:12px; color:var(--text-muted);">Reward: $2.50</div>
+        </div>
+        <button class="btn" style="width:auto; padding: 8px 16px;" onclick="watchVideo(2.50)">Watch</button>
+      </div>
+
+      <div class="video-card">
+        <div>
+          <div style="font-weight:600;">Promo Video #2</div>
+          <div style="font-size:12px; color:var(--text-muted);">Reward: $3.00</div>
+        </div>
+        <button class="btn" style="width:auto; padding: 8px 16px;" onclick="watchVideo(3.00)">Watch</button>
+      </div>
+
+      <button class="btn btn-secondary" onclick="logout()">Log Out</button>
+    </div>
+
+    <!-- ADMIN LOGIN VIEW -->
+    <div id="view-admin-login" class="card hidden">
+      <div style="text-align:center;"><span class="admin-badge">Admin Access</span></div>
+      <h1>Admin Portal ⚙️</h1>
+      <p class="subtitle">Manage user balances and daily video rewards</p>
+
+      <div class="form-group">
+        <label>Admin Key</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="admin-pass" placeholder="Enter admin password">
+        </div>
+      </div>
+
+      <button class="btn" onclick="loginAdmin()">Login as Admin</button>
+      <button class="btn btn-secondary" onclick="switchView('signup')">Back to Sign Up</button>
+    </div>
+
+    <!-- ADMIN DASHBOARD VIEW -->
+    <div id="view-admin-dashboard" class="card hidden">
+      <div style="text-align:center;"><span class="admin-badge">Admin Control Panel</span></div>
+      <h1>Manage Workers</h1>
+      <p class="subtitle">Edit balance and daily earnings for users</p>
+
+      <div class="form-group">
+        <label>Worker Email</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input type="text" id="edit-user-email" placeholder="name@example.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Set New Balance ($)</label>
+        <div class="input-wrapper">
+          <span class="input-icon">💵</span>
+          <input type="number" id="edit-user-balance" placeholder="e.g. 50.00">
+        </div>
+      </div>
+
+      <button class="btn" onclick="updateUserBalance()">Update Balance</button>
+      <button class="btn btn-secondary" onclick="logout()">Exit Admin</button>
+    </div>
+
+  </div>
+
+  <script>
+    // Simple state management using localStorage
+    let currentUser = null;
+
+    function switchView(viewName) {
+      document.querySelectorAll('.card').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`view-${viewName}`).classList.remove('hidden');
+    }
+
+    function registerUser() {
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+
+      if (!name || !email) {
+        alert('Please complete the form fields.');
+        return;
+      }
+
+      const userData = {
+        name: name,
+        email: email,
+        balance: 5.00, // Sign up bonus
+        dailyEarned: 0.00
+      };
+
+      localStorage.setItem(`user_${email}`, JSON.stringify(userData));
+      currentUser = userData;
+      
+      loadWorkerDashboard();
+    }
+
+    function loadWorkerDashboard() {
+      document.getElementById('welcome-msg').innerText = `Welcome, ${currentUser.name}! 👋`;
+      document.getElementById('user-balance').innerText = `$${currentUser.balance.toFixed(2)}`;
+      document.getElementById('user-daily').innerText = `$${currentUser.dailyEarned.toFixed(2)}`;
+      switchView('worker');
+    }
+
+    function watchVideo(reward) {
+      currentUser.balance += reward;
+      currentUser.dailyEarned += reward;
+      localStorage.setItem(`user_${currentUser.email}`, JSON.stringify(currentUser));
+      loadWorkerDashboard();
+      alert(`Video completed! You earned $${reward.toFixed(2)}.`);
+    }
+
+    function loginAdmin() {
+      const pass = document.getElementById('admin-pass').value;
+      // Default admin password set to 'admin123'
+      if (pass === 'admin123') {
+        switchView('admin-dashboard');
+      } else {
+        alert('Incorrect Admin Password! Use: admin123');
+      }
+    }
+
+    function updateUserBalance() {
+      const email = document.getElementById('edit-user-email').value;
+      const newBalance = parseFloat(document.getElementById('edit-user-balance').value);
+
+      const rawData = localStorage.getItem(`user_${email}`);
+      if (!rawData) {
+        alert('User email not found!');
+        return;
+      }
+
+      const userData = JSON.parse(rawData);
+      userData.balance = newBalance;
+      localStorage.setItem(`user_${email}`, JSON.stringify(userData));
+      
+      alert(`Updated balance for ${userData.name} to $${newBalance.toFixed(2)}`);
+    }
+
+    function logout() {
+      currentUser = null;
+      switchView('signup');
+    }
+  </script>
+</body>
+</html>
