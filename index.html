@@ -6,8 +6,8 @@
   <title>VideoEarn</title>
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0d0b21 0%, #17153b 50%, #0a071b 100%);
-      --card-bg: rgba(255, 255, 255, 0.04);
+      --bg-gradient: linear-gradient(135deg, #0d0b21 0%, #17153a 100%);
+      --card-bg: rgba(255, 255, 255, 0.05);
       --card-border: rgba(255, 255, 255, 0.1);
       --accent-color: #6366f1;
       --accent-hover: #4f46e5;
@@ -20,7 +20,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -28,9 +28,8 @@
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       padding: 20px;
     }
 
@@ -42,92 +41,74 @@
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      backdrop-filter: blur(12px);
-      border-radius: 24px;
-      padding: 32px 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
-    .brand-header {
+    .brand {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 24px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #fff;
     }
 
     .brand-icon {
       background: var(--accent-color);
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      font-size: 20px;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
     }
 
-    .brand-name {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    h1 {
-      font-size: 28px;
+    h2 {
+      font-size: 1.6rem;
       text-align: center;
-      margin-bottom: 8px;
-      font-weight: 700;
+      margin-bottom: 6px;
     }
 
     .subtitle {
-      text-align: center;
       color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 28px;
+      text-align: center;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
     }
 
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     label {
       display: block;
-      font-size: 13px;
-      color: var(--text-main);
-      margin-bottom: 8px;
-      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
     }
 
     .input-wrapper {
       position: relative;
     }
 
-    .input-wrapper input {
+    input, select {
       width: 100%;
-      padding: 14px 16px 14px 42px;
+      padding: 12px 14px;
       background: var(--input-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 10px;
       color: #fff;
-      font-size: 15px;
+      font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s;
     }
 
-    .input-wrapper input:focus {
+    input:focus, select:focus {
       border-color: var(--accent-color);
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 16px;
     }
 
     .btn {
@@ -135,13 +116,13 @@
       padding: 14px;
       background: var(--accent-color);
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       color: #fff;
-      font-size: 16px;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
       margin-top: 10px;
+      transition: background 0.2s;
     }
 
     .btn:hover {
@@ -151,265 +132,331 @@
     .btn-secondary {
       background: transparent;
       border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      margin-top: 12px;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.05);
       color: var(--text-main);
     }
 
-    .dashboard-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .stat-box {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--card-border);
-      padding: 16px;
-      border-radius: 16px;
+    .toggle-link {
       text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
     }
 
-    .stat-val {
-      font-size: 22px;
+    .toggle-link a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Dashboard UI */
+    .balance-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .balance-amount {
+      font-size: 2rem;
       font-weight: 700;
       color: #10b981;
-      margin-top: 4px;
+      margin: 6px 0;
     }
 
-    .video-card {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .hidden {
+      display: none !important;
     }
 
-    .admin-badge {
-      display: inline-block;
-      background: #ef4444;
-      color: white;
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
+    .user-list-item {
+      background: var(--input-bg);
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
     }
-
-    .hidden { display: none; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- BRAND HEADER -->
-    <div class="brand-header">
-      <div class="brand-icon">▶</div>
-      <div class="brand-name">VideoEarn</div>
-    </div>
+<div class="container">
 
-    <!-- SIGN UP VIEW -->
-    <div id="view-signup" class="card">
-      <h1>Create Account 🚀</h1>
-      <p class="subtitle">Join us and start earning daily by watching videos.</p>
-      
-      <div class="form-group">
-        <label>Full Name</label>
-        <div class="input-wrapper">
-          <span class="input-icon">👤</span>
-          <input type="text" id="reg-name" placeholder="John Doe">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Email Address</label>
-        <div class="input-wrapper">
-          <span class="input-icon">✉️</span>
-          <input type="email" id="reg-email" placeholder="name@example.com">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Password</label>
-        <div class="input-wrapper">
-          <span class="input-icon">🔒</span>
-          <input type="password" id="reg-pass" placeholder="Minimum 6 characters">
-        </div>
-      </div>
-
-      <button class="btn" onclick="registerUser()">Start Earning</button>
-      <button class="btn btn-secondary" onclick="switchView('admin-login')">Admin Portal</button>
-    </div>
-
-    <!-- WORKER DASHBOARD VIEW -->
-    <div id="view-worker" class="card hidden">
-      <h1 id="welcome-msg">Welcome! 👋</h1>
-      <p class="subtitle">Watch videos to increase your daily earnings</p>
-
-      <div class="dashboard-stats">
-        <div class="stat-box">
-          <label>Total Balance</label>
-          <div class="stat-val" id="user-balance">$0.00</div>
-        </div>
-        <div class="stat-box">
-          <label>Today's Earn</label>
-          <div class="stat-val" id="user-daily">$0.00</div>
-        </div>
-      </div>
-
-      <h3 style="margin-bottom: 12px; font-size: 16px;">Promoted Videos</h3>
-      
-      <div class="video-card">
-        <div>
-          <div style="font-weight:600;">Promo Video #1</div>
-          <div style="font-size:12px; color:var(--text-muted);">Reward: $2.50</div>
-        </div>
-        <button class="btn" style="width:auto; padding: 8px 16px;" onclick="watchVideo(2.50)">Watch</button>
-      </div>
-
-      <div class="video-card">
-        <div>
-          <div style="font-weight:600;">Promo Video #2</div>
-          <div style="font-size:12px; color:var(--text-muted);">Reward: $3.00</div>
-        </div>
-        <button class="btn" style="width:auto; padding: 8px 16px;" onclick="watchVideo(3.00)">Watch</button>
-      </div>
-
-      <button class="btn btn-secondary" onclick="logout()">Log Out</button>
-    </div>
-
-    <!-- ADMIN LOGIN VIEW -->
-    <div id="view-admin-login" class="card hidden">
-      <div style="text-align:center;"><span class="admin-badge">Admin Access</span></div>
-      <h1>Admin Portal ⚙️</h1>
-      <p class="subtitle">Manage user balances and daily video rewards</p>
-
-      <div class="form-group">
-        <label>Admin Key</label>
-        <div class="input-wrapper">
-          <span class="input-icon">🔑</span>
-          <input type="password" id="admin-pass" placeholder="Enter admin password">
-        </div>
-      </div>
-
-      <button class="btn" onclick="loginAdmin()">Login as Admin</button>
-      <button class="btn btn-secondary" onclick="switchView('signup')">Back to Sign Up</button>
-    </div>
-
-    <!-- ADMIN DASHBOARD VIEW -->
-    <div id="view-admin-dashboard" class="card hidden">
-      <div style="text-align:center;"><span class="admin-badge">Admin Control Panel</span></div>
-      <h1>Manage Workers</h1>
-      <p class="subtitle">Edit balance and daily earnings for users</p>
-
-      <div class="form-group">
-        <label>Worker Email</label>
-        <div class="input-wrapper">
-          <span class="input-icon">👤</span>
-          <input type="text" id="edit-user-email" placeholder="name@example.com">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Set New Balance ($)</label>
-        <div class="input-wrapper">
-          <span class="input-icon">💵</span>
-          <input type="number" id="edit-user-balance" placeholder="e.g. 50.00">
-        </div>
-      </div>
-
-      <button class="btn" onclick="updateUserBalance()">Update Balance</button>
-      <button class="btn btn-secondary" onclick="logout()">Exit Admin</button>
-    </div>
-
+  <!-- BRAND HEADER -->
+  <div class="brand">
+    <div class="brand-icon">⚡</div>
+    <span>VideoEarn</span>
   </div>
 
-  <script>
-    // Simple state management using localStorage
-    let currentUser = null;
+  <!-- 1. REGISTER CARD -->
+  <div id="view-register" class="card">
+    <h2>Create Account 🚀</h2>
+    <p class="subtitle">Join us and start earning daily by watching videos.</p>
 
-    function switchView(viewName) {
-      document.querySelectorAll('.card').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`view-${viewName}`).classList.remove('hidden');
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="reg-name" placeholder="John Doe">
+    </div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="reg-email" placeholder="name@example.com">
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="reg-pass" placeholder="Minimum 6 characters">
+    </div>
+
+    <button class="btn" onclick="registerUser()">Start Earning</button>
+    
+    <div class="toggle-link">
+      Already have an account? <a href="#" onclick="switchView('login')">Log In</a>
+    </div>
+    
+    <div class="toggle-link" style="margin-top: 10px;">
+      <a href="#" onclick="switchView('admin')">Admin Portal</a>
+    </div>
+  </div>
+
+
+  <!-- 2. LOGIN CARD -->
+  <div id="view-login" class="card hidden">
+    <h2>Welcome Back! 👋</h2>
+    <p class="subtitle">Log in to access your account dashboard.</p>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="login-email" placeholder="name@example.com">
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Enter password">
+    </div>
+
+    <button class="btn" onclick="loginUser()">Log In</button>
+
+    <div class="toggle-link">
+      Don't have an account? <a href="#" onclick="switchView('register')">Create Account</a>
+    </div>
+  </div>
+
+
+  <!-- 3. DASHBOARD VIEW -->
+  <div id="view-dashboard" class="card hidden">
+    <h2 id="welcome-msg">Dashboard</h2>
+    <p class="subtitle">Watch videos and complete daily tasks.</p>
+
+    <div class="balance-box">
+      <small style="color: var(--text-muted)">Total Balance</small>
+      <div class="balance-amount" id="user-balance">$0.00</div>
+      <small style="color: #10b981;">+$5.00 Sign-up Bonus Included</small>
+    </div>
+
+    <button class="btn" onclick="switchView('withdraw')">Withdraw Funds 🪙</button>
+    <button class="btn btn-secondary" onclick="logout()" style="margin-top: 10px;">Log Out</button>
+  </div>
+
+
+  <!-- 4. WITHDRAW CARD -->
+  <div id="view-withdraw" class="card hidden">
+    <h2>Crypto Withdrawal 💸</h2>
+    <p class="subtitle">Select your network and wallet details.</p>
+
+    <div class="form-group">
+      <label>Crypto Network</label>
+      <select id="withdraw-network">
+        <option value="USDT (TRC20)">USDT (TRC20)</option>
+        <option value="USDT (BEP20)">USDT (BEP20)</option>
+        <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+        <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
+        <option value="Solana (SOL)">Solana (SOL)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Wallet Address</label>
+      <input type="text" id="withdraw-address" placeholder="Paste your wallet address here">
+    </div>
+
+    <div class="form-group">
+      <label>Amount ($)</label>
+      <input type="number" id="withdraw-amount" placeholder="0.00">
+    </div>
+
+    <button class="btn" onclick="processWithdrawal()">Submit Withdrawal</button>
+    <button class="btn btn-secondary" onclick="switchView('dashboard')" style="margin-top: 10px;">Back to Dashboard</button>
+  </div>
+
+
+  <!-- 5. ADMIN PORTAL -->
+  <div id="view-admin" class="card hidden">
+    <h2>Admin Portal ⚙️</h2>
+    <p class="subtitle">Manage member balances and users.</p>
+
+    <div class="form-group">
+      <label>User Email to Edit</label>
+      <input type="email" id="admin-target-email" placeholder="user@example.com">
+    </div>
+
+    <div class="form-group">
+      <label>New Balance ($)</label>
+      <input type="number" id="admin-new-balance" placeholder="100.00">
+    </div>
+
+    <button class="btn" onclick="adminUpdateBalance()">Update User Balance</button>
+
+    <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 1rem;">Registered Users:</h3>
+    <div id="user-list"></div>
+
+    <button class="btn btn-secondary" onclick="switchView('register')" style="margin-top: 15px;">Back to Main Page</button>
+  </div>
+
+</div>
+
+<script>
+  let currentUser = null;
+
+  // VIEW SWITCHER
+  function switchView(viewName) {
+    const views = ['register', 'login', 'dashboard', 'withdraw', 'admin'];
+    views.forEach(v => {
+      document.getElementById(`view-${v}`).classList.add('hidden');
+    });
+    document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+    if (viewName === 'admin') {
+      loadAdminUsers();
+    }
+  }
+
+  // REGISTER USER
+  function registerUser() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value.trim();
+
+    if (!name || !email || !pass) {
+      alert('Please complete all form fields.');
+      return;
     }
 
-    function registerUser() {
-      const name = document.getElementById('reg-name').value;
-      const email = document.getElementById('reg-email').value;
-
-      if (!name || !email) {
-        alert('Please complete the form fields.');
-        return;
-      }
-
-      const userData = {
-        name: name,
-        email: email,
-        balance: 5.00, // Sign up bonus
-        dailyEarned: 0.00
-      };
-
-      localStorage.setItem(`user_${email}`, JSON.stringify(userData));
-      currentUser = userData;
-      
-      loadWorkerDashboard();
+    if (localStorage.getItem(`user_${email}`)) {
+      alert('An account with this email already exists!');
+      return;
     }
 
-    function loadWorkerDashboard() {
-      document.getElementById('welcome-msg').innerText = `Welcome, ${currentUser.name}! 👋`;
-      document.getElementById('user-balance').innerText = `$${currentUser.balance.toFixed(2)}`;
-      document.getElementById('user-daily').innerText = `$${currentUser.dailyEarned.toFixed(2)}`;
-      switchView('worker');
+    const userData = {
+      name: name,
+      email: email,
+      password: pass,
+      balance: 5.00
+    };
+
+    localStorage.setItem(`user_${email}`, JSON.stringify(userData));
+    currentUser = userData;
+    loadDashboard();
+  }
+
+  // LOGIN USER
+  function loginUser() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value.trim();
+
+    if (!email || !pass) {
+      alert('Please fill in both fields.');
+      return;
     }
 
-    function watchVideo(reward) {
-      currentUser.balance += reward;
-      currentUser.dailyEarned += reward;
-      localStorage.setItem(`user_${currentUser.email}`, JSON.stringify(currentUser));
-      loadWorkerDashboard();
-      alert(`Video completed! You earned $${reward.toFixed(2)}.`);
-    }
-
-    function loginAdmin() {
-      const pass = document.getElementById('admin-pass').value;
-      // Default admin password set to 'admin123'
-      if (pass === 'admin123') {
-        switchView('admin-dashboard');
+    const savedData = localStorage.getItem(`user_${email}`);
+    if (savedData) {
+      const user = JSON.parse(savedData);
+      if (user.password === pass) {
+        currentUser = user;
+        loadDashboard();
       } else {
-        alert('Incorrect Admin Password! Use: admin123');
+        alert('Incorrect password.');
+      }
+    } else {
+      alert('No account found with this email.');
+    }
+  }
+
+  // LOAD DASHBOARD
+  function loadDashboard() {
+    if (!currentUser) return;
+    document.getElementById('welcome-msg').innerText = `Welcome, ${currentUser.name}!`;
+    document.getElementById('user-balance').innerText = `$${parseFloat(currentUser.balance).toFixed(2)}`;
+    switchView('dashboard');
+  }
+
+  // LOGOUT
+  function logout() {
+    currentUser = null;
+    switchView('login');
+  }
+
+  // WITHDRAWAL
+  function processWithdrawal() {
+    const address = document.getElementById('withdraw-address').value.trim();
+    const amount = parseFloat(document.getElementById('withdraw-amount').value);
+
+    if (!address || isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid wallet address and amount.');
+      return;
+    }
+
+    if (amount > currentUser.balance) {
+      alert('Insufficient funds!');
+      return;
+    }
+
+    currentUser.balance -= amount;
+    localStorage.setItem(`user_${currentUser.email}`, JSON.stringify(currentUser));
+    loadDashboard();
+    alert('Withdrawal request submitted successfully!');
+  }
+
+  // ADMIN: LOAD USERS
+  function loadAdminUsers() {
+    const listContainer = document.getElementById('user-list');
+    listContainer.innerHTML = '';
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('user_')) {
+        const user = JSON.parse(localStorage.getItem(key));
+        const item = document.createElement('div');
+        item.className = 'user-list-item';
+        item.innerHTML = `<strong>${user.name}</strong> (${user.email})<br>Balance: $${parseFloat(user.balance).toFixed(2)}`;
+        listContainer.appendChild(item);
       }
     }
+  }
 
-    function updateUserBalance() {
-      const email = document.getElementById('edit-user-email').value;
-      const newBalance = parseFloat(document.getElementById('edit-user-balance').value);
+  // ADMIN: UPDATE BALANCE
+  function adminUpdateBalance() {
+    const targetEmail = document.getElementById('admin-target-email').value.trim();
+    const newBalance = parseFloat(document.getElementById('admin-new-balance').value);
 
-      const rawData = localStorage.getItem(`user_${email}`);
-      if (!rawData) {
-        alert('User email not found!');
-        return;
-      }
-
-      const userData = JSON.parse(rawData);
-      userData.balance = newBalance;
-      localStorage.setItem(`user_${email}`, JSON.stringify(userData));
-      
-      alert(`Updated balance for ${userData.name} to $${newBalance.toFixed(2)}`);
+    if (!targetEmail || isNaN(newBalance)) {
+      alert('Please provide a valid user email and balance amount.');
+      return;
     }
 
-    function logout() {
-      currentUser = null;
-      switchView('signup');
+    const savedData = localStorage.getItem(`user_${targetEmail}`);
+    if (savedData) {
+      const user = JSON.parse(savedData);
+      user.balance = newBalance;
+      localStorage.setItem(`user_${targetEmail}`, JSON.stringify(user));
+      alert(`Updated balance for ${targetEmail} to $${newBalance.toFixed(2)}`);
+      loadAdminUsers();
+    } else {
+      alert('User not found!');
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
