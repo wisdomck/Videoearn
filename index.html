@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --bg: #f1f5f9;
@@ -14,7 +15,6 @@
       --border: #e2e8f0;
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
-      --accent: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
       --text: #0f172a;
       --text-muted: #64748b;
       --success: #16a34a;
@@ -31,7 +31,7 @@
     .nav-btn { background: #ffffff; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     .nav-btn:hover { background: #f8fafc; }
 
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
     h2, h3, h4 { margin-bottom: 12px; color: var(--text); }
     p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
@@ -42,8 +42,7 @@
     .btn-telegram { background: var(--telegram); color: #fff; }
     
     label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
-    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
-    input:focus, select:focus { outline: 2px solid var(--primary); background: #fff; }
+    input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
 
     .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
@@ -74,7 +73,7 @@
       <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
     </header>
 
-    <!-- AUTHENTICATION VIEW (LOGIN / SIGNUP / FORGOT PASSWORD) -->
+    <!-- AUTHENTICATION VIEW -->
     <div id="auth-view" class="card">
       <div id="login-box">
         <h3>Welcome Back</h3>
@@ -101,6 +100,8 @@
         <input type="text" id="signup-username" placeholder="Choose Username">
         <label>Password</label>
         <input type="password" id="signup-password" placeholder="Create Password">
+        <label>Invitation Code</label>
+        <input type="text" id="signup-invite-code" placeholder="Enter Code (e.g. 2201)">
         <button class="btn" onclick="userSignup()">Create Account</button>
         <p style="margin-top: 12px; text-align: center;">
           Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
@@ -150,7 +151,7 @@
 
         <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 0;">
           <h4 style="color: var(--warning);">Set Paused / Completed!</h4>
-          <p id="pause-reason-text">Waiting for admin approval to proceed or unlock the next set.</p>
+          <p>Waiting for admin approval to proceed or unlock the next set.</p>
         </div>
 
         <div id="movie-container" class="movie-box">
@@ -173,10 +174,9 @@
         <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
       </div>
 
-      <!-- CUSTOMER SUPPORT CARD -->
       <div class="card" style="text-align: center;">
         <h3>Need Help?</h3>
-        <p>Contact our Official Support Team on Telegram for instant assistance.</p>
+        <p>Contact Support on Telegram for assistance.</p>
         <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Chat with Support on Telegram</a>
       </div>
     </div>
@@ -197,13 +197,11 @@
             <button class="nav-btn" onclick="logoutAdmin()">Logout</button>
           </div>
 
-          <!-- All Registered Members -->
           <div class="admin-section">
-            <h4>All Registered Members</h4>
-            <div id="all-users-list" class="user-list-box"></div>
+            <h4>All Registered Members (Live Cloud Data)</h4>
+            <div id="all-users-list" class="user-list-box">Loading members from Firestore...</div>
           </div>
 
-          <!-- Manage Selected Member -->
           <div class="admin-section">
             <h4>Manage Selected Member</h4>
             <label>Select Member to Manage:</label>
@@ -226,7 +224,6 @@
             <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Move to Next</button>
           </div>
 
-          <!-- Manage Telegram Support Link -->
           <div class="admin-section">
             <h4>Telegram Support Settings</h4>
             <label>Telegram Support Link or Username:</label>
@@ -234,32 +231,6 @@
             <button class="btn btn-secondary" onclick="saveTelegramLink()">Save Telegram Support Link</button>
           </div>
 
-          <!-- Upload Picture & Edit Settings -->
-          <div class="admin-section">
-            <h4>Upload & Edit Movie Pictures</h4>
-            <label>Select Set Number (1, 2, or 3):</label>
-            <select id="edit-set-num">
-              <option value="1">Set 1</option>
-              <option value="2">Set 2</option>
-              <option value="3">Set 3</option>
-            </select>
-
-            <label>Picture Number (1 to 29):</label>
-            <input type="number" id="edit-img-index" min="1" max="29" value="1">
-
-            <label>Upload Movie Picture:</label>
-            <input type="file" id="edit-img-file" accept="image/*">
-
-            <label>Reward Amount ($):</label>
-            <input type="number" id="edit-img-reward" value="0.50" step="0.01">
-
-            <label>Admin Comment:</label>
-            <input type="text" id="edit-img-comment" placeholder="Featured movie promo note...">
-
-            <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
-          </div>
-
-          <!-- Withdrawal Requests -->
           <div class="admin-section">
             <h4>Withdrawal Requests</h4>
             <p id="admin-withdraw-request-text">No active withdrawal request.</p>
@@ -271,18 +242,49 @@
 
   </div>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <script>
-    let users = JSON.parse(localStorage.getItem('ve_users')) || {};
-    let globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
+    // --- FIREBASE CONFIGURATION ---
+    // STEP 1: Replace the values below with your keys from Firebase Console
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase & Firestore Cloud Database
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    const REQUIRED_REGISTRATION_CODE = "2201";
+    let users = {};
     let telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
 
-    function saveUsers() {
-      localStorage.setItem('ve_users', JSON.stringify(users));
-    }
+    // LIVE FIRESTORE LISTENER (Syncs all user actions across all browsers automatically)
+    db.collection("users").onSnapshot((snapshot) => {
+      users = {};
+      snapshot.forEach((doc) => {
+        users[doc.id] = doc.data();
+      });
+      renderUI();
+      if (!document.getElementById('admin-dashboard').classList.contains('hidden')) {
+        populateAdminUsers();
+      }
+    });
 
-    function savePictures() {
-      localStorage.setItem('ve_pictures', JSON.stringify(globalPictureData));
+    async function saveUserToCloud(username) {
+      if (users[username]) {
+        await db.collection("users").doc(username).set(users[username]);
+      }
     }
 
     function showAuthTab(tab) {
@@ -299,32 +301,31 @@
       }
     }
 
-    function userSignup() {
+    async function userSignup() {
       const email = document.getElementById('signup-email').value.trim().toLowerCase();
       const u = document.getElementById('signup-username').value.trim();
       const p = document.getElementById('signup-password').value.trim();
+      const code = document.getElementById('signup-invite-code').value.trim();
 
-      if (!email || !u || !p) {
-        alert('Please fill in all fields including email.');
+      if (!email || !u || !p || !code) {
+        alert('Please fill in all fields including the registration code.');
         return;
       }
 
-      // Check if username already exists
+      if (code !== REQUIRED_REGISTRATION_CODE) {
+        alert('Invalid Invitation Code! You must enter code 2201 to register.');
+        return;
+      }
+
       if (users[u]) {
         alert('Username already exists. Please choose another.');
-        return;
-      }
-
-      // Check if email already exists
-      const emailExists = Object.values(users).some(user => user.email === email);
-      if (emailExists) {
-        alert('An account with this email already exists. Please log in.');
         return;
       }
 
       users[u] = {
         email: email,
         password: p,
+        registrationCode: code,
         currentSet: 1,
         completedInSet: 0,
         stopLimit: 29,
@@ -335,64 +336,49 @@
         walletAddress: ''
       };
 
-      saveUsers();
+      await saveUserToCloud(u);
       alert('Account created successfully! Please log in.');
       showAuthTab('login');
     }
 
     function userLogin() {
-      // Sync fresh data from localStorage in case account was modified or logged in on another tab/session
-      users = JSON.parse(localStorage.getItem('ve_users')) || {};
-      
       const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
       const p = document.getElementById('login-password').value.trim();
 
       if (!identifier || !p) {
-        alert('Please enter your email/username and password.');
+        alert('Please enter your details.');
         return;
       }
 
-      // Find user by username or email
-      let matchedUsername = null;
-      if (users[identifier]) {
-        matchedUsername = identifier;
-      } else {
-        matchedUsername = Object.keys(users).find(u => users[u].email === identifier);
-      }
+      let matchedUsername = users[identifier] ? identifier : Object.keys(users).find(u => users[u].email === identifier);
 
       if (matchedUsername && users[matchedUsername].password === p) {
         currentUser = matchedUsername;
         localStorage.setItem('ve_current_user', matchedUsername);
         renderUI();
       } else {
-        alert('Incorrect Email/Username or Password!');
+        alert('Incorrect details entered.');
       }
     }
 
-    function userResetPassword() {
-      users = JSON.parse(localStorage.getItem('ve_users')) || {};
+    async function userResetPassword() {
       const email = document.getElementById('forgot-email').value.trim().toLowerCase();
       const newPassword = document.getElementById('forgot-new-password').value.trim();
-
-      if (!email || !newPassword) {
-        alert('Please enter your email address and new password.');
-        return;
-      }
 
       const matchedUsername = Object.keys(users).find(u => users[u].email === email);
 
       if (!matchedUsername) {
-        alert('No account found with this email address.');
+        alert('No account found with this email.');
         return;
       }
 
       users[matchedUsername].password = newPassword;
-      saveUsers();
+      await saveUserToCloud(matchedUsername);
 
       currentUser = matchedUsername;
       localStorage.setItem('ve_current_user', matchedUsername);
 
-      alert('Password updated successfully! Logging you into your account...');
+      alert('Password updated successfully!');
       renderUI();
     }
 
@@ -425,7 +411,6 @@
       if (pass === 'admin1234') {
         document.getElementById('admin-login-card').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
-        document.getElementById('admin-telegram-link').value = telegramLink;
         populateAdminUsers();
         renderUI();
       } else {
@@ -434,25 +419,11 @@
     }
 
     function logoutAdmin() {
-      document.getElementById('admin-pass-input').value = '';
       document.getElementById('admin-login-card').classList.remove('hidden');
       document.getElementById('admin-dashboard').classList.add('hidden');
     }
 
-    function saveTelegramLink() {
-      const link = document.getElementById('admin-telegram-link').value.trim();
-      if (!link) {
-        alert('Please enter a valid Telegram link.');
-        return;
-      }
-      telegramLink = link.startsWith('http') ? link : `https://${link}`;
-      localStorage.setItem('ve_telegram_link', telegramLink);
-      renderUI();
-      alert('Telegram Support Link updated successfully!');
-    }
-
     function populateAdminUsers() {
-      users = JSON.parse(localStorage.getItem('ve_users')) || {};
       const select = document.getElementById('admin-selected-user');
       const userListContainer = document.getElementById('all-users-list');
       select.innerHTML = '';
@@ -460,19 +431,19 @@
 
       const usernames = Object.keys(users);
       if (usernames.length === 0) {
-        userListContainer.innerHTML = '<p style="font-size:0.8rem;">No registered members yet.</p>';
+        userListContainer.innerHTML = '<p style="font-size:0.8rem;">No members registered yet.</p>';
         return;
       }
 
       usernames.forEach(u => {
         const option = document.createElement('option');
         option.value = u;
-        option.innerText = `${u} (${users[u].email || 'No email'})`;
+        option.innerText = `${u} (${users[u].email}) - Code: ${users[u].registrationCode}`;
         select.appendChild(option);
 
         const item = document.createElement('div');
         item.className = 'user-item';
-        item.innerHTML = `<span><strong>${u}</strong> <small>(${users[u].email || 'No email'})</small></span> <span>$${users[u].balance.toFixed(2)}</span>`;
+        item.innerHTML = `<span><strong>${u}</strong> (${users[u].email})</span> <span>$${(users[u].balance || 0).toFixed(2)}</span>`;
         userListContainer.appendChild(item);
       });
 
@@ -484,220 +455,51 @@
       if (!selectedUser || !users[selectedUser]) return;
 
       const user = users[selectedUser];
-      document.getElementById('admin-user-balance').value = user.balance;
+      document.getElementById('admin-user-balance').value = user.balance || 0;
       document.getElementById('admin-stop-work-num').value = user.stopLimit || 29;
       document.getElementById('admin-user-set-select').value = user.currentSet || 1;
-
-      const wReqText = document.getElementById('admin-withdraw-request-text');
-      const wApproveBtn = document.getElementById('approve-withdraw-btn');
-
-      if (user.withdrawalStatus === 'Pending') {
-        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${(user.withdrawalAmount || user.balance).toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
-        wApproveBtn.style.display = 'block';
-      } else {
-        wReqText.innerText = 'No pending withdrawal requests for this member.';
-        wApproveBtn.style.display = 'none';
-      }
     }
 
-    function saveAdminUserSettings() {
+    async function saveAdminUserSettings() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !users[selectedUser]) return;
 
-      const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
-      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 29;
-      const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
+      users[selectedUser].balance = parseFloat(document.getElementById('admin-user-balance').value) || 0;
+      users[selectedUser].stopLimit = parseInt(document.getElementById('admin-stop-work-num').value) || 29;
+      users[selectedUser].currentSet = parseInt(document.getElementById('admin-user-set-select').value) || 1;
 
-      users[selectedUser].balance = newBal;
-      users[selectedUser].stopLimit = stopNum;
-      
-      if (users[selectedUser].currentSet !== setNum) {
-        users[selectedUser].currentSet = setNum;
-        users[selectedUser].completedInSet = 0;
-      }
-
-      if (users[selectedUser].completedInSet < stopNum) {
-        users[selectedUser].isSetApproved = true;
-      }
-
-      saveUsers();
-      populateAdminUsers();
-      renderUI();
-      alert(`Updated settings for ${selectedUser}!`);
+      await saveUserToCloud(selectedUser);
+      alert(`Settings updated for ${selectedUser}!`);
     }
 
-    function promoteMovie() {
+    async function promoteMovie() {
       if (!currentUser || !users[currentUser]) return;
 
       const user = users[currentUser];
-      const maxWork = user.stopLimit || 29;
-
-      if (user.completedInSet >= maxWork) return;
-
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
-      const reward = globalPictureData[key]?.reward || 0.50;
+      if (user.completedInSet >= user.stopLimit) return;
 
       user.completedInSet += 1;
-      user.balance += parseFloat(reward);
+      user.balance += 0.50;
 
-      if (user.completedInSet >= maxWork) {
-        user.isSetApproved = false;
-      }
-
-      saveUsers();
+      await saveUserToCloud(currentUser);
       renderUI();
-    }
-
-    function approveNextSet() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !users[selectedUser]) {
-        alert('Please select a member first.');
-        return;
-      }
-
-      const user = users[selectedUser];
-      if (user.currentSet < 3) {
-        user.currentSet += 1;
-        user.completedInSet = 0;
-        user.stopLimit = 29;
-        user.isSetApproved = true;
-        saveUsers();
-        populateAdminUsers();
-        renderUI();
-        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
-      } else {
-        alert(`${selectedUser} has already completed all 3 sets!`);
-      }
-    }
-
-    function savePictureAndSettings() {
-      const setNum = document.getElementById('edit-set-num').value;
-      const imgIndex = document.getElementById('edit-img-index').value;
-      const reward = document.getElementById('edit-img-reward').value;
-      const comment = document.getElementById('edit-img-comment').value;
-      const fileInput = document.getElementById('edit-img-file');
-
-      const key = `${setNum}-${imgIndex}`;
-
-      if (!globalPictureData[key]) globalPictureData[key] = {};
-      globalPictureData[key].reward = reward;
-      globalPictureData[key].comment = comment;
-
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          globalPictureData[key].image = e.target.result;
-          savePictures();
-          renderUI();
-          alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        savePictures();
-        renderUI();
-        alert(`Details saved for Set ${setNum}, Image #${imgIndex}!`);
-      }
-    }
-
-    function requestWithdrawal() {
-      if (!currentUser || !users[currentUser]) return;
-      const user = users[currentUser];
-
-      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value);
-
-      if (!wallet) {
-        alert('Please enter your Crypto Wallet Address.');
-        return;
-      }
-      if (!amount || amount <= 0 || amount > user.balance) {
-        alert('Please enter a valid withdrawal amount within your available balance.');
-        return;
-      }
-
-      user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amount;
-      user.walletAddress = wallet;
-
-      saveUsers();
-      renderUI();
-      alert('Withdrawal request submitted successfully!');
-    }
-
-    function approveWithdrawal() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !users[selectedUser]) return;
-      
-      const user = users[selectedUser];
-      user.withdrawalStatus = 'Approved';
-      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
-      user.withdrawalAmount = 0;
-      
-      saveUsers();
-      populateAdminUsers();
-      renderUI();
-      alert(`Withdrawal approved for ${selectedUser}!`);
     }
 
     function renderUI() {
-      users = JSON.parse(localStorage.getItem('ve_users')) || {};
-      const authView = document.getElementById('auth-view');
-      const workerView = document.getElementById('worker-view');
-
-      // Update Support Button Link
-      document.getElementById('telegram-support-btn').href = telegramLink;
-
       if (!currentUser || !users[currentUser]) {
-        authView.classList.remove('hidden');
-        workerView.classList.add('hidden');
+        document.getElementById('auth-view').classList.remove('hidden');
+        document.getElementById('worker-view').classList.add('hidden');
         return;
       }
 
-      authView.classList.add('hidden');
-      workerView.classList.remove('hidden');
+      document.getElementById('auth-view').classList.add('hidden');
+      document.getElementById('worker-view').classList.remove('hidden');
 
       const user = users[currentUser];
-      const stopLimit = user.stopLimit || 29;
-
       document.getElementById('user-display-name').innerText = currentUser;
-      document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
-      document.getElementById('set-num-text').innerText = user.currentSet;
-      document.getElementById('worker-balance').innerText = `$${user.balance.toFixed(2)}`;
-
-      const completed = user.completedInSet;
-      document.getElementById('progress-text').innerText = `${completed} / 29 Completed`;
-      document.getElementById('progress-fill').style.width = `${(completed / 29) * 100}%`;
-
-      const movieBox = document.getElementById('movie-container');
-      const setCompletedMsg = document.getElementById('completed-set-message');
-
-      if (completed >= stopLimit || !user.isSetApproved) {
-        movieBox.classList.add('hidden');
-        setCompletedMsg.classList.remove('hidden');
-      } else {
-        movieBox.classList.remove('hidden');
-        setCompletedMsg.classList.add('hidden');
-      }
-
-      const currentImgIndex = completed + 1;
-      const currentKey = `${user.currentSet}-${currentImgIndex}`;
-      const itemData = globalPictureData[currentKey] || {};
-
-      document.getElementById('movie-title').innerText = `Set ${user.currentSet} - Movie Promotion #${currentImgIndex}`;
-      document.getElementById('movie-reward').innerText = `$${itemData.reward || '0.50'}`;
-      document.getElementById('admin-comment').innerText = `Admin Comment: ${itemData.comment || 'Ready to promote!'}`;
-      
-      const defaultPlaceholder = `https://via.placeholder.com/400x250/e2e8f0/2563eb?text=Set+${user.currentSet}+-+Picture+${currentImgIndex}`;
-      document.getElementById('movie-img').src = itemData.image || defaultPlaceholder;
-
-      const wStatus = document.getElementById('withdraw-status');
-      if (user.withdrawalStatus === 'Pending') {
-        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending Admin Approval ($${user.withdrawalAmount.toFixed(2)})</span>`;
-      } else if (user.withdrawalStatus === 'Approved') {
-        wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved & Sent!</span>';
-      } else {
-        wStatus.innerText = '';
-      }
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('progress-text').innerText = `${user.completedInSet || 0} / 29 Completed`;
+      document.getElementById('progress-fill').style.width = `${((user.completedInSet || 0) / 29) * 100}%`;
     }
 
     renderUI();
