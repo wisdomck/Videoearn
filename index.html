@@ -7,6 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
     :root {
       --bg: #f1f5f9;
@@ -74,7 +79,7 @@
       <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
     </header>
 
-    <!-- AUTHENTICATION VIEW (LOGIN / SIGNUP) -->
+    <!-- AUTHENTICATION VIEW -->
     <div id="auth-view" class="card">
       <div id="login-box">
         <h3>Welcome Back</h3>
@@ -157,7 +162,6 @@
         <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
       </div>
 
-      <!-- CUSTOMER SUPPORT CARD -->
       <div class="card" style="text-align: center;">
         <h3>Need Help?</h3>
         <p>Contact our Official Support Team on Telegram for instant assistance.</p>
@@ -184,7 +188,7 @@
           <!-- All Registered Members -->
           <div class="admin-section">
             <h4>All Registered Members</h4>
-            <div id="all-users-list" class="user-list-box"></div>
+            <div id="all-users-list" class="user-list-box">Syncing members...</div>
           </div>
 
           <!-- Manage Selected Member -->
@@ -210,7 +214,7 @@
             <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Move to Next</button>
           </div>
 
-          <!-- Manage Telegram Support Link -->
+          <!-- Telegram Support Link -->
           <div class="admin-section">
             <h4>Telegram Support Settings</h4>
             <label>Telegram Support Link or Username:</label>
@@ -256,18 +260,59 @@
   </div>
 
   <script>
-    let users = JSON.parse(localStorage.getItem('ve_users')) || {};
-    let globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
-    let telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
+    // ======================================================
+    // 1. REPLACE THE KEYS BELOW WITH YOUR FIREBASE CONFIG
+    // ======================================================
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // App state
+    let users = {};
+    let globalPictureData = {};
+    let telegramLink = 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
 
-    function saveUsers() {
-      localStorage.setItem('ve_users', JSON.stringify(users));
+    // Real-time Database Listeners
+    function initDataListeners() {
+      // Sync Users across all devices
+      db.collection('users').onSnapshot((snapshot) => {
+        snapshot.forEach((doc) => {
+          users[doc.id] = doc.data();
+        });
+        if (document.getElementById('admin-dashboard').classList.contains('hidden') === false) {
+          populateAdminUsers();
+        }
+        renderUI();
+      });
+
+      // Sync Picture/Promos across devices
+      db.collection('settings').doc('pictures').onSnapshot((doc) => {
+        if (doc.exists) {
+          globalPictureData = doc.data() || {};
+          renderUI();
+        }
+      });
+
+      // Sync Telegram Link
+      db.collection('settings').doc('telegram').onSnapshot((doc) => {
+        if (doc.exists) {
+          telegramLink = doc.data().link || 'https://t.me/';
+          renderUI();
+        }
+      });
     }
 
-    function savePictures() {
-      localStorage.setItem('ve_pictures', JSON.stringify(globalPictureData));
-    }
+    initDataListeners();
 
     function showAuthTab(tab) {
       if (tab === 'signup') {
@@ -279,7 +324,7 @@
       }
     }
 
-    function userSignup() {
+    async function userSignup() {
       const email = document.getElementById('signup-email').value.trim().toLowerCase();
       const u = document.getElementById('signup-username').value.trim();
       const p = document.getElementById('signup-password').value.trim();
@@ -289,20 +334,20 @@
         return;
       }
 
-      // Check if username already exists
-      if (users[u]) {
+      const userDoc = await db.collection('users').doc(u).get();
+      if (userDoc.exists) {
         alert('Username already exists. Please choose another.');
         return;
       }
 
-      // Check if email already exists
-      const emailExists = Object.values(users).some(user => user.email === email);
-      if (emailExists) {
-        alert('An account with this email already exists. Please log in.');
+      const emailCheck = await db.collection('users').where('email', '==', email).get();
+      if (!emailCheck.empty) {
+        alert('An account with this email already exists.');
         return;
       }
 
-      users[u] = {
+      const newUser = {
+        username: u,
         email: email,
         password: p,
         currentSet: 1,
@@ -315,12 +360,12 @@
         walletAddress: ''
       };
 
-      saveUsers();
+      await db.collection('users').doc(u).set(newUser);
       alert('Account created successfully! Please log in.');
       showAuthTab('login');
     }
 
-    function userLogin() {
+    async function userLogin() {
       const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
       const p = document.getElementById('login-password').value.trim();
 
@@ -329,17 +374,16 @@
         return;
       }
 
-      // Find user by username or email
-      let matchedUsername = null;
+      let matchedUser = null;
       if (users[identifier]) {
-        matchedUsername = identifier;
+        matchedUser = users[identifier];
       } else {
-        matchedUsername = Object.keys(users).find(u => users[u].email === identifier);
+        matchedUser = Object.values(users).find(u => u.email === identifier);
       }
 
-      if (matchedUsername && users[matchedUsername].password === p) {
-        currentUser = matchedUsername;
-        localStorage.setItem('ve_current_user', matchedUsername);
+      if (matchedUser && matchedUser.password === p) {
+        currentUser = matchedUser.username || identifier;
+        localStorage.setItem('ve_current_user', currentUser);
         renderUI();
       } else {
         alert('Invalid Email/Username or Password!');
@@ -389,15 +433,14 @@
       document.getElementById('admin-dashboard').classList.add('hidden');
     }
 
-    function saveTelegramLink() {
+    async function saveTelegramLink() {
       const link = document.getElementById('admin-telegram-link').value.trim();
       if (!link) {
         alert('Please enter a valid Telegram link.');
         return;
       }
-      telegramLink = link.startsWith('http') ? link : `https://${link}`;
-      localStorage.setItem('ve_telegram_link', telegramLink);
-      renderUI();
+      const formattedLink = link.startsWith('http') ? link : `https://${link}`;
+      await db.collection('settings').doc('telegram').set({ link: formattedLink });
       alert('Telegram Support Link updated successfully!');
     }
 
@@ -449,7 +492,7 @@
       }
     }
 
-    function saveAdminUserSettings() {
+    async function saveAdminUserSettings() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !users[selectedUser]) return;
 
@@ -457,25 +500,25 @@
       const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 29;
       const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
 
-      users[selectedUser].balance = newBal;
-      users[selectedUser].stopLimit = stopNum;
-      
+      const updates = {
+        balance: newBal,
+        stopLimit: stopNum,
+        currentSet: setNum
+      };
+
       if (users[selectedUser].currentSet !== setNum) {
-        users[selectedUser].currentSet = setNum;
-        users[selectedUser].completedInSet = 0;
+        updates.completedInSet = 0;
       }
 
       if (users[selectedUser].completedInSet < stopNum) {
-        users[selectedUser].isSetApproved = true;
+        updates.isSetApproved = true;
       }
 
-      saveUsers();
-      populateAdminUsers();
-      renderUI();
+      await db.collection('users').doc(selectedUser).update(updates);
       alert(`Updated settings for ${selectedUser}!`);
     }
 
-    function promoteMovie() {
+    async function promoteMovie() {
       if (!currentUser || !users[currentUser]) return;
 
       const user = users[currentUser];
@@ -484,20 +527,21 @@
       if (user.completedInSet >= maxWork) return;
 
       const key = `${user.currentSet}-${user.completedInSet + 1}`;
-      const reward = globalPictureData[key]?.reward || 0.50;
+      const reward = parseFloat(globalPictureData[key]?.reward || 0.50);
 
-      user.completedInSet += 1;
-      user.balance += parseFloat(reward);
+      const updates = {
+        completedInSet: user.completedInSet + 1,
+        balance: user.balance + reward
+      };
 
-      if (user.completedInSet >= maxWork) {
-        user.isSetApproved = false;
+      if (updates.completedInSet >= maxWork) {
+        updates.isSetApproved = false;
       }
 
-      saveUsers();
-      renderUI();
+      await db.collection('users').doc(currentUser).update(updates);
     }
 
-    function approveNextSet() {
+    async function approveNextSet() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !users[selectedUser]) {
         alert('Please select a member first.');
@@ -506,20 +550,19 @@
 
       const user = users[selectedUser];
       if (user.currentSet < 3) {
-        user.currentSet += 1;
-        user.completedInSet = 0;
-        user.stopLimit = 29;
-        user.isSetApproved = true;
-        saveUsers();
-        populateAdminUsers();
-        renderUI();
-        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+        await db.collection('users').doc(selectedUser).update({
+          currentSet: user.currentSet + 1,
+          completedInSet: 0,
+          stopLimit: 29,
+          isSetApproved: true
+        });
+        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet + 1}.`);
       } else {
         alert(`${selectedUser} has already completed all 3 sets!`);
       }
     }
 
-    function savePictureAndSettings() {
+    async function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
       const imgIndex = document.getElementById('edit-img-index').value;
       const reward = document.getElementById('edit-img-reward').value;
@@ -527,28 +570,30 @@
       const fileInput = document.getElementById('edit-img-file');
 
       const key = `${setNum}-${imgIndex}`;
+      let pictureUpdate = globalPictureData[key] || {};
 
-      if (!globalPictureData[key]) globalPictureData[key] = {};
-      globalPictureData[key].reward = reward;
-      globalPictureData[key].comment = comment;
+      pictureUpdate.reward = reward;
+      pictureUpdate.comment = comment;
+
+      const commitToDb = async () => {
+        globalPictureData[key] = pictureUpdate;
+        await db.collection('settings').doc('pictures').set(globalPictureData);
+        alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
+      };
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function (e) {
-          globalPictureData[key].image = e.target.result;
-          savePictures();
-          renderUI();
-          alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
+        reader.onload = async function (e) {
+          pictureUpdate.image = e.target.result;
+          await commitToDb();
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        savePictures();
-        renderUI();
-        alert(`Details saved for Set ${setNum}, Image #${imgIndex}!`);
+        await commitToDb();
       }
     }
 
-    function requestWithdrawal() {
+    async function requestWithdrawal() {
       if (!currentUser || !users[currentUser]) return;
       const user = users[currentUser];
 
@@ -564,27 +609,28 @@
         return;
       }
 
-      user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amount;
-      user.walletAddress = wallet;
+      await db.collection('users').doc(currentUser).update({
+        withdrawalStatus: 'Pending',
+        withdrawalAmount: amount,
+        walletAddress: wallet
+      });
 
-      saveUsers();
-      renderUI();
       alert('Withdrawal request submitted successfully!');
     }
 
-    function approveWithdrawal() {
+    async function approveWithdrawal() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !users[selectedUser]) return;
       
       const user = users[selectedUser];
-      user.withdrawalStatus = 'Approved';
-      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
-      user.withdrawalAmount = 0;
-      
-      saveUsers();
-      populateAdminUsers();
-      renderUI();
+      const newBal = Math.max(0, user.balance - (user.withdrawalAmount || 0));
+
+      await db.collection('users').doc(selectedUser).update({
+        withdrawalStatus: 'Approved',
+        balance: newBal,
+        withdrawalAmount: 0
+      });
+
       alert(`Withdrawal approved for ${selectedUser}!`);
     }
 
@@ -592,7 +638,6 @@
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
 
-      // Update Support Button Link
       document.getElementById('telegram-support-btn').href = telegramLink;
 
       if (!currentUser || !users[currentUser]) {
