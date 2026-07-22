@@ -736,7 +736,7 @@
       }
     }
 
-    function savePictureAndSettings() {
+    async function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
       let imgIndex = parseInt(document.getElementById('edit-img-index').value) || 1;
       if (imgIndex > 16) {
@@ -744,55 +744,38 @@
         document.getElementById('edit-img-index').value = 16;
         imgIndex = 16;
       }
-      const reward = document.getElementById('edit-img-reward').value;
-      const comment = document.getElementById('edit-img-comment').value;
+      const reward = document.getElementById('edit-img-reward').value || "0.50";
+      const comment = document.getElementById('edit-img-comment').value.trim() || "Featured movie promo note...";
       const fileInput = document.getElementById('edit-img-file');
 
       const key = `${setNum}-${imgIndex}`;
 
-      if (!window.globalPictureData[key]) window.globalPictureData[key] = {};
-      window.globalPictureData[key].reward = reward;
-      window.globalPictureData[key].comment = comment;
+      const processSave = async (imgData) => {
+        const picData = {
+          img: imgData,
+          reward: reward,
+          comment: comment
+        };
+        window.globalPictureData[key] = picData;
+        window.savePictures();
 
-      const applyAndSave = async () => {
-        try {
-          window.savePictures();
-          if (window.savePicturesToFirebase) {
-            await window.savePicturesToFirebase(key, window.globalPictureData[key]);
-          }
-          renderUI();
-          alert(`Saved picture & details for Set ${setNum}, Image #${imgIndex}!`);
-        } catch (err) {
-          console.error("Save error:", err);
-          alert("Error saving picture to Firebase: " + err.message);
+        if (window.savePicturesToFirebase) {
+          await window.savePicturesToFirebase(key, picData);
         }
+
+        alert(`Picture and details saved for Set ${setNum}, Movie #${imgIndex}!`);
+        renderUI();
       };
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            
-            // Resize image to max 350px width to keep file size tiny (~30KB)
-            const MAX_WIDTH = 350;
-            const scale = MAX_WIDTH / img.width;
-            canvas.width = MAX_WIDTH;
-            canvas.height = img.height * scale;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            // Compress image to lightweight JPEG format
-            window.globalPictureData[key].imageData = canvas.toDataURL('image/jpeg', 0.7);
-            applyAndSave();
-          };
-          img.src = e.target.result;
+        reader.onload = function(e) {
+          processSave(e.target.result);
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        applyAndSave();
+        const existingData = window.globalPictureData[key]?.img || "";
+        processSave(existingData);
       }
     }
 
@@ -800,22 +783,22 @@
       if (!currentUser || !window.users[currentUser]) return;
 
       const user = window.users[currentUser];
-      const addr = document.getElementById('withdraw-wallet-address').value.trim();
-      const amt = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+      const address = document.getElementById('withdraw-wallet-address').value.trim();
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
 
-      if (!addr) {
-        alert('Please enter your crypto wallet address.');
+      if (!address) {
+        alert('Please enter a valid Crypto Wallet Address.');
         return;
       }
 
-      if (amt <= 0 || amt > user.balance) {
-        alert('Invalid withdrawal amount. Cannot exceed current balance.');
+      if (amount <= 0 || amount > (user.balance || 0)) {
+        alert('Invalid withdrawal amount! Make sure it does not exceed your available balance.');
         return;
       }
 
       user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amt;
-      user.walletAddress = addr;
+      user.withdrawalAmount = amount;
+      user.walletAddress = address;
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
@@ -831,9 +814,9 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      const wAmt = user.withdrawalAmount || 0;
+      const amt = user.withdrawalAmount || user.balance || 0;
 
-      user.balance = Math.max(0, (user.balance || 0) - wAmt);
+      user.balance = Math.max(0, (user.balance || 0) - amt);
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -844,74 +827,75 @@
 
       window.populateAdminUsers();
       renderUI();
-      alert(`Approved withdrawal for ${selectedUser}! $${wAmt.toFixed(2)} deducted.`);
+      alert(`Withdrawal of $${amt.toFixed(2)} approved for ${selectedUser}!`);
     }
 
-    function renderUI() {
+    window.renderUI = function() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
-      const telegramBtns = [document.getElementById('telegram-support-btn'), document.getElementById('support-set-link')];
 
-      telegramBtns.forEach(btn => {
-        if (btn) btn.href = window.telegramLink || 'https://t.me/';
-      });
+      // Update Telegram Support Links globally
+      const tgLink = window.telegramLink || 'https://t.me/';
+      document.getElementById('telegram-support-btn').href = tgLink;
+      document.getElementById('support-set-link').href = tgLink;
 
-      if (!currentUser || !window.users[currentUser]) {
-        if (document.getElementById('admin-view').classList.contains('hidden')) {
-          authView.classList.remove('hidden');
-          workerView.classList.add('hidden');
-        }
-        return;
-      }
-
-      if (document.getElementById('admin-view').classList.contains('hidden')) {
+      if (currentUser && window.users[currentUser]) {
         authView.classList.add('hidden');
         workerView.classList.remove('hidden');
-      }
 
-      const user = window.users[currentUser];
-      const maxWork = Math.min(user.stopLimit || 16, 16);
+        const user = window.users[currentUser];
+        const maxWork = Math.min(user.stopLimit || 16, 16);
 
-      document.getElementById('user-display-name').innerText = user.username;
-      document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
-      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-      document.getElementById('set-num-text').innerText = user.currentSet;
-      document.getElementById('progress-text').innerText = `${user.completedInSet} / ${maxWork} Completed`;
+        document.getElementById('user-display-name').innerText = user.username;
+        document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
+        document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+        document.getElementById('set-num-text').innerText = user.currentSet || 1;
+        document.getElementById('progress-text').innerText = `${user.completedInSet || 0} / ${maxWork} Completed`;
 
-      const pct = Math.min(100, Math.round((user.completedInSet / maxWork) * 100));
-      document.getElementById('progress-fill').style.width = `${pct}%`;
+        const pct = Math.min(100, Math.round(((user.completedInSet || 0) / maxWork) * 100));
+        document.getElementById('progress-fill').style.width = `${pct}%`;
 
-      const completedMsgBox = document.getElementById('completed-set-message');
-      const movieBox = document.getElementById('movie-container');
+        // Check if set work is paused/completed
+        const isPaused = (user.completedInSet >= maxWork) || (user.isSetApproved === false);
+        const movieBox = document.getElementById('movie-container');
+        const setMsgBox = document.getElementById('completed-set-message');
 
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) {
-        movieBox.classList.add('hidden');
-        completedMsgBox.classList.remove('hidden');
+        if (isPaused) {
+          movieBox.classList.add('hidden');
+          setMsgBox.classList.remove('hidden');
+        } else {
+          movieBox.classList.remove('hidden');
+          setMsgBox.classList.add('hidden');
+
+          const nextIndex = (user.completedInSet || 0) + 1;
+          const key = `${user.currentSet || 1}-${nextIndex}`;
+          const currentPicData = window.globalPictureData[key];
+
+          document.getElementById('movie-title').innerText = `Movie Promotion #${nextIndex}`;
+          document.getElementById('movie-img').src = currentPicData?.img || 'https://via.placeholder.com/400x250?text=Movie+Promo+' + nextIndex;
+          document.getElementById('admin-comment').innerText = `Admin Comment: ${currentPicData?.comment || 'Ready to promote!'}`;
+          document.getElementById('movie-reward').innerText = `$${parseFloat(currentPicData?.reward || 0.50).toFixed(2)}`;
+        }
+
+        // Withdrawal status feedback
+        const statusText = document.getElementById('withdraw-status');
+        if (user.withdrawalStatus === 'Pending') {
+          statusText.innerHTML = `<span class="badge badge-pending">Withdrawal Request Pending ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
+        } else if (user.withdrawalStatus === 'Approved') {
+          statusText.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
+        } else {
+          statusText.innerHTML = '';
+        }
+
       } else {
-        completedMsgBox.classList.add('hidden');
-        movieBox.classList.remove('hidden');
-
-        const nextIndex = user.completedInSet + 1;
-        const key = `${user.currentSet}-${nextIndex}`;
-        const picObj = window.globalPictureData[key];
-
-        document.getElementById('movie-title').innerText = `Movie Promotion #${nextIndex}`;
-        document.getElementById('movie-reward').innerText = `$${parseFloat(picObj?.reward || 0.50).toFixed(2)}`;
-        document.getElementById('admin-comment').innerText = picObj?.comment ? `Admin Comment: ${picObj.comment}` : 'Admin Comment: Ready to promote!';
-        document.getElementById('movie-img').src = picObj?.imageData || 'https://via.placeholder.com/400x250?text=Movie+Promo+Image';
+        if (document.getElementById('admin-view').classList.contains('hidden')) {
+          authView.classList.remove('hidden');
+        }
+        workerView.classList.add('hidden');
       }
+    };
 
-      const wStatusText = document.getElementById('withdraw-status');
-      if (user.withdrawalStatus === 'Pending') {
-        wStatusText.innerHTML = `<span class="badge badge-pending">Pending Withdrawal: $${(user.withdrawalAmount || 0).toFixed(2)}</span>`;
-      } else if (user.withdrawalStatus === 'Approved') {
-        wStatusText.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
-      } else {
-        wStatusText.innerText = '';
-      }
-    }
-
-    // Initial render on page load
+    // Initial render call on page startup
     renderUI();
   </script>
 </body>
