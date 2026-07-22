@@ -321,7 +321,7 @@
         const browserName = userData.browser || detectBrowser();
         const deviceType = userData.device || detectDevice();
         
-        await setDoc(doc(db, "users", userData.username), {
+        await setDoc(doc(db, "users", userData.username.toLowerCase()), {
           username: userData.username,
           email: userData.email,
           password: userData.password,
@@ -374,7 +374,7 @@
         snapshot.forEach((doc) => {
           const data = doc.data();
           if (data.stopLimit > 16) data.stopLimit = 16;
-          window.users[doc.id] = data;
+          window.users[doc.id.toLowerCase()] = data;
         });
         window.saveUsers();
         if (window.isAdminLoggedIn) {
@@ -458,27 +458,28 @@
 
     window.userSignup = async function() {
       const email = document.getElementById('signup-email').value.trim().toLowerCase();
-      const u = document.getElementById('signup-username').value.trim();
+      const uRaw = document.getElementById('signup-username').value.trim();
+      const uKey = uRaw.toLowerCase();
       const p = document.getElementById('signup-password').value.trim();
 
-      if (!email || !u || !p) {
+      if (!email || !uRaw || !p) {
         alert('Please fill in all fields including email.');
         return;
       }
 
-      if (window.users[u]) {
-        alert('Username already exists. Please choose another.');
+      if (window.users[uKey]) {
+        alert(`Username "${uRaw}" is already taken. Please choose a different username.`);
         return;
       }
 
       const emailExists = Object.values(window.users).some(user => user.email === email);
       if (emailExists) {
-        alert('An account with this email already exists. Please log in.');
+        alert('An account with this email address already exists. Please log in instead.');
         return;
       }
 
       const newUser = {
-        username: u,
+        username: uRaw,
         email: email,
         password: p,
         currentSet: 1,
@@ -491,15 +492,16 @@
         walletAddress: ''
       };
 
-      window.users[u] = newUser;
+      window.users[uKey] = newUser;
       window.saveUsers();
 
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(newUser);
       }
 
-      alert('Account created successfully! Please log in.');
+      alert('Account created successfully! You can now log in.');
       window.showAuthTab('login');
+      document.getElementById('login-identifier').value = uRaw;
     };
 
     window.userLogin = function() {
@@ -511,16 +513,16 @@
         return;
       }
 
-      let matchedUsername = null;
+      let matchedUserKey = null;
       if (window.users[identifier]) {
-        matchedUsername = identifier;
+        matchedUserKey = identifier;
       } else {
-        matchedUsername = Object.keys(window.users).find(u => window.users[u] && window.users[u].email === identifier);
+        matchedUserKey = Object.keys(window.users).find(u => window.users[u] && window.users[u].email === identifier);
       }
 
-      if (matchedUsername && window.users[matchedUsername].password === p) {
-        window.currentUser = matchedUsername;
-        localStorage.setItem('ve_current_user', matchedUsername);
+      if (matchedUserKey && window.users[matchedUserKey].password === p) {
+        window.currentUser = matchedUserKey;
+        localStorage.setItem('ve_current_user', matchedUserKey);
         window.renderUI();
       } else {
         alert('Invalid Email/Username or Password!');
@@ -595,27 +597,30 @@
       select.innerHTML = '';
       userListContainer.innerHTML = '';
 
-      const usernames = Object.keys(window.users);
-      if (usernames.length === 0) {
+      const userKeys = Object.keys(window.users);
+      if (userKeys.length === 0) {
         userListContainer.innerHTML = '<p style="font-size:0.8rem;">No registered members found yet.</p>';
         return;
       }
 
-      usernames.forEach(u => {
+      userKeys.forEach(uKey => {
+        const userData = window.users[uKey];
+        const displayUsername = userData.username || uKey;
+
         const option = document.createElement('option');
-        option.value = u;
-        option.innerText = `${u} (${window.users[u].email || 'No email'})`;
+        option.value = uKey;
+        option.innerText = `${displayUsername} (${userData.email || 'No email'})`;
         select.appendChild(option);
 
         const item = document.createElement('div');
         item.className = 'user-item';
-        const bal = typeof window.users[u].balance === 'number' ? window.users[u].balance.toFixed(2) : '0.00';
+        const bal = typeof userData.balance === 'number' ? userData.balance.toFixed(2) : '0.00';
         item.innerHTML = `
           <div class="user-item-header">
-            <span>${u} <small>($${bal})</small></span>
-            <span style="color:var(--primary);">${window.users[u].browser || 'Browser'} / ${window.users[u].device || 'Device'}</span>
+            <span>${displayUsername} <small>($${bal})</small></span>
+            <span style="color:var(--primary);">${userData.browser || 'Browser'} / ${userData.device || 'Device'}</span>
           </div>
-          <div class="user-item-details">${window.users[u].email || 'No email'}</div>
+          <div class="user-item-details">${userData.email || 'No email'}</div>
         `;
         userListContainer.appendChild(item);
       });
@@ -626,10 +631,10 @@
     window.loadAdminUserData = function() {
       const select = document.getElementById('admin-selected-user');
       if (!select) return;
-      const selectedUser = select.value;
-      if (!selectedUser || !window.users[selectedUser]) return;
+      const selectedUserKey = select.value;
+      if (!selectedUserKey || !window.users[selectedUserKey]) return;
 
-      const user = window.users[selectedUser];
+      const user = window.users[selectedUserKey];
       document.getElementById('admin-user-balance').value = user.balance || 0;
       document.getElementById('admin-stop-work-num').value = Math.min(user.stopLimit || 16, 16);
       document.getElementById('admin-user-set-select').value = user.currentSet || 1;
@@ -639,7 +644,7 @@
 
       if (user.withdrawalStatus === 'Pending') {
         const wAmt = user.withdrawalAmount || user.balance || 0;
-        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
+        wReqText.innerHTML = `<strong>${user.username || selectedUserKey}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
         wApproveBtn.style.display = 'block';
       } else {
         wReqText.innerText = 'No pending withdrawal requests for this member.';
@@ -648,33 +653,33 @@
     };
 
     window.saveAdminUserSettings = async function() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
+      const selectedUserKey = document.getElementById('admin-selected-user').value;
+      if (!selectedUserKey || !window.users[selectedUserKey]) return;
 
       const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
       let stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
       if (stopNum > 16) stopNum = 16;
       const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
 
-      window.users[selectedUser].balance = newBal;
-      window.users[selectedUser].stopLimit = stopNum;
+      window.users[selectedUserKey].balance = newBal;
+      window.users[selectedUserKey].stopLimit = stopNum;
       
-      if (window.users[selectedUser].currentSet !== setNum) {
-        window.users[selectedUser].currentSet = setNum;
-        window.users[selectedUser].completedInSet = 0;
+      if (window.users[selectedUserKey].currentSet !== setNum) {
+        window.users[selectedUserKey].currentSet = setNum;
+        window.users[selectedUserKey].completedInSet = 0;
       }
 
-      if (window.users[selectedUser].completedInSet < stopNum) {
-        window.users[selectedUser].isSetApproved = true;
+      if (window.users[selectedUserKey].completedInSet < stopNum) {
+        window.users[selectedUserKey].isSetApproved = true;
       }
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(window.users[selectedUser]);
+        await window.saveUserToFirebase(window.users[selectedUserKey]);
       }
       window.populateAdminUsers();
       window.renderUI();
-      alert(`Updated settings for ${selectedUser}!`);
+      alert(`Updated settings for ${window.users[selectedUserKey].username || selectedUserKey}!`);
     };
 
     window.promoteMovie = async function() {
@@ -710,13 +715,13 @@
     };
 
     window.approveNextSet = async function() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) {
+      const selectedUserKey = document.getElementById('admin-selected-user').value;
+      if (!selectedUserKey || !window.users[selectedUserKey]) {
         alert('Please select a member first.');
         return;
       }
 
-      const user = window.users[selectedUser];
+      const user = window.users[selectedUserKey];
       if (user.currentSet < 3) {
         user.currentSet += 1;
         user.completedInSet = 0;
@@ -728,9 +733,9 @@
         }
         window.populateAdminUsers();
         window.renderUI();
-        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+        alert(`Approved Set for ${user.username || selectedUserKey}! Moved to Set ${user.currentSet}.`);
       } else {
-        alert(`${selectedUser} has already completed all 3 sets!`);
+        alert(`${user.username || selectedUserKey} has already completed all 3 sets!`);
       }
     };
 
@@ -806,10 +811,10 @@
     };
 
     window.approveWithdrawal = async function() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
+      const selectedUserKey = document.getElementById('admin-selected-user').value;
+      if (!selectedUserKey || !window.users[selectedUserKey]) return;
 
-      const user = window.users[selectedUser];
+      const user = window.users[selectedUserKey];
       const amt = user.withdrawalAmount || user.balance || 0;
 
       user.balance = Math.max(0, user.balance - amt);
@@ -822,7 +827,7 @@
       }
       window.populateAdminUsers();
       window.renderUI();
-      alert(`Approved withdrawal of $${amt.toFixed(2)} for ${selectedUser}!`);
+      alert(`Approved withdrawal of $${amt.toFixed(2)} for ${user.username || selectedUserKey}!`);
     };
 
     window.renderUI = function() {
