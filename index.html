@@ -62,8 +62,10 @@
     .badge-approved { background: #dcfce7; color: var(--success); }
     .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 600; }
     
-    .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; }
-    .user-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
+    .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
+    .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
+    .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -255,6 +257,76 @@
 
   </div>
 
+  <!-- FIREBASE INTEGRATION -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGKL96cuFJpEDe8PQhwtm_Zg0LA2fOBgo",
+      authDomain: "videoearn-342ba.firebaseapp.com",
+      projectId: "videoearn-342ba",
+      storageBucket: "videoearn-342ba.firebasestorage.app",
+      messagingSenderId: "702949776076",
+      appId: "1:702949776076:web:2dfef02d203ad8ae1e0069",
+      measurementId: "G-WS6F04VFSM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    // Helper functions for Browser and Device detection
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      if (ua.includes("Firefox")) return "Mozilla Firefox";
+      if (ua.includes("SamsungBrowser")) return "Samsung Internet";
+      if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
+      if (ua.includes("Trident")) return "Internet Explorer";
+      if (ua.includes("Edge") || ua.includes("Edg")) return "Microsoft Edge";
+      if (ua.includes("Chrome")) return "Google Chrome";
+      if (ua.includes("Safari")) return "Apple Safari";
+      return "Unknown Browser";
+    }
+
+    function detectDevice() {
+      const ua = navigator.userAgent;
+      if (/android/i.test(ua)) return "Android Phone/Tablet";
+      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "iPhone/iPad (iOS)";
+      if (/Macintosh/.test(ua)) return "Mac Computer";
+      if (/Windows/.test(ua)) return "Windows PC";
+      if (/Linux/.test(ua)) return "Linux System";
+      return "Mobile/Desktop Device";
+    }
+
+    // Save registration to Firebase
+    window.saveUserToFirebase = async function(userData) {
+      try {
+        const browserName = detectBrowser();
+        const deviceType = detectDevice();
+        
+        // Save to Firebase Firestore under "users" collection
+        await setDoc(doc(db, "users", userData.username), {
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+          registeredAt: serverTimestamp(),
+          browser: browserName,
+          device: deviceType,
+          userAgent: navigator.userAgent,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          language: navigator.language || "Unknown",
+          currentSet: userData.currentSet,
+          balance: userData.balance
+        });
+        console.log("User successfully saved to Firebase Firestore!");
+      } catch (err) {
+        console.error("Firebase Firestore error:", err);
+      }
+    };
+  </script>
+
   <script>
     let users = JSON.parse(localStorage.getItem('ve_users')) || {};
     let globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
@@ -279,7 +351,7 @@
       }
     }
 
-    function userSignup() {
+    async function userSignup() {
       const email = document.getElementById('signup-email').value.trim().toLowerCase();
       const u = document.getElementById('signup-username').value.trim();
       const p = document.getElementById('signup-password').value.trim();
@@ -302,7 +374,20 @@
         return;
       }
 
-      users[u] = {
+      // Detect Browser & Device for local display
+      const ua = navigator.userAgent;
+      let browser = "Browser";
+      if (ua.includes("Chrome")) browser = "Chrome";
+      else if (ua.includes("Safari")) browser = "Safari";
+      else if (ua.includes("Firefox")) browser = "Firefox";
+
+      let device = "Device";
+      if (/iPhone|iPad/.test(ua)) device = "iOS";
+      else if (/Android/.test(ua)) device = "Android";
+      else if (/Windows/.test(ua)) device = "Windows";
+
+      const newUser = {
+        username: u,
         email: email,
         password: p,
         currentSet: 1,
@@ -312,10 +397,19 @@
         balance: 0.00,
         withdrawalStatus: 'None',
         withdrawalAmount: 0,
-        walletAddress: ''
+        walletAddress: '',
+        browser: browser,
+        device: device
       };
 
+      users[u] = newUser;
       saveUsers();
+
+      // Send record to Firebase Cloud Database
+      if (window.saveUserToFirebase) {
+        window.saveUserToFirebase(newUser);
+      }
+
       alert('Account created successfully! Please log in.');
       showAuthTab('login');
     }
@@ -421,7 +515,13 @@
 
         const item = document.createElement('div');
         item.className = 'user-item';
-        item.innerHTML = `<span><strong>${u}</strong> <small>(${users[u].email || 'No email'})</small></span> <span>$${users[u].balance.toFixed(2)}</span>`;
+        item.innerHTML = `
+          <div class="user-item-header">
+            <span>${u} <small>($${users[u].balance.toFixed(2)})</small></span>
+            <span style="color:var(--primary);">${users[u].browser || 'Browser'} / ${users[u].device || 'Device'}</span>
+          </div>
+          <div class="user-item-details">${users[u].email || 'No email'}</div>
+        `;
         userListContainer.appendChild(item);
       });
 
