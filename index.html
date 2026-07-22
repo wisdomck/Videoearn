@@ -45,7 +45,7 @@
     input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
     input:focus, select:focus { outline: 2px solid var(--primary); background: #fff; }
 
-    .progress-bar { background: #e2e8f0; height: 100px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
+    .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
     .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
     .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
@@ -134,7 +134,7 @@
           <span>Progress (Set <span id="set-num-text">1</span>)</span>
           <span id="progress-text">0 / 29 Completed</span>
         </div>
-        <div class="progress-bar" style="height:10px;">
+        <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
@@ -695,6 +695,52 @@
       }
     }
 
+    async function requestWithdrawal() {
+      if (!currentUser || !window.users[currentUser]) return;
+      const user = window.users[currentUser];
+      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+
+      if (!wallet || amount <= 0) {
+        alert('Please enter a valid wallet address and amount.');
+        return;
+      }
+
+      if (amount > user.balance) {
+        alert('Insufficient balance!');
+        return;
+      }
+
+      user.withdrawalStatus = 'Pending';
+      user.withdrawalAmount = amount;
+      user.walletAddress = wallet;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
+      }
+      renderUI();
+      alert('Withdrawal request submitted!');
+    }
+
+    async function approveWithdrawal() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
+      user.withdrawalStatus = 'Approved';
+      user.withdrawalAmount = 0;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
+      }
+      window.populateAdminUsers();
+      renderUI();
+      alert(`Approved withdrawal for ${selectedUser}!`);
+    }
+
     function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
       const imgIndex = document.getElementById('edit-img-index').value;
@@ -718,13 +764,89 @@
           alert(`Saved picture & details for Set ${setNum}, Image #${imgIndex}!`);
         } catch (err) {
           console.error("Save error:", err);
-          alert("Error saving picture to Firebase: " + err.message);
+          alert("Error saving picture: " + err.message);
         }
       };
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
+          window.globalPictureData[key].image = e.target.result;
+          applyAndSave();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        applyAndSave();
+      }
+    }
+
+    window.renderUI = function() {
+      // Update Telegram links across the UI
+      const supportBtns = [document.getElementById('telegram-support-btn'), document.getElementById('support-set-link')];
+      supportBtns.forEach(btn => {
+        if (btn) btn.href = window.telegramLink;
+      });
+
+      const authView = document.getElementById('auth-view');
+      const workerView = document.getElementById('worker-view');
+      const adminView = document.getElementById('admin-view');
+
+      if (!adminView.classList.contains('hidden')) return;
+
+      if (!currentUser || !window.users[currentUser]) {
+        authView.classList.remove('hidden');
+        workerView.classList.add('hidden');
+        return;
+      }
+
+      authView.classList.add('hidden');
+      workerView.classList.remove('hidden');
+
+      const user = window.users[currentUser];
+      const maxWork = user.stopLimit || 29;
+
+      document.getElementById('user-display-name').innerText = user.username;
+      document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('set-num-text').innerText = user.currentSet || 1;
+      document.getElementById('progress-text').innerText = `${user.completedInSet || 0} / ${maxWork} Completed`;
+
+      const pct = Math.min(100, ((user.completedInSet || 0) / maxWork) * 100);
+      document.getElementById('progress-fill').style.width = `${pct}%`;
+
+      const completedMsg = document.getElementById('completed-set-message');
+      const movieBox = document.getElementById('movie-container');
+
+      if (user.completedInSet >= maxWork || user.isSetApproved === false) {
+        completedMsg.classList.remove('hidden');
+        movieBox.classList.add('hidden');
+      } else {
+        completedMsg.classList.add('hidden');
+        movieBox.classList.remove('hidden');
+
+        const currentPicKey = `${user.currentSet || 1}-${(user.completedInSet || 0) + 1}`;
+        const picData = window.globalPictureData[currentPicKey] || {};
+
+        document.getElementById('movie-img').src = picData.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect width='100%25' height='100%25' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='sans-serif' font-size='16'%3ENo Movie Image Set%3C/text%3E%3C/svg%3E";
+        document.getElementById('movie-title').innerText = `Movie Promotion #${(user.completedInSet || 0) + 1}`;
+        document.getElementById('admin-comment').innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
+        document.getElementById('movie-reward').innerText = `$${parseFloat(picData.reward || 0.50).toFixed(2)}`;
+      }
+
+      const wStatus = document.getElementById('withdraw-status');
+      if (user.withdrawalStatus === 'Pending') {
+        wStatus.innerText = `Pending Withdrawal Request: $${(user.withdrawalAmount || 0).toFixed(2)}`;
+        wStatus.style.color = 'var(--warning)';
+      } else if (user.withdrawalStatus === 'Approved') {
+        wStatus.innerText = `Last withdrawal approved!`;
+        wStatus.style.color = 'var(--success)';
+      } else {
+        wStatus.innerText = '';
+      }
+    };
+
+    // Initial render call
+    window.renderUI();
+  </script>
+</body>
+</html>
