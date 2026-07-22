@@ -696,8 +696,22 @@
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          window.globalPictureData[key].image = e.target.result;
-          applyAndSave();
+          const img = new Image();
+          img.onload = function() {
+            // Compress and resize image down to small file size
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 500;
+            const scale = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scale;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            window.globalPictureData[key].image = canvas.toDataURL('image/jpeg', 0.6);
+            applyAndSave();
+          };
+          img.src = e.target.result;
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
@@ -772,32 +786,43 @@
 
       document.getElementById('user-display-name').innerText = currentUser;
       document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
-      document.getElementById('set-num-text').innerText = user.currentSet || 1;
       document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('set-num-text').innerText = user.currentSet || 1;
+      document.getElementById('progress-text').innerText = `${user.completedInSet || 0} / ${stopLimit} Completed`;
 
-      const completed = user.completedInSet || 0;
-      document.getElementById('progress-text').innerText = `${completed} / 29 Completed`;
-      document.getElementById('progress-fill').style.width = `${(completed / 29) * 100}%`;
+      const pct = Math.min(100, Math.round(((user.completedInSet || 0) / stopLimit) * 100));
+      document.getElementById('progress-fill').style.width = `${pct}%`;
 
-      const movieBox = document.getElementById('movie-container');
-      const setCompletedMsg = document.getElementById('completed-set-message');
+      const completedMsg = document.getElementById('completed-set-message');
+      const movieContainer = document.getElementById('movie-container');
 
-      if (completed >= stopLimit || user.isSetApproved === false) {
-        movieBox.classList.add('hidden');
-        setCompletedMsg.classList.remove('hidden');
+      if ((user.completedInSet || 0) >= stopLimit || user.isSetApproved === false) {
+        completedMsg.classList.remove('hidden');
+        movieContainer.classList.add('hidden');
       } else {
-        movieBox.classList.remove('hidden');
-        setCompletedMsg.classList.add('hidden');
+        completedMsg.classList.add('hidden');
+        movieContainer.classList.remove('hidden');
 
-        const key = `${user.currentSet || 1}-${completed + 1}`;
-        const picInfo = window.globalPictureData[key] || {};
+        const key = `${user.currentSet || 1}-${(user.completedInSet || 0) + 1}`;
+        const pData = window.globalPictureData[key] || {};
 
-        document.getElementById('movie-img').src = picInfo.image || 'https://via.placeholder.com/400x250?text=Promo+Movie+Image';
-        document.getElementById('movie-title').innerText = `Movie Promotion #${completed + 1}`;
-        document.getElementById('admin-comment').innerText = picInfo.comment ? `Admin Comment: ${picInfo.comment}` : 'Admin Comment: Ready to promote!';
-        document.getElementById('movie-reward').innerText = `$${parseFloat(picInfo.reward || 0.50).toFixed(2)}`;
+        document.getElementById('movie-img').src = pData.image || 'https://via.placeholder.com/400x250?text=Movie+Promotion';
+        document.getElementById('movie-title').innerText = `Movie Promotion #${(user.completedInSet || 0) + 1}`;
+        document.getElementById('admin-comment').innerText = pData.comment ? `Admin Comment: ${pData.comment}` : 'Admin Comment: Ready to promote!';
+        document.getElementById('movie-reward').innerText = `$${parseFloat(pData.reward || 0.50).toFixed(2)}`;
+      }
+
+      const wStatus = document.getElementById('withdraw-status');
+      if (user.withdrawalStatus === 'Pending') {
+        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending: $${(user.withdrawalAmount || 0).toFixed(2)}</span>`;
+      } else if (user.withdrawalStatus === 'Approved') {
+        wStatus.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
+      } else {
+        wStatus.innerHTML = '';
       }
     };
+
+    renderUI();
   </script>
 </body>
 </html>
