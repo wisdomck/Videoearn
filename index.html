@@ -66,6 +66,11 @@
     .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
     .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
     .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Custom Pop-up Modal Styling */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+    .modal-box { background: #ffffff; border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: popIn 0.2s ease-out; }
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -76,7 +81,7 @@
       <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
     </header>
 
-    <!-- AUTHENTICATION VIEW (LOGIN / SIGNUP) -->
+    <!-- AUTHENTICATION VIEW -->
     <div id="auth-view" class="card">
       <div id="login-box">
         <h3>Welcome Back</h3>
@@ -134,12 +139,16 @@
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
-        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 0;">
-          <h4 style="color: var(--warning);">Set Paused / Completed!</h4>
-          <p id="pause-reason-text">Waiting for admin approval to proceed or unlock the next set.</p>
+        <!-- SET COMPLETED / CONTACT CUSTOMER SUPPORT NOTIFICATION -->
+        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 10px; background: #fffbeeb0; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 12px;">
+          <h4 style="color: var(--warning); margin-bottom: 8px;">🎉 Set Completed!</h4>
+          <p id="pause-reason-text" style="color: #92400e; font-weight: 500; font-size: 0.95rem; margin-bottom: 16px;">
+            You have successfully completed this set! Kindly contact customer support to proceed to the next set.
+          </p>
+          <a id="support-set-link" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Contact Customer Support</a>
         </div>
 
-        <div id="movie-container" class="movie-box">
+        <div id="movie-container" class="movie-box" style="margin-top:12px;">
           <img id="movie-img" src="" alt="Promo Movie">
           <h4 id="movie-title">Movie Promotion #1</h4>
           <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
@@ -254,7 +263,16 @@
         </div>
       </div>
     </div>
+  </div>
 
+  <!-- PROMOTION COMPLETED MODAL POPUP -->
+  <div id="promo-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+      <h3>Thank You!</h3>
+      <p id="modal-reward-text">You earned $0.50 for completing this promotion task.</p>
+      <button class="btn" onclick="closeModal()">Continue</button>
+    </div>
   </div>
 
   <!-- FIREBASE INTEGRATION -->
@@ -630,10 +648,10 @@
       if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
 
       const key = `${user.currentSet}-${user.completedInSet + 1}`;
-      const reward = window.globalPictureData[key]?.reward || 0.50;
+      const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
 
       user.completedInSet += 1;
-      user.balance = (user.balance || 0) + parseFloat(reward);
+      user.balance = (user.balance || 0) + reward;
 
       if (user.completedInSet >= maxWork) {
         user.isSetApproved = false;
@@ -643,6 +661,14 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
+      // Show Pop-up Thank You Modal
+      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for completing promotion #${user.completedInSet}!`;
+      document.getElementById('promo-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('promo-modal').classList.add('hidden');
       renderUI();
     }
 
@@ -698,7 +724,7 @@
         reader.onload = function (e) {
           const img = new Image();
           img.onload = function() {
-            // Compress and resize image down to small file size
+            // Compress and resize image down to fit Firestore storage limitations safely
             const canvas = document.createElement('canvas');
             const MAX_WIDTH = 500;
             const scale = MAX_WIDTH / img.width;
@@ -771,6 +797,9 @@
 
       const telegramBtn = document.getElementById('telegram-support-btn');
       if (telegramBtn) telegramBtn.href = window.telegramLink;
+
+      const supportSetLink = document.getElementById('support-set-link');
+      if (supportSetLink) supportSetLink.href = window.telegramLink;
 
       if (!currentUser || !window.users[currentUser]) {
         authView.classList.remove('hidden');
