@@ -261,7 +261,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
-    import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGKL96cuFJpEDe8PQhwtm_Zg0LA2fOBgo",
@@ -299,17 +299,16 @@
       return "Mobile/Desktop Device";
     }
 
-    // Save registration to Firebase Firestore
     window.saveUserToFirebase = async function(userData) {
       try {
-        const browserName = detectBrowser();
-        const deviceType = detectDevice();
+        const browserName = userData.browser || detectBrowser();
+        const deviceType = userData.device || detectDevice();
         
         await setDoc(doc(db, "users", userData.username), {
           username: userData.username,
           email: userData.email,
           password: userData.password,
-          registeredAt: serverTimestamp(),
+          registeredAt: userData.registeredAt || serverTimestamp(),
           browser: browserName,
           device: deviceType,
           userAgent: navigator.userAgent,
@@ -323,15 +322,29 @@
           withdrawalStatus: userData.withdrawalStatus || 'None',
           withdrawalAmount: userData.withdrawalAmount || 0,
           walletAddress: userData.walletAddress || ''
-        });
-        console.log("User successfully saved to Firebase Firestore!");
+        }, { merge: true });
       } catch (err) {
         console.error("Firebase Firestore error:", err);
       }
     };
 
-    // Real-time listener for Firestore Users
-    window.listenToFirebaseUsers = function() {
+    window.savePicturesToFirebase = async function(pictureKey, picData) {
+      try {
+        await setDoc(doc(db, "pictures", pictureKey), picData, { merge: true });
+      } catch (err) {
+        console.error("Firebase pictures save error:", err);
+      }
+    };
+
+    window.saveTelegramToFirebase = async function(link) {
+      try {
+        await setDoc(doc(db, "app_settings", "telegram"), { link: link }, { merge: true });
+      } catch (err) {
+        console.error("Firebase Telegram save error:", err);
+      }
+    };
+
+    window.listenToFirebaseData = function() {
       onSnapshot(collection(db, "users"), (snapshot) => {
         snapshot.forEach((doc) => {
           window.users[doc.id] = doc.data();
@@ -340,29 +353,43 @@
         if (window.isAdminLoggedIn) {
           window.populateAdminUsers();
         }
-      }, (err) => {
-        console.error("Error syncing users from Firebase:", err);
+        window.renderUI();
+      });
+
+      onSnapshot(collection(db, "pictures"), (snapshot) => {
+        snapshot.forEach((doc) => {
+          window.globalPictureData[doc.id] = doc.data();
+        });
+        window.savePictures();
+        window.renderUI();
+      });
+
+      onSnapshot(doc(db, "app_settings", "telegram"), (docSnap) => {
+        if (docSnap.exists() && docSnap.data().link) {
+          window.telegramLink = docSnap.data().link;
+          localStorage.setItem('ve_telegram_link', window.telegramLink);
+          window.renderUI();
+        }
       });
     };
 
-    // Call sync on load
-    window.listenToFirebaseUsers();
+    window.listenToFirebaseData();
   </script>
 
   <script>
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
-    let globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
-    let telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
+    window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
+    window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
     window.isAdminLoggedIn = false;
 
     window.saveUsers = function() {
       localStorage.setItem('ve_users', JSON.stringify(window.users));
-    }
+    };
 
-    function savePictures() {
-      localStorage.setItem('ve_pictures', JSON.stringify(globalPictureData));
-    }
+    window.savePictures = function() {
+      localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData));
+    };
 
     function showAuthTab(tab) {
       if (tab === 'signup') {
@@ -395,17 +422,6 @@
         return;
       }
 
-      const ua = navigator.userAgent;
-      let browser = "Browser";
-      if (ua.includes("Chrome")) browser = "Chrome";
-      else if (ua.includes("Safari")) browser = "Safari";
-      else if (ua.includes("Firefox")) browser = "Firefox";
-
-      let device = "Device";
-      if (/iPhone|iPad/.test(ua)) device = "iOS";
-      else if (/Android/.test(ua)) device = "Android";
-      else if (/Windows/.test(ua)) device = "Windows";
-
       const newUser = {
         username: u,
         email: email,
@@ -417,9 +433,7 @@
         balance: 0.00,
         withdrawalStatus: 'None',
         withdrawalAmount: 0,
-        walletAddress: '',
-        browser: browser,
-        device: device
+        walletAddress: ''
       };
 
       window.users[u] = newUser;
@@ -446,7 +460,7 @@
       if (window.users[identifier]) {
         matchedUsername = identifier;
       } else {
-        matchedUsername = Object.keys(window.users).find(u => window.users[u].email === identifier);
+        matchedUsername = Object.keys(window.users).find(u => window.users[u] && window.users[u].email === identifier);
       }
 
       if (matchedUsername && window.users[matchedUsername].password === p) {
@@ -488,7 +502,7 @@
         window.isAdminLoggedIn = true;
         document.getElementById('admin-login-card').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
-        document.getElementById('admin-telegram-link').value = telegramLink;
+        document.getElementById('admin-telegram-link').value = window.telegramLink;
         window.populateAdminUsers();
         renderUI();
       } else {
@@ -503,14 +517,17 @@
       document.getElementById('admin-dashboard').classList.add('hidden');
     }
 
-    function saveTelegramLink() {
+    async function saveTelegramLink() {
       const link = document.getElementById('admin-telegram-link').value.trim();
       if (!link) {
         alert('Please enter a valid Telegram link.');
         return;
       }
-      telegramLink = link.startsWith('http') ? link : `https://${link}`;
-      localStorage.setItem('ve_telegram_link', telegramLink);
+      window.telegramLink = link.startsWith('http') ? link : `https://${link}`;
+      localStorage.setItem('ve_telegram_link', window.telegramLink);
+      if (window.saveTelegramToFirebase) {
+        await window.saveTelegramToFirebase(window.telegramLink);
+      }
       renderUI();
       alert('Telegram Support Link updated successfully!');
     }
@@ -518,6 +535,8 @@
     window.populateAdminUsers = function() {
       const select = document.getElementById('admin-selected-user');
       const userListContainer = document.getElementById('all-users-list');
+      if (!select || !userListContainer) return;
+
       select.innerHTML = '';
       userListContainer.innerHTML = '';
 
@@ -547,10 +566,12 @@
       });
 
       loadAdminUserData();
-    }
+    };
 
     function loadAdminUserData() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
+      const select = document.getElementById('admin-selected-user');
+      if (!select) return;
+      const selectedUser = select.value;
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
@@ -606,10 +627,10 @@
       const user = window.users[currentUser];
       const maxWork = user.stopLimit || 29;
 
-      if (user.completedInSet >= maxWork) return;
+      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
 
       const key = `${user.currentSet}-${user.completedInSet + 1}`;
-      const reward = globalPictureData[key]?.reward || 0.50;
+      const reward = window.globalPictureData[key]?.reward || 0.50;
 
       user.completedInSet += 1;
       user.balance = (user.balance || 0) + parseFloat(reward);
@@ -659,23 +680,28 @@
 
       const key = `${setNum}-${imgIndex}`;
 
-      if (!globalPictureData[key]) globalPictureData[key] = {};
-      globalPictureData[key].reward = reward;
-      globalPictureData[key].comment = comment;
+      if (!window.globalPictureData[key]) window.globalPictureData[key] = {};
+      window.globalPictureData[key].reward = reward;
+      window.globalPictureData[key].comment = comment;
+
+      const applyAndSave = async () => {
+        window.savePictures();
+        if (window.savePicturesToFirebase) {
+          await window.savePicturesToFirebase(key, window.globalPictureData[key]);
+        }
+        renderUI();
+        alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
+      };
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          globalPictureData[key].image = e.target.result;
-          savePictures();
-          renderUI();
-          alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
+          window.globalPictureData[key].image = e.target.result;
+          applyAndSave();
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        savePictures();
-        renderUI();
-        alert(`Details saved for Set ${setNum}, Image #${imgIndex}!`);
+        applyAndSave();
       }
     }
 
@@ -725,11 +751,12 @@
       alert(`Withdrawal approved for ${selectedUser}!`);
     }
 
-    function renderUI() {
+    window.renderUI = function() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
 
-      document.getElementById('telegram-support-btn').href = telegramLink;
+      const telegramBtn = document.getElementById('telegram-support-btn');
+      if (telegramBtn) telegramBtn.href = window.telegramLink;
 
       if (!currentUser || !window.users[currentUser]) {
         authView.classList.remove('hidden');
@@ -755,36 +782,22 @@
       const movieBox = document.getElementById('movie-container');
       const setCompletedMsg = document.getElementById('completed-set-message');
 
-      if (completed >= stopLimit || !user.isSetApproved) {
+      if (completed >= stopLimit || user.isSetApproved === false) {
         movieBox.classList.add('hidden');
         setCompletedMsg.classList.remove('hidden');
       } else {
         movieBox.classList.remove('hidden');
         setCompletedMsg.classList.add('hidden');
+
+        const key = `${user.currentSet || 1}-${completed + 1}`;
+        const picInfo = window.globalPictureData[key] || {};
+
+        document.getElementById('movie-img').src = picInfo.image || 'https://via.placeholder.com/400x250?text=Promo+Movie+Image';
+        document.getElementById('movie-title').innerText = `Movie Promotion #${completed + 1}`;
+        document.getElementById('admin-comment').innerText = picInfo.comment ? `Admin Comment: ${picInfo.comment}` : 'Admin Comment: Ready to promote!';
+        document.getElementById('movie-reward').innerText = `$${parseFloat(picInfo.reward || 0.50).toFixed(2)}`;
       }
-
-      const currentImgIndex = completed + 1;
-      const currentKey = `${user.currentSet || 1}-${currentImgIndex}`;
-      const itemData = globalPictureData[currentKey] || {};
-
-      document.getElementById('movie-title').innerText = `Set ${user.currentSet || 1} - Movie Promotion #${currentImgIndex}`;
-      document.getElementById('movie-reward').innerText = `$${itemData.reward || '0.50'}`;
-      document.getElementById('admin-comment').innerText = `Admin Comment: ${itemData.comment || 'Ready to promote!'}`;
-      
-      const defaultPlaceholder = `https://via.placeholder.com/400x250/e2e8f0/2563eb?text=Set+${user.currentSet || 1}+-+Picture+${currentImgIndex}`;
-      document.getElementById('movie-img').src = itemData.image || defaultPlaceholder;
-
-      const wStatus = document.getElementById('withdraw-status');
-      if (user.withdrawalStatus === 'Pending') {
-        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending Admin Approval ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
-      } else if (user.withdrawalStatus === 'Approved') {
-        wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved & Sent!</span>';
-      } else {
-        wStatus.innerText = '';
-      }
-    }
-
-    renderUI();
+    };
   </script>
 </body>
 </html>
