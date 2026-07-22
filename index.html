@@ -132,7 +132,7 @@
 
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 500;">
           <span>Progress (Set <span id="set-num-text">1</span>)</span>
-          <span id="progress-text">0 / 29 Completed</span>
+          <span id="progress-text">0 / 16 Completed</span>
         </div>
         <div class="progress-bar" style="height:10px;">
           <div class="progress-fill" id="progress-fill"></div>
@@ -210,8 +210,8 @@
               <option value="3">Set 3</option>
             </select>
 
-            <label>Stop Member At Work # (1 to 29):</label>
-            <input type="number" id="admin-stop-work-num" min="1" max="29" value="29">
+            <label>Stop Member At Work # (1 to 16):</label>
+            <input type="number" id="admin-stop-work-num" min="1" max="16" value="16">
 
             <label>Edit Member Balance ($):</label>
             <input type="number" id="admin-user-balance" step="0.01">
@@ -238,8 +238,8 @@
               <option value="3">Set 3</option>
             </select>
 
-            <label>Picture Number (1 to 29):</label>
-            <input type="number" id="edit-img-index" min="1" max="29" value="1">
+            <label>Picture Number (1 to 16):</label>
+            <input type="number" id="edit-img-index" min="1" max="16" value="1">
 
             <label>Upload Movie Picture:</label>
             <input type="file" id="edit-img-file" accept="image/*">
@@ -278,7 +278,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
-    import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGKL96cuFJpEDe8PQhwtm_Zg0LA2fOBgo",
@@ -333,7 +333,7 @@
           language: navigator.language || "Unknown",
           currentSet: userData.currentSet || 1,
           completedInSet: userData.completedInSet || 0,
-          stopLimit: userData.stopLimit || 29,
+          stopLimit: Math.min(userData.stopLimit || 16, 16),
           isSetApproved: userData.isSetApproved !== undefined ? userData.isSetApproved : true,
           balance: userData.balance || 0,
           withdrawalStatus: userData.withdrawalStatus || 'None',
@@ -353,6 +353,14 @@
       }
     };
 
+    window.deletePictureFromFirebase = async function(pictureKey) {
+      try {
+        await deleteDoc(doc(db, "pictures", pictureKey));
+      } catch (err) {
+        console.error("Firebase picture delete error:", err);
+      }
+    };
+
     window.saveTelegramToFirebase = async function(link) {
       try {
         await setDoc(doc(db, "app_settings", "telegram"), { link: link }, { merge: true });
@@ -364,7 +372,9 @@
     window.listenToFirebaseData = function() {
       onSnapshot(collection(db, "users"), (snapshot) => {
         snapshot.forEach((doc) => {
-          window.users[doc.id] = doc.data();
+          const data = doc.data();
+          if (data.stopLimit > 16) data.stopLimit = 16;
+          window.users[doc.id] = data;
         });
         window.saveUsers();
         if (window.isAdminLoggedIn) {
@@ -374,9 +384,17 @@
       });
 
       onSnapshot(collection(db, "pictures"), (snapshot) => {
-        snapshot.forEach((doc) => {
-          window.globalPictureData[doc.id] = doc.data();
+        snapshot.forEach((docSnap) => {
+          const key = docSnap.id;
+          const parts = key.split('-');
+          if (parts.length === 2 && parseInt(parts[1]) > 16) {
+            window.deletePictureFromFirebase(key);
+            delete window.globalPictureData[key];
+          } else {
+            window.globalPictureData[key] = docSnap.data();
+          }
         });
+        window.cleanupExcessPictures();
         window.savePictures();
         window.renderUI();
       });
@@ -399,6 +417,28 @@
     window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
     window.isAdminLoggedIn = false;
+
+    // Clear memory/storage for any pictures above index 16
+    window.cleanupExcessPictures = function() {
+      let changed = false;
+      Object.keys(window.globalPictureData).forEach(key => {
+        const parts = key.split('-');
+        if (parts.length === 2 && parseInt(parts[1]) > 16) {
+          delete window.globalPictureData[key];
+          changed = true;
+        }
+      });
+      if (changed) window.savePictures();
+    };
+
+    // Standardize user stopLimits to 16 maximum
+    Object.keys(window.users).forEach(u => {
+      if (window.users[u].stopLimit > 16) {
+        window.users[u].stopLimit = 16;
+      }
+    });
+
+    window.cleanupExcessPictures();
 
     window.saveUsers = function() {
       localStorage.setItem('ve_users', JSON.stringify(window.users));
@@ -445,7 +485,7 @@
         password: p,
         currentSet: 1,
         completedInSet: 0,
-        stopLimit: 29,
+        stopLimit: 16,
         isSetApproved: true,
         balance: 0.00,
         withdrawalStatus: 'None',
@@ -593,7 +633,7 @@
 
       const user = window.users[selectedUser];
       document.getElementById('admin-user-balance').value = user.balance || 0;
-      document.getElementById('admin-stop-work-num').value = user.stopLimit || 29;
+      document.getElementById('admin-stop-work-num').value = Math.min(user.stopLimit || 16, 16);
       document.getElementById('admin-user-set-select').value = user.currentSet || 1;
 
       const wReqText = document.getElementById('admin-withdraw-request-text');
@@ -614,7 +654,8 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
-      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 29;
+      let stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
+      if (stopNum > 16) stopNum = 16;
       const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
 
       window.users[selectedUser].balance = newBal;
@@ -642,7 +683,7 @@
       if (!currentUser || !window.users[currentUser]) return;
 
       const user = window.users[currentUser];
-      const maxWork = user.stopLimit || 29;
+      const maxWork = Math.min(user.stopLimit || 16, 16);
 
       if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
 
@@ -681,7 +722,7 @@
       if (user.currentSet < 3) {
         user.currentSet += 1;
         user.completedInSet = 0;
-        user.stopLimit = 29;
+        user.stopLimit = 16;
         user.isSetApproved = true;
         window.saveUsers();
         if (window.saveUserToFirebase) {
@@ -697,7 +738,12 @@
 
     function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
-      const imgIndex = document.getElementById('edit-img-index').value;
+      let imgIndex = parseInt(document.getElementById('edit-img-index').value) || 1;
+      if (imgIndex > 16) {
+        alert('Maximum allowed pictures per set is 16.');
+        document.getElementById('edit-img-index').value = 16;
+        imgIndex = 16;
+      }
       const reward = document.getElementById('edit-img-reward').value;
       const comment = document.getElementById('edit-img-comment').value;
       const fileInput = document.getElementById('edit-img-file');
@@ -737,9 +783,9 @@
 
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            // Compress image using JPEG quality 0.4 (40%)
-            window.globalPictureData[key].image = canvas.toDataURL('image/jpeg', 0.4);
+            
+            // Compress image to lightweight JPEG format
+            window.globalPictureData[key].imageData = canvas.toDataURL('image/jpeg', 0.7);
             applyAndSave();
           };
           img.src = e.target.result;
@@ -752,27 +798,30 @@
 
     async function requestWithdrawal() {
       if (!currentUser || !window.users[currentUser]) return;
-      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value);
-      const user = window.users[currentUser];
 
-      if (!wallet) {
-        alert('Please enter a valid crypto wallet address.');
+      const user = window.users[currentUser];
+      const addr = document.getElementById('withdraw-wallet-address').value.trim();
+      const amt = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+
+      if (!addr) {
+        alert('Please enter your crypto wallet address.');
         return;
       }
-      if (!amount || amount <= 0 || amount > user.balance) {
-        alert('Invalid or insufficient balance for withdrawal amount.');
+
+      if (amt <= 0 || amt > user.balance) {
+        alert('Invalid withdrawal amount. Cannot exceed current balance.');
         return;
       }
 
       user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amount;
-      user.walletAddress = wallet;
+      user.withdrawalAmount = amt;
+      user.walletAddress = addr;
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
       renderUI();
       alert('Withdrawal request submitted successfully!');
     }
@@ -782,8 +831,9 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      const amt = user.withdrawalAmount || 0;
-      user.balance = Math.max(0, user.balance - amt);
+      const wAmt = user.withdrawalAmount || 0;
+
+      user.balance = Math.max(0, (user.balance || 0) - wAmt);
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -791,76 +841,77 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
       window.populateAdminUsers();
       renderUI();
-      alert(`Approved withdrawal of $${amt.toFixed(2)} for ${selectedUser}!`);
+      alert(`Approved withdrawal for ${selectedUser}! $${wAmt.toFixed(2)} deducted.`);
     }
 
     function renderUI() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
+      const telegramBtns = [document.getElementById('telegram-support-btn'), document.getElementById('support-set-link')];
 
-      if (!currentUser) {
+      telegramBtns.forEach(btn => {
+        if (btn) btn.href = window.telegramLink || 'https://t.me/';
+      });
+
+      if (!currentUser || !window.users[currentUser]) {
         if (document.getElementById('admin-view').classList.contains('hidden')) {
           authView.classList.remove('hidden');
+          workerView.classList.add('hidden');
         }
-        workerView.classList.add('hidden');
         return;
       }
 
-      authView.classList.add('hidden');
-      workerView.classList.remove('hidden');
+      if (document.getElementById('admin-view').classList.contains('hidden')) {
+        authView.classList.add('hidden');
+        workerView.classList.remove('hidden');
+      }
 
       const user = window.users[currentUser];
-      document.getElementById('user-display-name').innerText = user.username;
-      document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
-      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-      document.getElementById('set-num-text').innerText = user.currentSet || 1;
+      const maxWork = Math.min(user.stopLimit || 16, 16);
 
-      const completed = user.completedInSet || 0;
-      const stopLimit = user.stopLimit || 29;
-      document.getElementById('progress-text').innerText = `${completed} / ${stopLimit} Completed`;
-      
-      const pct = Math.min(100, Math.round((completed / stopLimit) * 100));
+      document.getElementById('user-display-name').innerText = user.username;
+      document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('set-num-text').innerText = user.currentSet;
+      document.getElementById('progress-text').innerText = `${user.completedInSet} / ${maxWork} Completed`;
+
+      const pct = Math.min(100, Math.round((user.completedInSet / maxWork) * 100));
       document.getElementById('progress-fill').style.width = `${pct}%`;
 
-      const completedMsg = document.getElementById('completed-set-message');
-      const movieContainer = document.getElementById('movie-container');
-      const supportLink = document.getElementById('support-set-link');
-      const telegramBtn = document.getElementById('telegram-support-btn');
+      const completedMsgBox = document.getElementById('completed-set-message');
+      const movieBox = document.getElementById('movie-container');
 
-      if (supportLink) supportLink.href = window.telegramLink;
-      if (telegramBtn) telegramBtn.href = window.telegramLink;
-
-      if (completed >= stopLimit || user.isSetApproved === false) {
-        completedMsg.classList.remove('hidden');
-        movieContainer.classList.add('hidden');
+      if (user.completedInSet >= maxWork || user.isSetApproved === false) {
+        movieBox.classList.add('hidden');
+        completedMsgBox.classList.remove('hidden');
       } else {
-        completedMsg.classList.add('hidden');
-        movieContainer.classList.remove('hidden');
+        completedMsgBox.classList.add('hidden');
+        movieBox.classList.remove('hidden');
 
-        const nextImgNum = completed + 1;
-        const key = `${user.currentSet || 1}-${nextImgNum}`;
-        const picData = window.globalPictureData[key] || {};
+        const nextIndex = user.completedInSet + 1;
+        const key = `${user.currentSet}-${nextIndex}`;
+        const picObj = window.globalPictureData[key];
 
-        document.getElementById('movie-title').innerText = `Movie Promotion #${nextImgNum}`;
-        document.getElementById('movie-reward').innerText = `$${parseFloat(picData.reward || 0.50).toFixed(2)}`;
-        document.getElementById('admin-comment').innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
-        document.getElementById('movie-img').src = picData.image || 'https://via.placeholder.com/400x250?text=No+Movie+Picture+Uploaded';
+        document.getElementById('movie-title').innerText = `Movie Promotion #${nextIndex}`;
+        document.getElementById('movie-reward').innerText = `$${parseFloat(picObj?.reward || 0.50).toFixed(2)}`;
+        document.getElementById('admin-comment').innerText = picObj?.comment ? `Admin Comment: ${picObj.comment}` : 'Admin Comment: Ready to promote!';
+        document.getElementById('movie-img').src = picObj?.imageData || 'https://via.placeholder.com/400x250?text=Movie+Promo+Image';
       }
 
       const wStatusText = document.getElementById('withdraw-status');
       if (user.withdrawalStatus === 'Pending') {
-        wStatusText.innerText = `Pending withdrawal request for $${(user.withdrawalAmount || 0).toFixed(2)}.`;
-        wStatusText.style.color = 'var(--warning)';
+        wStatusText.innerHTML = `<span class="badge badge-pending">Pending Withdrawal: $${(user.withdrawalAmount || 0).toFixed(2)}</span>`;
       } else if (user.withdrawalStatus === 'Approved') {
-        wStatusText.innerText = 'Last withdrawal request was approved!';
-        wStatusText.style.color = 'var(--success)';
+        wStatusText.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
       } else {
         wStatusText.innerText = '';
       }
     }
 
+    // Initial render on page load
     renderUI();
   </script>
 </body>
