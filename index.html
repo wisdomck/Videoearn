@@ -45,7 +45,7 @@
     input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
     input:focus, select:focus { outline: 2px solid var(--primary); background: #fff; }
 
-    .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
+    .progress-bar { background: #e2e8f0; height: 100px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
     .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
     .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
@@ -67,7 +67,6 @@
     .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
     .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
 
-    /* Custom Pop-up Modal Styling */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
     .modal-box { background: #ffffff; border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: popIn 0.2s ease-out; }
     @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -135,7 +134,7 @@
           <span>Progress (Set <span id="set-num-text">1</span>)</span>
           <span id="progress-text">0 / 29 Completed</span>
         </div>
-        <div class="progress-bar">
+        <div class="progress-bar" style="height:10px;">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
@@ -662,7 +661,6 @@
         await window.saveUserToFirebase(user);
       }
 
-      // Show Pop-up Thank You Modal
       document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for completing promotion #${user.completedInSet}!`;
       document.getElementById('promo-modal').classList.remove('hidden');
     }
@@ -724,9 +722,8 @@
         reader.onload = function (e) {
           const img = new Image();
           img.onload = function() {
-            // Compress and resize image down to fit Firestore storage limitations safely
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 500;
+            const MAX_WIDTH = 400;
             const scale = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scale;
@@ -734,7 +731,7 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            window.globalPictureData[key].image = canvas.toDataURL('image/jpeg', 0.6);
+            window.globalPictureData[key].image = canvas.toDataURL('image/jpeg', 0.5);
             applyAndSave();
           };
           img.src = e.target.result;
@@ -747,59 +744,55 @@
 
     async function requestWithdrawal() {
       if (!currentUser || !window.users[currentUser]) return;
-      const user = window.users[currentUser];
-
       const wallet = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value);
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
 
-      if (!wallet) {
-        alert('Please enter your Crypto Wallet Address.');
-        return;
-      }
-      if (!amount || amount <= 0 || amount > user.balance) {
-        alert('Please enter a valid withdrawal amount within your available balance.');
+      if (!wallet || amount <= 0) {
+        alert('Please enter a valid wallet address and amount.');
         return;
       }
 
-      user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amount;
-      user.walletAddress = wallet;
+      if (amount > window.users[currentUser].balance) {
+        alert('Insufficient balance.');
+        return;
+      }
+
+      window.users[currentUser].withdrawalStatus = 'Pending';
+      window.users[currentUser].withdrawalAmount = amount;
+      window.users[currentUser].walletAddress = wallet;
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(user);
+        await window.saveUserToFirebase(window.users[currentUser]);
       }
       renderUI();
-      alert('Withdrawal request submitted successfully!');
+      alert('Withdrawal request submitted!');
     }
 
     async function approveWithdrawal() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !window.users[selectedUser]) return;
-      
+
       const user = window.users[selectedUser];
+      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
       user.withdrawalStatus = 'Approved';
-      user.balance = Math.max(0, (user.balance || 0) - (user.withdrawalAmount || 0));
       user.withdrawalAmount = 0;
-      
+
       window.saveUsers();
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
-      window.populateAdminUsers();
+      loadAdminUserData();
       renderUI();
       alert(`Withdrawal approved for ${selectedUser}!`);
     }
 
-    window.renderUI = function() {
+    function renderUI() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
+      const adminView = document.getElementById('admin-view');
 
-      const telegramBtn = document.getElementById('telegram-support-btn');
-      if (telegramBtn) telegramBtn.href = window.telegramLink;
-
-      const supportSetLink = document.getElementById('support-set-link');
-      if (supportSetLink) supportSetLink.href = window.telegramLink;
+      if (!adminView.classList.contains('hidden')) return;
 
       if (!currentUser || !window.users[currentUser]) {
         authView.classList.remove('hidden');
@@ -811,45 +804,57 @@
       workerView.classList.remove('hidden');
 
       const user = window.users[currentUser];
-      const stopLimit = user.stopLimit || 29;
+      const setNum = user.currentSet || 1;
+      const completed = user.completedInSet || 0;
+      const maxWork = user.stopLimit || 29;
 
-      document.getElementById('user-display-name').innerText = currentUser;
-      document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
+      document.getElementById('user-display-name').innerText = user.username;
+      document.getElementById('current-set-display').innerText = `Set ${setNum} / 3`;
       document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-      document.getElementById('set-num-text').innerText = user.currentSet || 1;
-      document.getElementById('progress-text').innerText = `${user.completedInSet || 0} / ${stopLimit} Completed`;
-
-      const pct = Math.min(100, Math.round(((user.completedInSet || 0) / stopLimit) * 100));
+      document.getElementById('set-num-text').innerText = setNum;
+      document.getElementById('progress-text').innerText = `${completed} / ${maxWork} Completed`;
+      
+      const pct = Math.min(100, Math.round((completed / maxWork) * 100));
       document.getElementById('progress-fill').style.width = `${pct}%`;
 
-      const completedMsg = document.getElementById('completed-set-message');
-      const movieContainer = document.getElementById('movie-container');
+      document.getElementById('telegram-support-btn').href = window.telegramLink;
+      document.getElementById('support-set-link').href = window.telegramLink;
 
-      if ((user.completedInSet || 0) >= stopLimit || user.isSetApproved === false) {
+      const completedMsg = document.getElementById('completed-set-message');
+      const movieBox = document.getElementById('movie-container');
+
+      if (completed >= maxWork || user.isSetApproved === false) {
         completedMsg.classList.remove('hidden');
-        movieContainer.classList.add('hidden');
+        movieBox.classList.add('hidden');
       } else {
         completedMsg.classList.add('hidden');
-        movieContainer.classList.remove('hidden');
+        movieBox.classList.remove('hidden');
 
-        const key = `${user.currentSet || 1}-${(user.completedInSet || 0) + 1}`;
-        const pData = window.globalPictureData[key] || {};
+        const nextImgIndex = completed + 1;
+        const key = `${setNum}-${nextImgIndex}`;
+        const picData = window.globalPictureData[key] || {};
 
-        document.getElementById('movie-img').src = pData.image || 'https://via.placeholder.com/400x250?text=Movie+Promotion';
-        document.getElementById('movie-title').innerText = `Movie Promotion #${(user.completedInSet || 0) + 1}`;
-        document.getElementById('admin-comment').innerText = pData.comment ? `Admin Comment: ${pData.comment}` : 'Admin Comment: Ready to promote!';
-        document.getElementById('movie-reward').innerText = `$${parseFloat(pData.reward || 0.50).toFixed(2)}`;
+        document.getElementById('movie-title').innerText = `Movie Promotion #${nextImgIndex}`;
+        document.getElementById('movie-reward').innerText = `$${parseFloat(picData.reward || 0.50).toFixed(2)}`;
+        document.getElementById('admin-comment').innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
+        
+        const imgElem = document.getElementById('movie-img');
+        if (picData.image) {
+          imgElem.src = picData.image;
+        } else {
+          imgElem.src = 'https://via.placeholder.com/400x250?text=No+Movie+Image+Uploaded';
+        }
       }
 
       const wStatus = document.getElementById('withdraw-status');
       if (user.withdrawalStatus === 'Pending') {
-        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending: $${(user.withdrawalAmount || 0).toFixed(2)}</span>`;
+        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
       } else if (user.withdrawalStatus === 'Approved') {
         wStatus.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
       } else {
-        wStatus.innerHTML = '';
+        wStatus.innerText = '';
       }
-    };
+    }
 
     renderUI();
   </script>
