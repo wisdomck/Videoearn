@@ -42,6 +42,7 @@
 
     .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; }
     .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: #e2e8f0; }
     .btn-telegram { background: var(--telegram); color: #fff; }
@@ -88,7 +89,7 @@
         <input type="text" id="login-identifier" placeholder="Enter Email or Username">
         <label>Password</label>
         <input type="password" id="login-password" placeholder="Password">
-        <button class="btn" onclick="userLogin()">Log In</button>
+        <button class="btn" id="login-btn" onclick="userLogin()">Log In</button>
         <p style="margin-top: 12px; text-align: center;">
           Don't have an account? <span class="tab-link" onclick="showAuthTab('signup')">Sign Up</span>
         </p>
@@ -103,7 +104,7 @@
         <input type="text" id="signup-username" placeholder="Choose Username">
         <label>Password</label>
         <input type="password" id="signup-password" placeholder="Create Password">
-        <button class="btn" onclick="userSignup()">Create Account</button>
+        <button class="btn" id="signup-btn" onclick="userSignup()">Create Account</button>
         <p style="margin-top: 12px; text-align: center;">
           Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
         </p>
@@ -147,7 +148,7 @@
           <h4 id="movie-title">Movie Promotion #1</h4>
           <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
           <div style="font-weight: 700; color: var(--success); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
-          <button class="btn" onclick="promoteMovie()">Promote This Movie</button>
+          <button class="btn" id="promote-btn" onclick="promoteMovie()">Promote This Movie</button>
         </div>
       </div>
 
@@ -261,7 +262,7 @@
 
   <script>
     // ======================================================
-    // 1. REPLACE THE KEYS BELOW WITH YOUR FIREBASE CONFIG
+    // 1. ADD YOUR FIREBASE CONFIG KEYS HERE IF NOT SET
     // ======================================================
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
@@ -273,7 +274,9 @@
     };
 
     // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
     // App state
@@ -284,18 +287,19 @@
 
     // Real-time Database Listeners
     function initDataListeners() {
-      // Sync Users across all devices
       db.collection('users').onSnapshot((snapshot) => {
+        users = {};
         snapshot.forEach((doc) => {
           users[doc.id] = doc.data();
         });
-        if (document.getElementById('admin-dashboard').classList.contains('hidden') === false) {
+        if (!document.getElementById('admin-dashboard').classList.contains('hidden')) {
           populateAdminUsers();
         }
         renderUI();
+      }, (error) => {
+        console.error("Firestore Users listener error:", error);
       });
 
-      // Sync Picture/Promos across devices
       db.collection('settings').doc('pictures').onSnapshot((doc) => {
         if (doc.exists) {
           globalPictureData = doc.data() || {};
@@ -303,7 +307,6 @@
         }
       });
 
-      // Sync Telegram Link
       db.collection('settings').doc('telegram').onSnapshot((doc) => {
         if (doc.exists) {
           telegramLink = doc.data().link || 'https://t.me/';
@@ -326,43 +329,61 @@
 
     async function userSignup() {
       const email = document.getElementById('signup-email').value.trim().toLowerCase();
-      const u = document.getElementById('signup-username').value.trim();
+      const rawUsername = document.getElementById('signup-username').value.trim();
       const p = document.getElementById('signup-password').value.trim();
+      const btn = document.getElementById('signup-btn');
 
-      if (!email || !u || !p) {
-        alert('Please fill in all fields including email.');
+      if (!email || !rawUsername || !p) {
+        alert('Please complete all fields (Email, Username, Password).');
         return;
       }
 
-      const userDoc = await db.collection('users').doc(u).get();
-      if (userDoc.exists) {
-        alert('Username already exists. Please choose another.');
-        return;
+      const u = rawUsername.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+
+      btn.disabled = true;
+      btn.innerText = "Creating Account...";
+
+      try {
+        const userDoc = await db.collection('users').doc(u).get();
+        if (userDoc.exists) {
+          alert('Username is already taken. Please choose another.');
+          btn.disabled = false;
+          btn.innerText = "Create Account";
+          return;
+        }
+
+        const emailCheck = await db.collection('users').where('email', '==', email).get();
+        if (!emailCheck.empty) {
+          alert('An account with this email address already exists.');
+          btn.disabled = false;
+          btn.innerText = "Create Account";
+          return;
+        }
+
+        const newUser = {
+          username: rawUsername,
+          email: email,
+          password: p,
+          currentSet: 1,
+          completedInSet: 0,
+          stopLimit: 29,
+          isSetApproved: true,
+          balance: 0.00,
+          withdrawalStatus: 'None',
+          withdrawalAmount: 0,
+          walletAddress: ''
+        };
+
+        await db.collection('users').doc(u).set(newUser);
+        alert('Account created successfully! You can now log in.');
+        showAuthTab('login');
+      } catch (err) {
+        console.error("Signup Error: ", err);
+        alert('Signup failed: ' + err.message + '\n\nMake sure Firestore Security Rules are set to test mode or public write permissions.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Create Account";
       }
-
-      const emailCheck = await db.collection('users').where('email', '==', email).get();
-      if (!emailCheck.empty) {
-        alert('An account with this email already exists.');
-        return;
-      }
-
-      const newUser = {
-        username: u,
-        email: email,
-        password: p,
-        currentSet: 1,
-        completedInSet: 0,
-        stopLimit: 29,
-        isSetApproved: true,
-        balance: 0.00,
-        withdrawalStatus: 'None',
-        withdrawalAmount: 0,
-        walletAddress: ''
-      };
-
-      await db.collection('users').doc(u).set(newUser);
-      alert('Account created successfully! Please log in.');
-      showAuthTab('login');
     }
 
     async function userLogin() {
@@ -370,23 +391,21 @@
       const p = document.getElementById('login-password').value.trim();
 
       if (!identifier || !p) {
-        alert('Please enter your email/username and password.');
+        alert('Please enter both username/email and password.');
         return;
       }
 
-      let matchedUser = null;
-      if (users[identifier]) {
-        matchedUser = users[identifier];
-      } else {
-        matchedUser = Object.values(users).find(u => u.email === identifier);
-      }
+      let matchedUserKey = Object.keys(users).find(key => {
+        const u = users[key];
+        return key === identifier || u.username?.toLowerCase() === identifier || u.email === identifier;
+      });
 
-      if (matchedUser && matchedUser.password === p) {
-        currentUser = matchedUser.username || identifier;
+      if (matchedUserKey && users[matchedUserKey].password === p) {
+        currentUser = matchedUserKey;
         localStorage.setItem('ve_current_user', currentUser);
         renderUI();
       } else {
-        alert('Invalid Email/Username or Password!');
+        alert('Invalid login credentials. Please try again.');
       }
     }
 
@@ -436,12 +455,12 @@
     async function saveTelegramLink() {
       const link = document.getElementById('admin-telegram-link').value.trim();
       if (!link) {
-        alert('Please enter a valid Telegram link.');
+        alert('Please enter a valid link.');
         return;
       }
       const formattedLink = link.startsWith('http') ? link : `https://${link}`;
       await db.collection('settings').doc('telegram').set({ link: formattedLink });
-      alert('Telegram Support Link updated successfully!');
+      alert('Telegram Link updated!');
     }
 
     function populateAdminUsers() {
@@ -459,12 +478,12 @@
       usernames.forEach(u => {
         const option = document.createElement('option');
         option.value = u;
-        option.innerText = `${u} (${users[u].email || 'No email'})`;
+        option.innerText = `${users[u].username || u} (${users[u].email || 'No email'})`;
         select.appendChild(option);
 
         const item = document.createElement('div');
         item.className = 'user-item';
-        item.innerHTML = `<span><strong>${u}</strong> <small>(${users[u].email || 'No email'})</small></span> <span>$${users[u].balance.toFixed(2)}</span>`;
+        item.innerHTML = `<span><strong>${users[u].username || u}</strong> <small>(${users[u].email || 'No email'})</small></span> <span>$${(users[u].balance || 0).toFixed(2)}</span>`;
         userListContainer.appendChild(item);
       });
 
@@ -476,7 +495,7 @@
       if (!selectedUser || !users[selectedUser]) return;
 
       const user = users[selectedUser];
-      document.getElementById('admin-user-balance').value = user.balance;
+      document.getElementById('admin-user-balance').value = user.balance || 0;
       document.getElementById('admin-stop-work-num').value = user.stopLimit || 29;
       document.getElementById('admin-user-set-select').value = user.currentSet || 1;
 
@@ -484,7 +503,7 @@
       const wApproveBtn = document.getElementById('approve-withdraw-btn');
 
       if (user.withdrawalStatus === 'Pending') {
-        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${(user.withdrawalAmount || user.balance).toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
+        wReqText.innerHTML = `<strong>${user.username || selectedUser}</strong> requested <strong>$${(user.withdrawalAmount || user.balance).toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
         wApproveBtn.style.display = 'block';
       } else {
         wReqText.innerText = 'No pending withdrawal requests for this member.';
@@ -510,12 +529,12 @@
         updates.completedInSet = 0;
       }
 
-      if (users[selectedUser].completedInSet < stopNum) {
+      if ((users[selectedUser].completedInSet || 0) < stopNum) {
         updates.isSetApproved = true;
       }
 
       await db.collection('users').doc(selectedUser).update(updates);
-      alert(`Updated settings for ${selectedUser}!`);
+      alert(`Updated settings for ${users[selectedUser].username || selectedUser}!`);
     }
 
     async function promoteMovie() {
@@ -524,14 +543,17 @@
       const user = users[currentUser];
       const maxWork = user.stopLimit || 29;
 
-      if (user.completedInSet >= maxWork) return;
+      if ((user.completedInSet || 0) >= maxWork) return;
 
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
+      const btn = document.getElementById('promote-btn');
+      btn.disabled = true;
+
+      const key = `${user.currentSet}-${(user.completedInSet || 0) + 1}`;
       const reward = parseFloat(globalPictureData[key]?.reward || 0.50);
 
       const updates = {
-        completedInSet: user.completedInSet + 1,
-        balance: user.balance + reward
+        completedInSet: (user.completedInSet || 0) + 1,
+        balance: (user.balance || 0) + reward
       };
 
       if (updates.completedInSet >= maxWork) {
@@ -539,6 +561,7 @@
       }
 
       await db.collection('users').doc(currentUser).update(updates);
+      btn.disabled = false;
     }
 
     async function approveNextSet() {
@@ -556,9 +579,9 @@
           stopLimit: 29,
           isSetApproved: true
         });
-        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet + 1}.`);
+        alert(`Approved Set for ${user.username || selectedUser}! Moved to Set ${user.currentSet + 1}.`);
       } else {
-        alert(`${selectedUser} has already completed all 3 sets!`);
+        alert(`${user.username || selectedUser} has already finished all sets!`);
       }
     }
 
@@ -578,7 +601,7 @@
       const commitToDb = async () => {
         globalPictureData[key] = pictureUpdate;
         await db.collection('settings').doc('pictures').set(globalPictureData);
-        alert(`Picture & details saved for Set ${setNum}, Image #${imgIndex}!`);
+        alert(`Details saved for Set ${setNum}, Image #${imgIndex}!`);
       };
 
       if (fileInput.files && fileInput.files[0]) {
@@ -605,7 +628,7 @@
         return;
       }
       if (!amount || amount <= 0 || amount > user.balance) {
-        alert('Please enter a valid withdrawal amount within your available balance.');
+        alert('Enter a valid amount within your current balance.');
         return;
       }
 
@@ -615,7 +638,7 @@
         walletAddress: wallet
       });
 
-      alert('Withdrawal request submitted successfully!');
+      alert('Withdrawal request submitted!');
     }
 
     async function approveWithdrawal() {
@@ -623,7 +646,7 @@
       if (!selectedUser || !users[selectedUser]) return;
       
       const user = users[selectedUser];
-      const newBal = Math.max(0, user.balance - (user.withdrawalAmount || 0));
+      const newBal = Math.max(0, (user.balance || 0) - (user.withdrawalAmount || 0));
 
       await db.collection('users').doc(selectedUser).update({
         withdrawalStatus: 'Approved',
@@ -631,7 +654,7 @@
         withdrawalAmount: 0
       });
 
-      alert(`Withdrawal approved for ${selectedUser}!`);
+      alert(`Withdrawal approved for ${user.username || selectedUser}!`);
     }
 
     function renderUI() {
@@ -652,12 +675,12 @@
       const user = users[currentUser];
       const stopLimit = user.stopLimit || 29;
 
-      document.getElementById('user-display-name').innerText = currentUser;
+      document.getElementById('user-display-name').innerText = user.username || currentUser;
       document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
       document.getElementById('set-num-text').innerText = user.currentSet;
-      document.getElementById('worker-balance').innerText = `$${user.balance.toFixed(2)}`;
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
 
-      const completed = user.completedInSet;
+      const completed = user.completedInSet || 0;
       document.getElementById('progress-text').innerText = `${completed} / 29 Completed`;
       document.getElementById('progress-fill').style.width = `${(completed / 29) * 100}%`;
 
@@ -685,7 +708,7 @@
 
       const wStatus = document.getElementById('withdraw-status');
       if (user.withdrawalStatus === 'Pending') {
-        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending Admin Approval ($${user.withdrawalAmount.toFixed(2)})</span>`;
+        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending Admin Approval ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
       } else if (user.withdrawalStatus === 'Approved') {
         wStatus.innerHTML = '<span class="badge badge-approved">Withdrawal Approved & Sent!</span>';
       } else {
