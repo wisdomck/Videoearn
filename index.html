@@ -74,7 +74,7 @@
       <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
     </header>
 
-    <!-- AUTHENTICATION VIEW (LOGIN / SIGNUP) -->
+    <!-- AUTHENTICATION VIEW (LOGIN / SIGNUP / FORGOT PASSWORD) -->
     <div id="auth-view" class="card">
       <div id="login-box">
         <h3>Welcome Back</h3>
@@ -84,7 +84,10 @@
         <label>Password</label>
         <input type="password" id="login-password" placeholder="Password">
         <button class="btn" onclick="userLogin()">Log In</button>
-        <p style="margin-top: 12px; text-align: center;">
+        <p style="margin-top: 10px; text-align: center; font-size: 0.85rem;">
+          <span class="tab-link" onclick="showAuthTab('forgot')">Forgot Password?</span>
+        </p>
+        <p style="margin-top: 8px; text-align: center;">
           Don't have an account? <span class="tab-link" onclick="showAuthTab('signup')">Sign Up</span>
         </p>
       </div>
@@ -101,6 +104,19 @@
         <button class="btn" onclick="userSignup()">Create Account</button>
         <p style="margin-top: 12px; text-align: center;">
           Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
+        </p>
+      </div>
+
+      <div id="forgot-box" class="hidden">
+        <h3>Reset Password</h3>
+        <p>Enter your registered email and new password</p>
+        <label>Registered Email Address</label>
+        <input type="email" id="forgot-email" placeholder="name@example.com">
+        <label>New Password</label>
+        <input type="password" id="forgot-new-password" placeholder="Enter New Password">
+        <button class="btn" onclick="userResetPassword()">Update Password & Log In</button>
+        <p style="margin-top: 12px; text-align: center;">
+          Remembered your password? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
         </p>
       </div>
     </div>
@@ -270,11 +286,15 @@
     }
 
     function showAuthTab(tab) {
+      document.getElementById('login-box').classList.add('hidden');
+      document.getElementById('signup-box').classList.add('hidden');
+      document.getElementById('forgot-box').classList.add('hidden');
+
       if (tab === 'signup') {
-        document.getElementById('login-box').classList.add('hidden');
         document.getElementById('signup-box').classList.remove('hidden');
+      } else if (tab === 'forgot') {
+        document.getElementById('forgot-box').classList.remove('hidden');
       } else {
-        document.getElementById('signup-box').classList.add('hidden');
         document.getElementById('login-box').classList.remove('hidden');
       }
     }
@@ -321,6 +341,9 @@
     }
 
     function userLogin() {
+      // Sync fresh data from localStorage in case account was modified or logged in on another tab/session
+      users = JSON.parse(localStorage.getItem('ve_users')) || {};
+      
       const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
       const p = document.getElementById('login-password').value.trim();
 
@@ -342,8 +365,35 @@
         localStorage.setItem('ve_current_user', matchedUsername);
         renderUI();
       } else {
-        alert('Invalid Email/Username or Password!');
+        alert('Incorrect Email/Username or Password!');
       }
+    }
+
+    function userResetPassword() {
+      users = JSON.parse(localStorage.getItem('ve_users')) || {};
+      const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+      const newPassword = document.getElementById('forgot-new-password').value.trim();
+
+      if (!email || !newPassword) {
+        alert('Please enter your email address and new password.');
+        return;
+      }
+
+      const matchedUsername = Object.keys(users).find(u => users[u].email === email);
+
+      if (!matchedUsername) {
+        alert('No account found with this email address.');
+        return;
+      }
+
+      users[matchedUsername].password = newPassword;
+      saveUsers();
+
+      currentUser = matchedUsername;
+      localStorage.setItem('ve_current_user', matchedUsername);
+
+      alert('Password updated successfully! Logging you into your account...');
+      renderUI();
     }
 
     function userLogout() {
@@ -402,6 +452,7 @@
     }
 
     function populateAdminUsers() {
+      users = JSON.parse(localStorage.getItem('ve_users')) || {};
       const select = document.getElementById('admin-selected-user');
       const userListContainer = document.getElementById('all-users-list');
       select.innerHTML = '';
@@ -589,6 +640,7 @@
     }
 
     function renderUI() {
+      users = JSON.parse(localStorage.getItem('ve_users')) || {};
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
 
