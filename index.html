@@ -45,7 +45,7 @@
     input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
     input:focus, select:focus { outline: 2px solid var(--primary); background: #fff; }
 
-    .progress-bar { background: #e2e8f0; height: 100px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
+    .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
     .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
     .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
@@ -134,7 +134,7 @@
           <span>Progress (Set <span id="set-num-text">1</span>)</span>
           <span id="progress-text">0 / 16 Completed</span>
         </div>
-        <div class="progress-bar" style="height:10px;">
+        <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
@@ -415,10 +415,9 @@
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
     window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
     window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
-    let currentUser = localStorage.getItem('ve_current_user') || null;
+    window.currentUser = localStorage.getItem('ve_current_user') || null;
     window.isAdminLoggedIn = false;
 
-    // Clear memory/storage for any pictures above index 16
     window.cleanupExcessPictures = function() {
       let changed = false;
       Object.keys(window.globalPictureData).forEach(key => {
@@ -431,7 +430,6 @@
       if (changed) window.savePictures();
     };
 
-    // Standardize user stopLimits to 16 maximum
     Object.keys(window.users).forEach(u => {
       if (window.users[u].stopLimit > 16) {
         window.users[u].stopLimit = 16;
@@ -448,7 +446,7 @@
       localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData));
     };
 
-    function showAuthTab(tab) {
+    window.showAuthTab = function(tab) {
       if (tab === 'signup') {
         document.getElementById('login-box').classList.add('hidden');
         document.getElementById('signup-box').classList.remove('hidden');
@@ -456,9 +454,9 @@
         document.getElementById('signup-box').classList.add('hidden');
         document.getElementById('login-box').classList.remove('hidden');
       }
-    }
+    };
 
-    async function userSignup() {
+    window.userSignup = async function() {
       const email = document.getElementById('signup-email').value.trim().toLowerCase();
       const u = document.getElementById('signup-username').value.trim();
       const p = document.getElementById('signup-password').value.trim();
@@ -501,10 +499,10 @@
       }
 
       alert('Account created successfully! Please log in.');
-      showAuthTab('login');
-    }
+      window.showAuthTab('login');
+    };
 
-    function userLogin() {
+    window.userLogin = function() {
       const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
       const p = document.getElementById('login-password').value.trim();
 
@@ -521,21 +519,21 @@
       }
 
       if (matchedUsername && window.users[matchedUsername].password === p) {
-        currentUser = matchedUsername;
+        window.currentUser = matchedUsername;
         localStorage.setItem('ve_current_user', matchedUsername);
-        renderUI();
+        window.renderUI();
       } else {
         alert('Invalid Email/Username or Password!');
       }
-    }
+    };
 
-    function userLogout() {
-      currentUser = null;
+    window.userLogout = function() {
+      window.currentUser = null;
       localStorage.removeItem('ve_current_user');
-      renderUI();
-    }
+      window.renderUI();
+    };
 
-    function toggleView() {
+    window.toggleView = function() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
       const adminView = document.getElementById('admin-view');
@@ -549,11 +547,11 @@
       } else {
         adminView.classList.add('hidden');
         toggleBtn.innerText = 'Admin Login';
-        renderUI();
+        window.renderUI();
       }
-    }
+    };
 
-    function loginAdmin() {
+    window.loginAdmin = function() {
       const pass = document.getElementById('admin-pass-input').value;
       if (pass === 'admin1234') {
         window.isAdminLoggedIn = true;
@@ -561,20 +559,20 @@
         document.getElementById('admin-dashboard').classList.remove('hidden');
         document.getElementById('admin-telegram-link').value = window.telegramLink;
         window.populateAdminUsers();
-        renderUI();
+        window.renderUI();
       } else {
         alert('Incorrect Admin Password!');
       }
-    }
+    };
 
-    function logoutAdmin() {
+    window.logoutAdmin = function() {
       window.isAdminLoggedIn = false;
       document.getElementById('admin-pass-input').value = '';
       document.getElementById('admin-login-card').classList.remove('hidden');
       document.getElementById('admin-dashboard').classList.add('hidden');
-    }
+    };
 
-    async function saveTelegramLink() {
+    window.saveTelegramLink = async function() {
       const link = document.getElementById('admin-telegram-link').value.trim();
       if (!link) {
         alert('Please enter a valid Telegram link.');
@@ -585,9 +583,9 @@
       if (window.saveTelegramToFirebase) {
         await window.saveTelegramToFirebase(window.telegramLink);
       }
-      renderUI();
+      window.renderUI();
       alert('Telegram Support Link updated successfully!');
-    }
+    };
 
     window.populateAdminUsers = function() {
       const select = document.getElementById('admin-selected-user');
@@ -622,10 +620,10 @@
         userListContainer.appendChild(item);
       });
 
-      loadAdminUserData();
+      window.loadAdminUserData();
     };
 
-    function loadAdminUserData() {
+    window.loadAdminUserData = function() {
       const select = document.getElementById('admin-selected-user');
       if (!select) return;
       const selectedUser = select.value;
@@ -647,9 +645,9 @@
         wReqText.innerText = 'No pending withdrawal requests for this member.';
         wApproveBtn.style.display = 'none';
       }
-    }
+    };
 
-    async function saveAdminUserSettings() {
+    window.saveAdminUserSettings = async function() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !window.users[selectedUser]) return;
 
@@ -675,14 +673,14 @@
         await window.saveUserToFirebase(window.users[selectedUser]);
       }
       window.populateAdminUsers();
-      renderUI();
+      window.renderUI();
       alert(`Updated settings for ${selectedUser}!`);
-    }
+    };
 
-    async function promoteMovie() {
-      if (!currentUser || !window.users[currentUser]) return;
+    window.promoteMovie = async function() {
+      if (!window.currentUser || !window.users[window.currentUser]) return;
 
-      const user = window.users[currentUser];
+      const user = window.users[window.currentUser];
       const maxWork = Math.min(user.stopLimit || 16, 16);
 
       if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
@@ -704,14 +702,14 @@
 
       document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for completing promotion #${user.completedInSet}!`;
       document.getElementById('promo-modal').classList.remove('hidden');
-    }
+    };
 
-    function closeModal() {
+    window.closeModal = function() {
       document.getElementById('promo-modal').classList.add('hidden');
-      renderUI();
-    }
+      window.renderUI();
+    };
 
-    async function approveNextSet() {
+    window.approveNextSet = async function() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !window.users[selectedUser]) {
         alert('Please select a member first.');
@@ -729,14 +727,14 @@
           await window.saveUserToFirebase(user);
         }
         window.populateAdminUsers();
-        renderUI();
+        window.renderUI();
         alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
       } else {
         alert(`${selectedUser} has already completed all 3 sets!`);
       }
-    }
+    };
 
-    async function savePictureAndSettings() {
+    window.savePictureAndSettings = async function() {
       const setNum = document.getElementById('edit-set-num').value;
       let imgIndex = parseInt(document.getElementById('edit-img-index').value) || 1;
       if (imgIndex > 16) {
@@ -744,79 +742,77 @@
         document.getElementById('edit-img-index').value = 16;
         imgIndex = 16;
       }
-      const reward = document.getElementById('edit-img-reward').value || "0.50";
-      const comment = document.getElementById('edit-img-comment').value.trim() || "Featured movie promo note...";
+      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const comment = document.getElementById('edit-img-comment').value.trim();
       const fileInput = document.getElementById('edit-img-file');
 
       const key = `${setNum}-${imgIndex}`;
+      if (!window.globalPictureData[key]) {
+        window.globalPictureData[key] = {};
+      }
 
-      const processSave = async (imgData) => {
-        const picData = {
-          img: imgData,
-          reward: reward,
-          comment: comment
-        };
-        window.globalPictureData[key] = picData;
-        window.savePictures();
-
-        if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(key, picData);
-        }
-
-        alert(`Picture and details saved for Set ${setNum}, Movie #${imgIndex}!`);
-        renderUI();
-      };
+      window.globalPictureData[key].reward = reward;
+      window.globalPictureData[key].comment = comment || 'Ready to promote!';
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-          processSave(e.target.result);
+        reader.onload = async function(e) {
+          window.globalPictureData[key].src = e.target.result;
+          window.savePictures();
+          if (window.savePicturesToFirebase) {
+            await window.savePicturesToFirebase(key, window.globalPictureData[key]);
+          }
+          window.renderUI();
+          alert(`Picture and details saved for Set ${setNum} #${imgIndex}!`);
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        const existingData = window.globalPictureData[key]?.img || "";
-        processSave(existingData);
+        window.savePictures();
+        if (window.savePicturesToFirebase) {
+          await window.savePicturesToFirebase(key, window.globalPictureData[key]);
+        }
+        window.renderUI();
+        alert(`Details updated for Set ${setNum} #${imgIndex}!`);
       }
-    }
+    };
 
-    async function requestWithdrawal() {
-      if (!currentUser || !window.users[currentUser]) return;
+    window.requestWithdrawal = async function() {
+      if (!window.currentUser || !window.users[window.currentUser]) return;
 
-      const user = window.users[currentUser];
-      const address = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+      const user = window.users[window.currentUser];
+      const addr = document.getElementById('withdraw-wallet-address').value.trim();
+      const amt = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
 
-      if (!address) {
-        alert('Please enter a valid Crypto Wallet Address.');
+      if (!addr) {
+        alert('Please enter your crypto wallet address.');
         return;
       }
 
-      if (amount <= 0 || amount > (user.balance || 0)) {
-        alert('Invalid withdrawal amount! Make sure it does not exceed your available balance.');
+      if (amt <= 0 || amt > user.balance) {
+        alert('Invalid or insufficient withdrawal amount.');
         return;
       }
 
       user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amount;
-      user.walletAddress = address;
+      user.withdrawalAmount = amt;
+      user.walletAddress = addr;
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
-
-      renderUI();
+      window.renderUI();
       alert('Withdrawal request submitted successfully!');
-    }
+    };
 
-    async function approveWithdrawal() {
+    window.approveWithdrawal = async function() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
       const amt = user.withdrawalAmount || user.balance || 0;
 
-      user.balance = Math.max(0, (user.balance || 0) - amt);
+      user.balance = Math.max(0, user.balance - amt);
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -824,26 +820,28 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
-
       window.populateAdminUsers();
-      renderUI();
-      alert(`Withdrawal of $${amt.toFixed(2)} approved for ${selectedUser}!`);
-    }
+      window.renderUI();
+      alert(`Approved withdrawal of $${amt.toFixed(2)} for ${selectedUser}!`);
+    };
 
     window.renderUI = function() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
+      const adminView = document.getElementById('admin-view');
 
-      // Update Telegram Support Links globally
-      const tgLink = window.telegramLink || 'https://t.me/';
-      document.getElementById('telegram-support-btn').href = tgLink;
-      document.getElementById('support-set-link').href = tgLink;
+      document.getElementById('telegram-support-btn').href = window.telegramLink;
+      document.getElementById('support-set-link').href = window.telegramLink;
 
-      if (currentUser && window.users[currentUser]) {
+      if (!adminView.classList.contains('hidden')) {
+        return;
+      }
+
+      if (window.currentUser && window.users[window.currentUser]) {
         authView.classList.add('hidden');
         workerView.classList.remove('hidden');
 
-        const user = window.users[currentUser];
+        const user = window.users[window.currentUser];
         const maxWork = Math.min(user.stopLimit || 16, 16);
 
         document.getElementById('user-display-name').innerText = user.username;
@@ -855,48 +853,45 @@
         const pct = Math.min(100, Math.round(((user.completedInSet || 0) / maxWork) * 100));
         document.getElementById('progress-fill').style.width = `${pct}%`;
 
-        // Check if set work is paused/completed
-        const isPaused = (user.completedInSet >= maxWork) || (user.isSetApproved === false);
+        const isStopped = user.completedInSet >= maxWork || user.isSetApproved === false;
+        const setMsg = document.getElementById('completed-set-message');
         const movieBox = document.getElementById('movie-container');
-        const setMsgBox = document.getElementById('completed-set-message');
 
-        if (isPaused) {
+        if (isStopped) {
+          setMsg.classList.remove('hidden');
           movieBox.classList.add('hidden');
-          setMsgBox.classList.remove('hidden');
         } else {
+          setMsg.classList.add('hidden');
           movieBox.classList.remove('hidden');
-          setMsgBox.classList.add('hidden');
 
           const nextIndex = (user.completedInSet || 0) + 1;
-          const key = `${user.currentSet || 1}-${nextIndex}`;
-          const currentPicData = window.globalPictureData[key];
+          const picKey = `${user.currentSet || 1}-${nextIndex}`;
+          const picData = window.globalPictureData[picKey] || {};
 
           document.getElementById('movie-title').innerText = `Movie Promotion #${nextIndex}`;
-          document.getElementById('movie-img').src = currentPicData?.img || 'https://via.placeholder.com/400x250?text=Movie+Promo+' + nextIndex;
-          document.getElementById('admin-comment').innerText = `Admin Comment: ${currentPicData?.comment || 'Ready to promote!'}`;
-          document.getElementById('movie-reward').innerText = `$${parseFloat(currentPicData?.reward || 0.50).toFixed(2)}`;
+          document.getElementById('movie-img').src = picData.src || 'https://via.placeholder.com/400x250?text=Movie+Promo';
+          document.getElementById('admin-comment').innerText = `Admin Comment: ${picData.comment || 'Ready to promote!'}`;
+          document.getElementById('movie-reward').innerText = `$${(picData.reward || 0.50).toFixed(2)}`;
         }
 
-        // Withdrawal status feedback
-        const statusText = document.getElementById('withdraw-status');
+        const wStatus = document.getElementById('withdraw-status');
         if (user.withdrawalStatus === 'Pending') {
-          statusText.innerHTML = `<span class="badge badge-pending">Withdrawal Request Pending ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
+          wStatus.innerText = `Status: Withdrawal of $${user.withdrawalAmount.toFixed(2)} is Pending...`;
+          wStatus.style.color = 'var(--warning)';
         } else if (user.withdrawalStatus === 'Approved') {
-          statusText.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
+          wStatus.innerText = `Status: Last withdrawal was Approved!`;
+          wStatus.style.color = 'var(--success)';
         } else {
-          statusText.innerHTML = '';
+          wStatus.innerText = '';
         }
 
       } else {
-        if (document.getElementById('admin-view').classList.contains('hidden')) {
-          authView.classList.remove('hidden');
-        }
         workerView.classList.add('hidden');
+        authView.classList.remove('hidden');
       }
     };
 
-    // Initial render call on page startup
-    renderUI();
+    window.renderUI();
   </script>
 </body>
 </html>
