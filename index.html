@@ -139,7 +139,7 @@
         </div>
 
         <div id="movie-container" class="movie-box" style="margin-top:12px;">
-          <img id="movie-img" src="" alt="Promo Movie">
+          <img id="movie-img" src="" alt="Movie Promotion">
           <h4 id="movie-title">Movie Promotion #1</h4>
           <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
           <div style="font-weight: 700; color: var(--success); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
@@ -205,7 +205,7 @@
             <input type="number" id="admin-stop-work-num" min="1" max="16" value="16">
 
             <label>Custom Pause Message (Shows in Red Box):</label>
-            <input type="text" id="admin-pause-message-input" placeholder="e.g. You have reached a special milestone. Contact support.">
+            <input type="text" id="admin-pause-message-input" placeholder="e.g. You have reached a special promotional milestone. Contact support.">
 
             <label>Edit Member Balance ($):</label>
             <input type="number" id="admin-user-balance" step="0.01">
@@ -276,10 +276,10 @@
       
       <!-- Red Custom Admin Message -->
       <p id="modal-pause-reason-text" style="color: #dc2626; font-weight: 700; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4;">
-        <!-- Custom text dynamically injected here -->
+        <!-- Dynamic Red Message -->
       </p>
 
-      <!-- Telegram Support Button -->
+      <!-- Telegram Support Link -->
       <a id="modal-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram" style="display: block; text-decoration: none;">
         💬 Please contact customer service now
       </a>
@@ -704,7 +704,8 @@
       }
 
       const nextWorkIndex = completed + 1;
-      const picKey = `${user.currentSet || 1}-${nextWorkIndex}`;
+      const currentSetNum = user.currentSet || 1;
+      const picKey = `${currentSetNum}-${nextWorkIndex}`;
       const picData = window.globalPictureData[picKey];
 
       const movieImg = document.getElementById('movie-img');
@@ -712,15 +713,17 @@
       const adminComment = document.getElementById('admin-comment');
       const movieReward = document.getElementById('movie-reward');
 
+      // Set 1 Fix & General Image Fallback Handling
       if (picData && picData.image) {
         movieImg.src = picData.image;
         movieTitle.innerText = `Movie Promotion #${nextWorkIndex}`;
         adminComment.innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
         movieReward.innerText = `$${parseFloat(picData.reward || 0.50).toFixed(2)}`;
       } else {
-        movieImg.src = 'https://via.placeholder.com/400x250?text=Default+Movie+Promo';
-        movieTitle.innerText = `Movie Promotion #${nextWorkIndex}`;
-        adminComment.innerText = 'Admin Comment: Ready to promote!';
+        // High quality fallback movie banner so Set 1/2/3 never look blank/broken
+        movieImg.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80';
+        movieTitle.innerText = `Set ${currentSetNum} - Movie Promotion #${nextWorkIndex}`;
+        adminComment.innerText = 'Admin Comment: Premium Movie Campaign Active!';
         movieReward.innerText = '$0.50';
       }
     }
@@ -736,7 +739,7 @@
         return;
       }
 
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
+      const key = `${user.currentSet || 1}-${user.completedInSet + 1}`;
       const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
 
       user.completedInSet += 1;
