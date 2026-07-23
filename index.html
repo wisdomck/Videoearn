@@ -395,9 +395,7 @@
 
   <script>
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
-    // Reset previously uploaded pictures as requested
-    window.globalPictureData = {};
-    localStorage.removeItem('ve_pictures');
+    window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
 
     window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
@@ -744,107 +742,107 @@
       alert(`Approved withdrawal for ${selectedUser}!`);
     }
 
-    function savePictureAndSettings() {
+    async function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
       const imgIndex = document.getElementById('edit-img-index').value;
-      const reward = document.getElementById('edit-img-reward').value;
-      const comment = document.getElementById('edit-img-comment').value;
+      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const comment = document.getElementById('edit-img-comment').value.trim() || 'Featured movie promo note...';
       const fileInput = document.getElementById('edit-img-file');
 
       const key = `${setNum}-${imgIndex}`;
 
-      const processSave = async (imgDataUrl) => {
-        const picData = {
-          reward: parseFloat(reward) || 0.50,
-          comment: comment || 'Featured movie promo note...',
-          img: imgDataUrl || window.globalPictureData[key]?.img || ''
-        };
-
-        window.globalPictureData[key] = picData;
-        window.savePictures();
-
-        if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(key, picData);
-        }
-
-        renderUI();
-        alert(`Saved picture & settings for Set ${setNum} - Picture #${imgIndex}!`);
+      const picData = {
+        reward: reward,
+        comment: comment,
+        image: window.globalPictureData[key]?.image || 'https://via.placeholder.com/400x250?text=Movie+Promo'
       };
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-          processSave(e.target.result);
+        reader.onload = async function(e) {
+          picData.image = e.target.result;
+          window.globalPictureData[key] = picData;
+          window.savePictures();
+          if (window.savePicturesToFirebase) {
+            await window.savePicturesToFirebase(key, picData);
+          }
+          renderUI();
+          alert(`Saved Picture & Details for Set ${setNum}, Image #${imgIndex}!`);
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        processSave(null);
+        window.globalPictureData[key] = picData;
+        window.savePictures();
+        if (window.savePicturesToFirebase) {
+          await window.savePicturesToFirebase(key, picData);
+        }
+        renderUI();
+        alert(`Saved Details for Set ${setNum}, Image #${imgIndex}!`);
       }
     }
 
     function renderUI() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
-      const adminView = document.getElementById('admin-view');
 
+      // Update Telegram Link on all buttons
       document.getElementById('telegram-support-btn').href = window.telegramLink;
       document.getElementById('support-set-link').href = window.telegramLink;
 
-      if (!adminView.classList.contains('hidden')) return;
-
-      if (currentUser && window.users[currentUser]) {
-        authView.classList.add('hidden');
-        workerView.classList.remove('hidden');
-
-        const user = window.users[currentUser];
-        const maxWork = user.stopLimit || 16;
-        const currentTaskIndex = user.completedInSet + 1;
-
-        document.getElementById('user-display-name').innerText = user.username;
-        document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
-        document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-
-        document.getElementById('set-num-text').innerText = user.currentSet;
-        document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
-        
-        const pct = Math.min(100, Math.round((user.completedInSet / 16) * 100));
-        document.getElementById('progress-fill').style.width = `${pct}%`;
-
-        const completedMsg = document.getElementById('completed-set-message');
-        const movieBox = document.getElementById('movie-container');
-
-        if (user.completedInSet >= maxWork || user.isSetApproved === false) {
-          completedMsg.classList.remove('hidden');
-          movieBox.classList.add('hidden');
-        } else {
-          completedMsg.classList.add('hidden');
-          movieBox.classList.remove('hidden');
-
-          const key = `${user.currentSet}-${currentTaskIndex}`;
-          const currentPicData = window.globalPictureData[key] || {};
-
-          document.getElementById('movie-title').innerText = `Movie Promotion #${currentTaskIndex}`;
-          document.getElementById('movie-img').src = currentPicData.img || 'https://via.placeholder.com/400x250?text=No+Movie+Picture+Uploaded';
-          document.getElementById('movie-reward').innerText = `$${(currentPicData.reward || 0.50).toFixed(2)}`;
-          document.getElementById('admin-comment').innerText = `Admin Comment: ${currentPicData.comment || 'Ready to promote!'}`;
-        }
-
-        const withdrawStatus = document.getElementById('withdraw-status');
-        if (user.withdrawalStatus === 'Pending') {
-          withdrawStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
-        } else if (user.withdrawalStatus === 'Approved') {
-          withdrawStatus.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
-        } else {
-          withdrawStatus.innerHTML = '';
-        }
-
-      } else {
-        workerView.classList.add('hidden');
+      if (!currentUser || !window.users[currentUser]) {
         authView.classList.remove('hidden');
+        workerView.classList.add('hidden');
+        return;
+      }
+
+      authView.classList.add('hidden');
+      workerView.classList.remove('hidden');
+
+      const user = window.users[currentUser];
+      document.getElementById('user-display-name').innerText = user.username;
+      document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('set-num-text').innerText = user.currentSet;
+      document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
+
+      const pct = (user.completedInSet / 16) * 100;
+      document.getElementById('progress-fill').style.width = `${pct}%`;
+
+      const maxWork = user.stopLimit || 16;
+      const isPaused = (user.completedInSet >= maxWork) || (user.isSetApproved === false);
+
+      if (isPaused) {
+        document.getElementById('movie-container').classList.add('hidden');
+        document.getElementById('completed-set-message').classList.remove('hidden');
+      } else {
+        document.getElementById('completed-set-message').classList.add('hidden');
+        document.getElementById('movie-container').classList.remove('hidden');
+
+        // OPTION B IMPLEMENTATION HERE:
+        // Completed 12 tasks -> Current task being viewed is #13
+        const currentTaskNumber = user.completedInSet + 1;
+        const key = `${user.currentSet}-${currentTaskNumber}`;
+        const pic = window.globalPictureData[key];
+
+        document.getElementById('movie-title').innerText = `Movie Promotion #${currentTaskNumber}`;
+        document.getElementById('movie-img').src = pic?.image || 'https://via.placeholder.com/400x250?text=Movie+Promo';
+        document.getElementById('admin-comment').innerText = pic?.comment ? `Admin Comment: ${pic.comment}` : 'Admin Comment: Ready to promote!';
+        document.getElementById('movie-reward').innerText = `$${(pic?.reward || 0.50).toFixed(2)}`;
+      }
+
+      const withdrawStatus = document.getElementById('withdraw-status');
+      if (user.withdrawalStatus === 'Pending') {
+        withdrawStatus.innerText = `Pending withdrawal of $${(user.withdrawalAmount || 0).toFixed(2)}`;
+        withdrawStatus.style.color = 'var(--warning)';
+      } else if (user.withdrawalStatus === 'Approved') {
+        withdrawStatus.innerText = 'Last withdrawal was approved!';
+        withdrawStatus.style.color = 'var(--success)';
+      } else {
+        withdrawStatus.innerText = '';
       }
     }
 
-    // Initialize UI on load
+    // Initial render
     renderUI();
   </script>
 </body>
