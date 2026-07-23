@@ -48,7 +48,7 @@
     .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
     .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
-    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
+    .movie-box img { width: 100%; max-height: 280px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
     
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     .stat-card { background: #f8fafc; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
@@ -138,7 +138,7 @@
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
-        <!-- SET COMPLETED / CONTACT CUSTOMER SUPPORT NOTIFICATION -->
+        <!-- SET COMPLETED NOTIFICATION -->
         <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 10px; background: #fffbeeb0; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 12px;">
           <h4 style="color: var(--warning); margin-bottom: 8px;">🎉 Set Completed!</h4>
           <p id="pause-reason-text" style="color: #92400e; font-weight: 500; font-size: 0.95rem; margin-bottom: 16px;">
@@ -294,37 +294,43 @@
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
-    // DIRECT IMGBB PHOTO LINKS FOR SET 1 & SET 2
+    // DIRECT WORKING IMAGE SOURCES FOR SET 1 & SET 2 (TASKS 1 TO 16)
     const defaultTasks = {
-      // SET 1 (TASKS 1 TO 10)
-      "1-1": { title: "Movie Task 1", reward: "0.50", comment: "Official Release Promo #1", image: "https://i.ibb.co/DgKgB2Hv/1.jpg" },
-      "1-2": { title: "Movie Task 2", reward: "0.50", comment: "Official Release Promo #2", image: "https://i.ibb.co/vxtcZNBN/2.jpg" },
-      "1-3": { title: "Movie Task 3", reward: "0.50", comment: "Official Release Promo #3", image: "https://i.ibb.co/kVf39czf/3.jpg" },
-      "1-4": { title: "Movie Task 4", reward: "0.50", comment: "Official Release Promo #4", image: "https://i.ibb.co/jZT5zcfh/4.jpg" },
-      "1-5": { title: "Movie Task 5", reward: "0.50", comment: "Official Release Promo #5", image: "https://i.ibb.co/XrysxdCK/5.jpg" },
-      "1-6": { title: "Movie Task 6", reward: "0.50", comment: "Official Release Promo #6", image: "https://i.ibb.co/Lhkz3bsS/6.jpg" },
-      "1-7": { title: "Movie Task 7", reward: "0.50", comment: "Official Release Promo #7", image: "https://i.ibb.co/8DpsrJ71/7.jpg" },
-      "1-8": { title: "Movie Task 8", reward: "0.50", comment: "Official Release Promo #8", image: "https://i.ibb.co/Y7sgp7Bk/8.jpg" },
-      "1-9": { title: "Movie Task 9", reward: "0.50", comment: "Official Release Promo #9", image: "https://i.ibb.co/J0xFppY/9.jpg" },
-      "1-10": { title: "Movie Task 10", reward: "0.50", comment: "Official Release Promo #10", image: "https://i.ibb.co/VWTxdVRT/10.jpg" },
+      // SET 1
+      "1-1": { title: "Movie Task 1", reward: "0.50", comment: "Official Release Promo #1", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80" },
+      "1-2": { title: "Movie Task 2", reward: "0.50", comment: "Official Release Promo #2", image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80" },
+      "1-3": { title: "Movie Task 3", reward: "0.50", comment: "Official Release Promo #3", image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=600&q=80" },
+      "1-4": { title: "Movie Task 4", reward: "0.50", comment: "Official Release Promo #4", image: "https://images.unsplash.com/photo-1574267432553-4b4628081c31?auto=format&fit=crop&w=600&q=80" },
+      "1-5": { title: "Movie Task 5", reward: "0.50", comment: "Official Release Promo #5", image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=600&q=80" },
+      "1-6": { title: "Movie Task 6", reward: "0.50", comment: "Official Release Promo #6", image: "https://images.unsplash.com/photo-1518676599625-5832a820c4c4?auto=format&fit=crop&w=600&q=80" },
+      "1-7": { title: "Movie Task 7", reward: "0.50", comment: "Official Release Promo #7", image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=600&q=80" },
+      "1-8": { title: "Movie Task 8", reward: "0.50", comment: "Official Release Promo #8", image: "https://images.unsplash.com/photo-1535016120720-40c646be5580?auto=format&fit=crop&w=600&q=80" },
+      "1-9": { title: "Movie Task 9", reward: "0.50", comment: "Official Release Promo #9", image: "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=600&q=80" },
+      "1-10": { title: "Movie Task 10", reward: "0.50", comment: "Official Release Promo #10", image: "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?auto=format&fit=crop&w=600&q=80" },
+      "1-11": { title: "Movie Task 11", reward: "0.50", comment: "Official Release Promo #11", image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=80" },
+      "1-12": { title: "Movie Task 12", reward: "0.50", comment: "Official Release Promo #12", image: "https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=600&q=80" },
+      "1-13": { title: "Movie Task 13", reward: "0.50", comment: "Official Release Promo #13", image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80" },
+      "1-14": { title: "Movie Task 14", reward: "0.50", comment: "Official Release Promo #14", image: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&w=600&q=80" },
+      "1-15": { title: "Movie Task 15", reward: "0.50", comment: "Official Release Promo #15", image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=600&q=80" },
+      "1-16": { title: "Movie Task 16", reward: "0.50", comment: "Official Release Promo #16", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80" },
 
-      // SET 2 (TASKS 1 TO 16)
-      "2-1": { title: "Movie Task 1", reward: "0.50", comment: "Official Release Promo #1", image: "https://ibb.co/0VvcZBHP" },
-      "2-2": { title: "Movie Task 2", reward: "0.50", comment: "Official Release Promo #2", image: "https://ibb.co/HDSdyzZs" },
-      "2-3": { title: "Movie Task 3", reward: "0.50", comment: "Official Release Promo #3", image: "https://ibb.co/XkND1tvQ" },
-      "2-4": { title: "Movie Task 4", reward: "0.50", comment: "Official Release Promo #4", image: "https://ibb.co/Gf7gZ5NK" },
-      "2-5": { title: "Movie Task 5", reward: "0.50", comment: "Official Release Promo #5", image: "https://ibb.co/5g5tNh0m" },
-      "2-6": { title: "Movie Task 6", reward: "0.50", comment: "Official Release Promo #6", image: "https://ibb.co/bj48NpnV" },
-      "2-7": { title: "Movie Task 7", reward: "0.50", comment: "Official Release Promo #7", image: "https://ibb.co/v6Xdh6Cp" },
-      "2-8": { title: "Movie Task 8", reward: "0.50", comment: "Official Release Promo #8", image: "https://ibb.co/27q4JVc6" },
-      "2-9": { title: "Movie Task 9", reward: "0.50", comment: "Official Release Promo #9", image: "https://ibb.co/KxrNy6M8" },
-      "2-10": { title: "Movie Task 10", reward: "0.50", comment: "Official Release Promo #10", image: "https://ibb.co/SXQvVzgZ" },
-      "2-11": { title: "Movie Task 11", reward: "0.50", comment: "Official Release Promo #11", image: "https://ibb.co/MksstdR5" },
-      "2-12": { title: "Movie Task 12", reward: "0.50", comment: "Official Release Promo #12", image: "https://ibb.co/SXFMMCD2" },
-      "2-13": { title: "Movie Task 13", reward: "0.50", comment: "Official Release Promo #13", image: "https://ibb.co/ZpGmvYLT" },
-      "2-14": { title: "Movie Task 14", reward: "0.50", comment: "Official Release Promo #14", image: "https://ibb.co/395tMYfX" },
-      "2-15": { title: "Movie Task 15", reward: "0.50", comment: "Official Release Promo #15", image: "https://ibb.co/pv50k2Dq" },
-      "2-16": { title: "Movie Task 16", reward: "0.50", comment: "Official Release Promo #16", image: "https://ibb.co/MDDRDmMy" }
+      // SET 2 (FULLY UPDATED - 1 TO 16)
+      "2-1": { title: "Action Movie Task 1", reward: "0.50", comment: "Set 2 Blockbuster Promo #1", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80" },
+      "2-2": { title: "Action Movie Task 2", reward: "0.50", comment: "Set 2 Blockbuster Promo #2", image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80" },
+      "2-3": { title: "Action Movie Task 3", reward: "0.50", comment: "Set 2 Blockbuster Promo #3", image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=600&q=80" },
+      "2-4": { title: "Action Movie Task 4", reward: "0.50", comment: "Set 2 Blockbuster Promo #4", image: "https://images.unsplash.com/photo-1574267432553-4b4628081c31?auto=format&fit=crop&w=600&q=80" },
+      "2-5": { title: "Action Movie Task 5", reward: "0.50", comment: "Set 2 Blockbuster Promo #5", image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=600&q=80" },
+      "2-6": { title: "Action Movie Task 6", reward: "0.50", comment: "Set 2 Blockbuster Promo #6", image: "https://images.unsplash.com/photo-1518676599625-5832a820c4c4?auto=format&fit=crop&w=600&q=80" },
+      "2-7": { title: "Action Movie Task 7", reward: "0.50", comment: "Set 2 Blockbuster Promo #7", image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=600&q=80" },
+      "2-8": { title: "Action Movie Task 8", reward: "0.50", comment: "Set 2 Blockbuster Promo #8", image: "https://images.unsplash.com/photo-1535016120720-40c646be5580?auto=format&fit=crop&w=600&q=80" },
+      "2-9": { title: "Action Movie Task 9", reward: "0.50", comment: "Set 2 Blockbuster Promo #9", image: "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=600&q=80" },
+      "2-10": { title: "Action Movie Task 10", reward: "0.50", comment: "Set 2 Blockbuster Promo #10", image: "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?auto=format&fit=crop&w=600&q=80" },
+      "2-11": { title: "Action Movie Task 11", reward: "0.50", comment: "Set 2 Blockbuster Promo #11", image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=80" },
+      "2-12": { title: "Action Movie Task 12", reward: "0.50", comment: "Set 2 Blockbuster Promo #12", image: "https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=600&q=80" },
+      "2-13": { title: "Action Movie Task 13", reward: "0.50", comment: "Set 2 Blockbuster Promo #13", image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80" },
+      "2-14": { title: "Action Movie Task 14", reward: "0.50", comment: "Set 2 Blockbuster Promo #14", image: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&w=600&q=80" },
+      "2-15": { title: "Action Movie Task 15", reward: "0.50", comment: "Set 2 Blockbuster Promo #15", image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=600&q=80" },
+      "2-16": { title: "Action Movie Task 16", reward: "0.50", comment: "Set 2 Blockbuster Promo #16", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80" }
     };
 
     function detectBrowser() {
@@ -423,9 +429,9 @@
       });
     };
 
-    // Auto-populate Set 1 & Set 2 photos if not already configured in Firebase
+    // Auto-populate Set 1 & Set 2 photos into Firebase
     Object.keys(defaultTasks).forEach(key => {
-      if (!window.globalPictureData[key]) {
+      if (!window.globalPictureData[key] || !window.globalPictureData[key].image.startsWith('http')) {
         window.globalPictureData[key] = defaultTasks[key];
         window.savePicturesToFirebase(key, defaultTasks[key]);
       }
@@ -885,7 +891,7 @@
         document.getElementById('movie-title').innerText = picObj.title || `Movie Promotion #${nextWorkIndex}`;
         document.getElementById('movie-reward').innerText = `$${parseFloat(picObj.reward || 0.50).toFixed(2)}`;
         document.getElementById('admin-comment').innerText = `Admin Comment: ${picObj.comment || "Ready to promote!"}`;
-        document.getElementById('movie-img').src = picObj.image || "https://via.placeholder.com/400x250?text=Movie+Promo";
+        document.getElementById('movie-img').src = picObj.image || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80";
       }
 
       const wStatus = document.getElementById('withdraw-status');
