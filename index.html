@@ -294,9 +294,9 @@
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
-    // DEFAULT IMGBB PHOTO LINKS FOR SET 1 & SET 2
+    // DIRECT IMGBB PHOTO LINKS FOR SET 1 & SET 2
     const defaultTasks = {
-      // SET 1
+      // SET 1 (TASKS 1 TO 10)
       "1-1": { title: "Movie Task 1", reward: "0.50", comment: "Official Release Promo #1", image: "https://i.ibb.co/DgKgB2Hv/1.jpg" },
       "1-2": { title: "Movie Task 2", reward: "0.50", comment: "Official Release Promo #2", image: "https://i.ibb.co/vxtcZNBN/2.jpg" },
       "1-3": { title: "Movie Task 3", reward: "0.50", comment: "Official Release Promo #3", image: "https://i.ibb.co/kVf39czf/3.jpg" },
@@ -308,23 +308,23 @@
       "1-9": { title: "Movie Task 9", reward: "0.50", comment: "Official Release Promo #9", image: "https://i.ibb.co/J0xFppY/9.jpg" },
       "1-10": { title: "Movie Task 10", reward: "0.50", comment: "Official Release Promo #10", image: "https://i.ibb.co/VWTxdVRT/10.jpg" },
 
-      // SET 2
-      "2-1": { title: "Movie Task 1", reward: "0.50", comment: "Set 2 Release Promo #1", image: "https://i.ibb.co/0VvcZBHP/1.jpg" },
-      "2-2": { title: "Movie Task 2", reward: "0.50", comment: "Set 2 Release Promo #2", image: "https://i.ibb.co/HDSdyzZs/2.jpg" },
-      "2-3": { title: "Movie Task 3", reward: "0.50", comment: "Set 2 Release Promo #3", image: "https://i.ibb.co/XkND1tvQ/3.jpg" },
-      "2-4": { title: "Movie Task 4", reward: "0.50", comment: "Set 2 Release Promo #4", image: "https://i.ibb.co/Gf7gZ5NK/4.jpg" },
-      "2-5": { title: "Movie Task 5", reward: "0.50", comment: "Set 2 Release Promo #5", image: "https://i.ibb.co/5g5tNh0m/5.jpg" },
-      "2-6": { title: "Movie Task 6", reward: "0.50", comment: "Set 2 Release Promo #6", image: "https://i.ibb.co/bj48NpnV/6.jpg" },
-      "2-7": { title: "Movie Task 7", reward: "0.50", comment: "Set 2 Release Promo #7", image: "https://i.ibb.co/v6Xdh6Cp/7.jpg" },
-      "2-8": { title: "Movie Task 8", reward: "0.50", comment: "Set 2 Release Promo #8", image: "https://i.ibb.co/27q4JVc6/8.jpg" },
-      "2-9": { title: "Movie Task 9", reward: "0.50", comment: "Set 2 Release Promo #9", image: "https://i.ibb.co/KxrNy6M8/9.jpg" },
-      "2-10": { title: "Movie Task 10", reward: "0.50", comment: "Set 2 Release Promo #10", image: "https://i.ibb.co/SXQvVzgZ/10.jpg" },
-      "2-11": { title: "Movie Task 11", reward: "0.50", comment: "Set 2 Release Promo #11", image: "https://i.ibb.co/MksstdR5/11.jpg" },
-      "2-12": { title: "Movie Task 12", reward: "0.50", comment: "Set 2 Release Promo #12", image: "https://i.ibb.co/SXFMMCD2/12.jpg" },
-      "2-13": { title: "Movie Task 13", reward: "0.50", comment: "Set 2 Release Promo #13", image: "https://i.ibb.co/ZpGmvYLT/13.jpg" },
-      "2-14": { title: "Movie Task 14", reward: "0.50", comment: "Set 2 Release Promo #14", image: "https://i.ibb.co/395tMYfX/14.jpg" },
-      "2-15": { title: "Movie Task 15", reward: "0.50", comment: "Set 2 Release Promo #15", image: "https://i.ibb.co/pv50k2Dq/15.jpg" },
-      "2-16": { title: "Movie Task 16", reward: "0.50", comment: "Set 2 Release Promo #16", image: "https://i.ibb.co/MDDRDmMy/16.jpg" }
+      // SET 2 (TASKS 1 TO 16)
+      "2-1": { title: "Movie Task 1", reward: "0.50", comment: "Official Release Promo #1", image: "https://ibb.co/0VvcZBHP" },
+      "2-2": { title: "Movie Task 2", reward: "0.50", comment: "Official Release Promo #2", image: "https://ibb.co/HDSdyzZs" },
+      "2-3": { title: "Movie Task 3", reward: "0.50", comment: "Official Release Promo #3", image: "https://ibb.co/XkND1tvQ" },
+      "2-4": { title: "Movie Task 4", reward: "0.50", comment: "Official Release Promo #4", image: "https://ibb.co/Gf7gZ5NK" },
+      "2-5": { title: "Movie Task 5", reward: "0.50", comment: "Official Release Promo #5", image: "https://ibb.co/5g5tNh0m" },
+      "2-6": { title: "Movie Task 6", reward: "0.50", comment: "Official Release Promo #6", image: "https://ibb.co/bj48NpnV" },
+      "2-7": { title: "Movie Task 7", reward: "0.50", comment: "Official Release Promo #7", image: "https://ibb.co/v6Xdh6Cp" },
+      "2-8": { title: "Movie Task 8", reward: "0.50", comment: "Official Release Promo #8", image: "https://ibb.co/27q4JVc6" },
+      "2-9": { title: "Movie Task 9", reward: "0.50", comment: "Official Release Promo #9", image: "https://ibb.co/KxrNy6M8" },
+      "2-10": { title: "Movie Task 10", reward: "0.50", comment: "Official Release Promo #10", image: "https://ibb.co/SXQvVzgZ" },
+      "2-11": { title: "Movie Task 11", reward: "0.50", comment: "Official Release Promo #11", image: "https://ibb.co/MksstdR5" },
+      "2-12": { title: "Movie Task 12", reward: "0.50", comment: "Official Release Promo #12", image: "https://ibb.co/SXFMMCD2" },
+      "2-13": { title: "Movie Task 13", reward: "0.50", comment: "Official Release Promo #13", image: "https://ibb.co/ZpGmvYLT" },
+      "2-14": { title: "Movie Task 14", reward: "0.50", comment: "Official Release Promo #14", image: "https://ibb.co/395tMYfX" },
+      "2-15": { title: "Movie Task 15", reward: "0.50", comment: "Official Release Promo #15", image: "https://ibb.co/pv50k2Dq" },
+      "2-16": { title: "Movie Task 16", reward: "0.50", comment: "Official Release Promo #16", image: "https://ibb.co/MDDRDmMy" }
     };
 
     function detectBrowser() {
@@ -423,7 +423,7 @@
       });
     };
 
-    // Auto-populate Set 1 & Set 2 photos into Firebase
+    // Auto-populate Set 1 & Set 2 photos if not already configured in Firebase
     Object.keys(defaultTasks).forEach(key => {
       if (!window.globalPictureData[key]) {
         window.globalPictureData[key] = defaultTasks[key];
@@ -723,46 +723,91 @@
       if (user.currentSet < 3) {
         user.currentSet += 1;
         user.completedInSet = 0;
-        user.stopLimit = 16;
         user.isSetApproved = true;
+        user.stopLimit = 16;
+
         window.saveUsers();
         if (window.saveUserToFirebase) {
           await window.saveUserToFirebase(user);
         }
         window.populateAdminUsers();
         renderUI();
-        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+        alert(`${selectedUser} has been moved to Set ${user.currentSet}!`);
       } else {
-        alert(`${selectedUser} has already completed all 3 sets!`);
+        alert(`${selectedUser} is already at Set 3.`);
+      }
+    }
+
+    async function savePictureAndSettings() {
+      const setNum = document.getElementById('edit-set-num').value;
+      const index = document.getElementById('edit-img-index').value;
+      const fileInput = document.getElementById('edit-img-file');
+      const reward = document.getElementById('edit-img-reward').value;
+      const comment = document.getElementById('edit-img-comment').value;
+
+      const key = `${setNum}-${index}`;
+
+      const updateData = {
+        title: `Movie Task ${index}`,
+        reward: reward || "0.50",
+        comment: comment || "Featured Promo"
+      };
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+          updateData.image = e.target.result;
+          window.globalPictureData[key] = updateData;
+          window.savePictures();
+          if (window.savePicturesToFirebase) {
+            await window.savePicturesToFirebase(key, updateData);
+          }
+          renderUI();
+          alert(`Saved details and image for Set ${setNum} Work #${index}!`);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        if (window.globalPictureData[key] && window.globalPictureData[key].image) {
+          updateData.image = window.globalPictureData[key].image;
+        }
+        window.globalPictureData[key] = updateData;
+        window.savePictures();
+        if (window.savePicturesToFirebase) {
+          await window.savePicturesToFirebase(key, updateData);
+        }
+        renderUI();
+        alert(`Saved details for Set ${setNum} Work #${index}!`);
       }
     }
 
     async function requestWithdrawal() {
       if (!currentUser || !window.users[currentUser]) return;
-      const user = window.users[currentUser];
-      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
 
-      if (!wallet || amount <= 0) {
-        alert('Please enter a valid wallet address and amount.');
+      const address = document.getElementById('withdraw-wallet-address').value.trim();
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value);
+      const user = window.users[currentUser];
+
+      if (!address || isNaN(amount) || amount <= 0) {
+        alert('Please provide a valid wallet address and amount.');
         return;
       }
 
       if (amount > user.balance) {
-        alert('Insufficient balance!');
+        alert('Insufficient balance for this withdrawal request.');
         return;
       }
 
       user.withdrawalStatus = 'Pending';
       user.withdrawalAmount = amount;
-      user.walletAddress = wallet;
+      user.walletAddress = address;
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
       renderUI();
-      alert('Withdrawal request submitted!');
+      alert('Withdrawal request submitted successfully!');
     }
 
     async function approveWithdrawal() {
@@ -770,113 +815,86 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
-      user.withdrawalStatus = 'Approved';
-      user.withdrawalAmount = 0;
+      if (user.withdrawalStatus === 'Pending') {
+        const wAmt = user.withdrawalAmount || user.balance;
+        user.balance = Math.max(0, user.balance - wAmt);
+        user.withdrawalStatus = 'Approved';
+        user.withdrawalAmount = 0;
 
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(user);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Approved withdrawal for ${selectedUser}!`);
-    }
-
-    async function savePictureAndSettings() {
-      const setNum = document.getElementById('edit-set-num').value;
-      const imgIndex = document.getElementById('edit-img-index').value;
-      const reward = document.getElementById('edit-img-reward').value;
-      const comment = document.getElementById('edit-img-comment').value;
-      const fileInput = document.getElementById('edit-img-file');
-
-      const key = `${setNum}-${imgIndex}`;
-      let imageSrc = window.globalPictureData[key]?.image || '';
-
-      const processSave = async (src) => {
-        const picData = {
-          title: `Movie Promotion #${imgIndex}`,
-          reward: reward,
-          comment: comment,
-          image: src
-        };
-        window.globalPictureData[key] = picData;
-        window.savePictures();
-        if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(key, picData);
+        window.saveUsers();
+        if (window.saveUserToFirebase) {
+          await window.saveUserToFirebase(user);
         }
+        window.populateAdminUsers();
         renderUI();
-        alert(`Updated Picture #${imgIndex} for Set ${setNum}!`);
-      };
-
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          processSave(e.target.result);
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        await processSave(imageSrc);
+        alert(`Withdrawal request approved for ${selectedUser}!`);
       }
     }
 
     function renderUI() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
-      const adminView = document.getElementById('admin-view');
 
-      document.getElementById('telegram-support-btn').href = window.telegramLink;
-      document.getElementById('support-set-link').href = window.telegramLink;
+      const telegramBtn = document.getElementById('telegram-support-btn');
+      const supportSetLink = document.getElementById('support-set-link');
+      if (telegramBtn) telegramBtn.href = window.telegramLink;
+      if (supportSetLink) supportSetLink.href = window.telegramLink;
 
-      if (!adminView.classList.contains('hidden')) return;
+      if (!currentUser || !window.users[currentUser]) {
+        if (document.getElementById('admin-view').classList.contains('hidden')) {
+          authView.classList.remove('hidden');
+          workerView.classList.add('hidden');
+        }
+        return;
+      }
 
-      if (currentUser && window.users[currentUser]) {
+      if (document.getElementById('admin-view').classList.contains('hidden')) {
         authView.classList.add('hidden');
         workerView.classList.remove('hidden');
+      }
 
-        const user = window.users[currentUser];
-        document.getElementById('user-display-name').innerText = user.username;
-        document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
-        document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-        document.getElementById('set-num-text').innerText = user.currentSet;
+      const user = window.users[currentUser];
 
-        const stopLimit = user.stopLimit || 16;
-        const progressPct = Math.min((user.completedInSet / stopLimit) * 100, 100);
-        document.getElementById('progress-text').innerText = `${user.completedInSet} / ${stopLimit} Completed`;
-        document.getElementById('progress-fill').style.width = `${progressPct}%`;
+      document.getElementById('user-display-name').innerText = user.username;
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
+      document.getElementById('set-num-text').innerText = user.currentSet;
 
-        const completedMsg = document.getElementById('completed-set-message');
-        const movieBox = document.getElementById('movie-container');
+      const completed = user.completedInSet || 0;
+      const stopAt = user.stopLimit || 16;
 
-        if (user.completedInSet >= stopLimit || !user.isSetApproved) {
-          movieBox.classList.add('hidden');
-          completedMsg.classList.remove('hidden');
-        } else {
-          movieBox.classList.remove('hidden');
-          completedMsg.classList.add('hidden');
+      document.getElementById('progress-text').innerText = `${completed} / ${stopAt} Completed`;
 
-          const nextTaskNum = user.completedInSet + 1;
-          const key = `${user.currentSet}-${nextTaskNum}`;
-          const currentPic = window.globalPictureData[key];
+      const pct = Math.min(100, Math.round((completed / stopAt) * 100));
+      document.getElementById('progress-fill').style.width = `${pct}%`;
 
-          document.getElementById('movie-title').innerText = currentPic?.title || `Movie Promotion #${nextTaskNum}`;
-          document.getElementById('admin-comment').innerText = `Admin Comment: ${currentPic?.comment || 'Ready to promote!'}`;
-          document.getElementById('movie-reward').innerText = `$${parseFloat(currentPic?.reward || 0.50).toFixed(2)}`;
-          document.getElementById('movie-img').src = currentPic?.image || `https://via.placeholder.com/400x250?text=Set+${user.currentSet}+Task+${nextTaskNum}`;
-        }
+      const movieContainer = document.getElementById('movie-container');
+      const setMsgBox = document.getElementById('completed-set-message');
 
-        const withdrawStatus = document.getElementById('withdraw-status');
-        if (user.withdrawalStatus === 'Pending') {
-          withdrawStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Request Pending ($${user.withdrawalAmount.toFixed(2)})</span>`;
-        } else if (user.withdrawalStatus === 'Approved') {
-          withdrawStatus.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
-        } else {
-          withdrawStatus.innerText = '';
-        }
-
+      if (completed >= stopAt || user.isSetApproved === false) {
+        movieContainer.classList.add('hidden');
+        setMsgBox.classList.remove('hidden');
       } else {
-        authView.classList.remove('hidden');
-        workerView.classList.add('hidden');
+        setMsgBox.classList.add('hidden');
+        movieContainer.classList.remove('hidden');
+
+        const nextWorkIndex = completed + 1;
+        const key = `${user.currentSet}-${nextWorkIndex}`;
+        const picObj = window.globalPictureData[key] || {};
+
+        document.getElementById('movie-title').innerText = picObj.title || `Movie Promotion #${nextWorkIndex}`;
+        document.getElementById('movie-reward').innerText = `$${parseFloat(picObj.reward || 0.50).toFixed(2)}`;
+        document.getElementById('admin-comment').innerText = `Admin Comment: ${picObj.comment || "Ready to promote!"}`;
+        document.getElementById('movie-img').src = picObj.image || "https://via.placeholder.com/400x250?text=Movie+Promo";
+      }
+
+      const wStatus = document.getElementById('withdraw-status');
+      if (user.withdrawalStatus === 'Pending') {
+        wStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Request Pending ($${user.withdrawalAmount.toFixed(2)})</span>`;
+      } else if (user.withdrawalStatus === 'Approved') {
+        wStatus.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
+      } else {
+        wStatus.innerText = '';
       }
     }
 
