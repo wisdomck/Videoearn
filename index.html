@@ -67,7 +67,7 @@
     .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
     .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
     .modal-box { background: #ffffff; border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: popIn 0.2s ease-out; }
     @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
@@ -138,8 +138,17 @@
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
+        <!-- SET COMPLETED / CONTACT CUSTOMER SUPPORT NOTIFICATION -->
+        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 10px; background: #fffbeeb0; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 12px;">
+          <h4 style="color: var(--warning); margin-bottom: 8px;">🎉 Set Completed!</h4>
+          <p id="pause-reason-text" style="color: #92400e; font-weight: 500; font-size: 0.95rem; margin-bottom: 16px;">
+            You have successfully completed this set! Kindly contact customer support to proceed to the next set.
+          </p>
+          <a id="support-set-link" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Contact Customer Support</a>
+        </div>
+
         <div id="movie-container" class="movie-box" style="margin-top:12px;">
-          <img id="movie-img" src="" alt="Movie Promotion">
+          <img id="movie-img" src="" alt="Promo Movie">
           <h4 id="movie-title">Movie Promotion #1</h4>
           <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
           <div style="font-weight: 700; color: var(--success); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
@@ -204,9 +213,6 @@
             <label>Stop Member At Work # (1 to 16):</label>
             <input type="number" id="admin-stop-work-num" min="1" max="16" value="16">
 
-            <label>Custom Pause Message (Shows in Red Box):</label>
-            <input type="text" id="admin-pause-message-input" placeholder="e.g. You have reached a special promotional milestone. Contact support.">
-
             <label>Edit Member Balance ($):</label>
             <input type="number" id="admin-user-balance" step="0.01">
 
@@ -265,24 +271,6 @@
       <h3>Thank You!</h3>
       <p id="modal-reward-text">You earned $0.50 for completing this promotion task.</p>
       <button class="btn" onclick="closeModal()">Continue</button>
-    </div>
-  </div>
-
-  <!-- MANDATORY PAUSE POPUP MODAL FOR USER -->
-  <div id="admin-pause-modal" class="modal-overlay hidden">
-    <div class="modal-box" style="border: 2px solid #fde047; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
-      <div style="font-size: 2.5rem; margin-bottom: 6px;">🎉✨</div>
-      <h3 style="color: #0f172a; margin-bottom: 8px;">Congratulations!</h3>
-      
-      <!-- Red Custom Admin Message -->
-      <p id="modal-pause-reason-text" style="color: #dc2626; font-weight: 700; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4;">
-        <!-- Dynamic Red Message -->
-      </p>
-
-      <!-- Telegram Support Link -->
-      <a id="modal-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram" style="display: block; text-decoration: none;">
-        💬 Please contact customer service now
-      </a>
     </div>
   </div>
 
@@ -347,7 +335,6 @@
           completedInSet: userData.completedInSet || 0,
           stopLimit: userData.stopLimit || 16,
           isSetApproved: userData.isSetApproved !== undefined ? userData.isSetApproved : true,
-          pauseMessage: userData.pauseMessage || 'You have successfully completed this set! Kindly contact customer support to proceed.',
           balance: userData.balance || 0,
           withdrawalStatus: userData.withdrawalStatus || 'None',
           withdrawalAmount: userData.withdrawalAmount || 0,
@@ -408,7 +395,9 @@
 
   <script>
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
-    window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
+    // Reset previously uploaded pictures as requested
+    window.globalPictureData = {};
+    localStorage.removeItem('ve_pictures');
 
     window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
@@ -461,7 +450,6 @@
         completedInSet: 0,
         stopLimit: 16,
         isSetApproved: true,
-        pauseMessage: 'You have successfully completed this set! Kindly contact customer support to proceed.',
         balance: 0.00,
         withdrawalStatus: 'None',
         withdrawalAmount: 0,
@@ -610,7 +598,6 @@
       document.getElementById('admin-user-balance').value = user.balance || 0;
       document.getElementById('admin-stop-work-num').value = user.stopLimit || 16;
       document.getElementById('admin-user-set-select').value = user.currentSet || 1;
-      document.getElementById('admin-pause-message-input').value = user.pauseMessage || 'You have successfully completed this set! Kindly contact customer support to proceed.';
 
       const wReqText = document.getElementById('admin-withdraw-request-text');
       const wApproveBtn = document.getElementById('approve-withdraw-btn');
@@ -632,11 +619,9 @@
       const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
       const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
       const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
-      const pauseMsg = document.getElementById('admin-pause-message-input').value.trim();
 
       window.users[selectedUser].balance = newBal;
       window.users[selectedUser].stopLimit = stopNum;
-      window.users[selectedUser].pauseMessage = pauseMsg || 'You have successfully completed this set! Kindly contact customer support to proceed.';
       
       if (window.users[selectedUser].currentSet !== setNum) {
         window.users[selectedUser].currentSet = setNum;
@@ -656,90 +641,15 @@
       alert(`Updated settings for ${selectedUser}!`);
     }
 
-    function renderUI() {
-      const authView = document.getElementById('auth-view');
-      const workerView = document.getElementById('worker-view');
-      const adminView = document.getElementById('admin-view');
-
-      if (!adminView.classList.contains('hidden')) return;
-
-      if (!currentUser || !window.users[currentUser]) {
-        authView.classList.remove('hidden');
-        workerView.classList.add('hidden');
-        return;
-      }
-
-      authView.classList.add('hidden');
-      workerView.classList.remove('hidden');
-
-      const user = window.users[currentUser];
-      document.getElementById('user-display-name').innerText = user.username;
-      document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
-      document.getElementById('set-num-text').innerText = user.currentSet || 1;
-      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-
-      const completed = user.completedInSet || 0;
-      const maxWork = user.stopLimit || 16;
-      document.getElementById('progress-text').innerText = `${completed} / ${maxWork} Completed`;
-      const fillPercentage = Math.min(100, Math.round((completed / maxWork) * 100));
-      document.getElementById('progress-fill').style.width = `${fillPercentage}%`;
-
-      const telegramBtns = [
-        document.getElementById('telegram-support-btn'),
-        document.getElementById('modal-support-btn')
-      ];
-      telegramBtns.forEach(btn => {
-        if (btn) btn.href = window.telegramLink;
-      });
-
-      const isPaused = (completed >= maxWork) || (user.isSetApproved === false);
-      const pauseModal = document.getElementById('admin-pause-modal');
-      const modalPauseText = document.getElementById('modal-pause-reason-text');
-
-      if (isPaused) {
-        modalPauseText.innerText = user.pauseMessage || 'You have successfully completed this set! Kindly contact customer support to proceed.';
-        pauseModal.classList.remove('hidden');
-      } else {
-        pauseModal.classList.add('hidden');
-      }
-
-      const nextWorkIndex = completed + 1;
-      const currentSetNum = user.currentSet || 1;
-      const picKey = `${currentSetNum}-${nextWorkIndex}`;
-      const picData = window.globalPictureData[picKey];
-
-      const movieImg = document.getElementById('movie-img');
-      const movieTitle = document.getElementById('movie-title');
-      const adminComment = document.getElementById('admin-comment');
-      const movieReward = document.getElementById('movie-reward');
-
-      // Set 1 Fix & General Image Fallback Handling
-      if (picData && picData.image) {
-        movieImg.src = picData.image;
-        movieTitle.innerText = `Movie Promotion #${nextWorkIndex}`;
-        adminComment.innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
-        movieReward.innerText = `$${parseFloat(picData.reward || 0.50).toFixed(2)}`;
-      } else {
-        // High quality fallback movie banner so Set 1/2/3 never look blank/broken
-        movieImg.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80';
-        movieTitle.innerText = `Set ${currentSetNum} - Movie Promotion #${nextWorkIndex}`;
-        adminComment.innerText = 'Admin Comment: Premium Movie Campaign Active!';
-        movieReward.innerText = '$0.50';
-      }
-    }
-
     async function promoteMovie() {
       if (!currentUser || !window.users[currentUser]) return;
 
       const user = window.users[currentUser];
       const maxWork = user.stopLimit || 16;
 
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) {
-        renderUI();
-        return;
-      }
+      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
 
-      const key = `${user.currentSet || 1}-${user.completedInSet + 1}`;
+      const key = `${user.currentSet}-${user.completedInSet + 1}`;
       const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
 
       user.completedInSet += 1;
@@ -771,23 +681,21 @@
       }
 
       const user = window.users[selectedUser];
-      
-      user.isSetApproved = true;
-      user.completedInSet = 0;
-      user.stopLimit = 16;
-      
       if (user.currentSet < 3) {
         user.currentSet += 1;
+        user.completedInSet = 0;
+        user.stopLimit = 16;
+        user.isSetApproved = true;
+        window.saveUsers();
+        if (window.saveUserToFirebase) {
+          await window.saveUserToFirebase(user);
+        }
+        window.populateAdminUsers();
+        renderUI();
+        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+      } else {
+        alert(`${selectedUser} has already completed all 3 sets!`);
       }
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(user);
-      }
-
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Approved ${selectedUser}! Pause overlay has been cleared for them.`);
     }
 
     async function requestWithdrawal() {
@@ -836,31 +744,31 @@
       alert(`Approved withdrawal for ${selectedUser}!`);
     }
 
-    async function savePictureAndSettings() {
+    function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
       const imgIndex = document.getElementById('edit-img-index').value;
       const reward = document.getElementById('edit-img-reward').value;
       const comment = document.getElementById('edit-img-comment').value;
       const fileInput = document.getElementById('edit-img-file');
 
-      const pictureKey = `${setNum}-${imgIndex}`;
+      const key = `${setNum}-${imgIndex}`;
 
-      const processSave = async (base64Image) => {
+      const processSave = async (imgDataUrl) => {
         const picData = {
-          image: base64Image || window.globalPictureData[pictureKey]?.image || '',
-          reward: reward || 0.50,
-          comment: comment || ''
+          reward: parseFloat(reward) || 0.50,
+          comment: comment || 'Featured movie promo note...',
+          img: imgDataUrl || window.globalPictureData[key]?.img || ''
         };
 
-        window.globalPictureData[pictureKey] = picData;
+        window.globalPictureData[key] = picData;
         window.savePictures();
 
         if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(pictureKey, picData);
+          await window.savePicturesToFirebase(key, picData);
         }
 
         renderUI();
-        alert(`Picture and details updated for Set ${setNum} - Picture #${imgIndex}!`);
+        alert(`Saved picture & settings for Set ${setNum} - Picture #${imgIndex}!`);
       };
 
       if (fileInput.files && fileInput.files[0]) {
@@ -873,6 +781,71 @@
         processSave(null);
       }
     }
+
+    function renderUI() {
+      const authView = document.getElementById('auth-view');
+      const workerView = document.getElementById('worker-view');
+      const adminView = document.getElementById('admin-view');
+
+      document.getElementById('telegram-support-btn').href = window.telegramLink;
+      document.getElementById('support-set-link').href = window.telegramLink;
+
+      if (!adminView.classList.contains('hidden')) return;
+
+      if (currentUser && window.users[currentUser]) {
+        authView.classList.add('hidden');
+        workerView.classList.remove('hidden');
+
+        const user = window.users[currentUser];
+        const maxWork = user.stopLimit || 16;
+        const currentTaskIndex = user.completedInSet + 1;
+
+        document.getElementById('user-display-name').innerText = user.username;
+        document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
+        document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+
+        document.getElementById('set-num-text').innerText = user.currentSet;
+        document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
+        
+        const pct = Math.min(100, Math.round((user.completedInSet / 16) * 100));
+        document.getElementById('progress-fill').style.width = `${pct}%`;
+
+        const completedMsg = document.getElementById('completed-set-message');
+        const movieBox = document.getElementById('movie-container');
+
+        if (user.completedInSet >= maxWork || user.isSetApproved === false) {
+          completedMsg.classList.remove('hidden');
+          movieBox.classList.add('hidden');
+        } else {
+          completedMsg.classList.add('hidden');
+          movieBox.classList.remove('hidden');
+
+          const key = `${user.currentSet}-${currentTaskIndex}`;
+          const currentPicData = window.globalPictureData[key] || {};
+
+          document.getElementById('movie-title').innerText = `Movie Promotion #${currentTaskIndex}`;
+          document.getElementById('movie-img').src = currentPicData.img || 'https://via.placeholder.com/400x250?text=No+Movie+Picture+Uploaded';
+          document.getElementById('movie-reward').innerText = `$${(currentPicData.reward || 0.50).toFixed(2)}`;
+          document.getElementById('admin-comment').innerText = `Admin Comment: ${currentPicData.comment || 'Ready to promote!'}`;
+        }
+
+        const withdrawStatus = document.getElementById('withdraw-status');
+        if (user.withdrawalStatus === 'Pending') {
+          withdrawStatus.innerHTML = `<span class="badge badge-pending">Withdrawal Pending ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
+        } else if (user.withdrawalStatus === 'Approved') {
+          withdrawStatus.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
+        } else {
+          withdrawStatus.innerHTML = '';
+        }
+
+      } else {
+        workerView.classList.add('hidden');
+        authView.classList.remove('hidden');
+      }
+    }
+
+    // Initialize UI on load
+    renderUI();
   </script>
 </body>
 </html>
