@@ -647,7 +647,8 @@
 
       if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
 
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
+      const nextTaskIndex = user.completedInSet + 1;
+      const key = `${user.currentSet}-${nextTaskIndex}`;
       const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
 
       user.completedInSet += 1;
@@ -818,13 +819,13 @@
         document.getElementById('completed-set-message').classList.add('hidden');
         document.getElementById('movie-container').classList.remove('hidden');
 
-        // OPTION B IMPLEMENTATION HERE:
-        // Completed 12 tasks -> Current task being viewed is #13
-        const currentTaskNumber = user.completedInSet + 1;
-        const key = `${user.currentSet}-${currentTaskNumber}`;
+        // OPTION A IMPLEMENTATION (Numbers match identically):
+        // Shows Movie Promotion #1 when progress is 1/16 completed
+        const displayTaskNumber = user.completedInSet > 0 ? user.completedInSet : 1;
+        const key = `${user.currentSet}-${displayTaskNumber}`;
         const pic = window.globalPictureData[key];
 
-        document.getElementById('movie-title').innerText = `Movie Promotion #${currentTaskNumber}`;
+        document.getElementById('movie-title').innerText = `Movie Promotion #${displayTaskNumber}`;
         document.getElementById('movie-img').src = pic?.image || 'https://via.placeholder.com/400x250?text=Movie+Promo';
         document.getElementById('admin-comment').innerText = pic?.comment ? `Admin Comment: ${pic.comment}` : 'Admin Comment: Ready to promote!';
         document.getElementById('movie-reward').innerText = `$${(pic?.reward || 0.50).toFixed(2)}`;
