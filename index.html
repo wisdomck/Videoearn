@@ -294,20 +294,6 @@
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
-    // Initial Set 1 (Tasks 1 to 10) Default Configuration
-    const defaultSet1Tasks = {
-      "1-1": { title: "Movie Task 1", reward: "0.50", comment: "Official Release Promo #1", image: "https://i.ibb.co/3m6S322/task1.jpg" },
-      "1-2": { title: "Movie Task 2", reward: "0.50", comment: "Official Release Promo #2", image: "https://i.ibb.co/D8m3X23/task2.jpg" },
-      "1-3": { title: "Movie Task 3", reward: "0.50", comment: "Official Release Promo #3", image: "https://i.ibb.co/C0wF1kK/task3.jpg" },
-      "1-4": { title: "Movie Task 4", reward: "0.50", comment: "Official Release Promo #4", image: "https://i.ibb.co/y4p1tK9/task4.jpg" },
-      "1-5": { title: "Movie Task 5", reward: "0.50", comment: "Official Release Promo #5", image: "https://i.ibb.co/p3yD3H5/task5.jpg" },
-      "1-6": { title: "Movie Task 6", reward: "0.50", comment: "Official Release Promo #6", image: "https://i.ibb.co/n3B32K3/task6.jpg" },
-      "1-7": { title: "Movie Task 7", reward: "0.50", comment: "Official Release Promo #7", image: "https://i.ibb.co/K2T32yK/task7.jpg" },
-      "1-8": { title: "Movie Task 8", reward: "0.50", comment: "Official Release Promo #8", image: "https://i.ibb.co/wL450Pz/task8.jpg" },
-      "1-9": { title: "Movie Task 9", reward: "0.50", comment: "Official Release Promo #9", image: "https://i.ibb.co/3Y88PjP/task9.jpg" },
-      "1-10": { title: "Movie Task 10", reward: "0.50", comment: "Official Release Promo #10", image: "https://i.ibb.co/L51D5p3/task10.jpg" }
-    };
-
     function detectBrowser() {
       const ua = navigator.userAgent;
       if (ua.includes("Firefox")) return "Mozilla Firefox";
@@ -403,13 +389,6 @@
         }
       });
     };
-
-    // Load defaults if set 1 is missing
-    Object.keys(defaultSet1Tasks).forEach(key => {
-      if (!window.globalPictureData[key]) {
-        window.globalPictureData[key] = defaultSet1Tasks[key];
-      }
-    });
 
     window.listenToFirebaseData();
   </script>
@@ -842,7 +821,7 @@
           document.getElementById('movie-title').innerText = currentPic?.title || `Movie Promotion #${nextTaskNum}`;
           document.getElementById('admin-comment').innerText = `Admin Comment: ${currentPic?.comment || 'Ready to promote!'}`;
           document.getElementById('movie-reward').innerText = `$${parseFloat(currentPic?.reward || 0.50).toFixed(2)}`;
-          document.getElementById('movie-img').src = currentPic?.image || 'https://via.placeholder.com/400x250?text=No+Movie+Image+Uploaded';
+          document.getElementById('movie-img').src = currentPic?.image || `https://via.placeholder.com/400x250?text=Set+${user.currentSet}+Task+${nextTaskNum}`;
         }
 
         const withdrawStatus = document.getElementById('withdraw-status');
