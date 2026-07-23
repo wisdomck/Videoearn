@@ -294,6 +294,20 @@
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
+    // DIRECT IMGBB PHOTO LINKS FOR SET 1 (TASKS 1 TO 10)
+    const defaultSet1Tasks = {
+      "1-1": { title: "Movie Task 1", reward: "0.50", comment: "Official Release Promo #1", image: "https://i.ibb.co/DgKgB2Hv/1.jpg" },
+      "1-2": { title: "Movie Task 2", reward: "0.50", comment: "Official Release Promo #2", image: "https://i.ibb.co/vxtcZNBN/2.jpg" },
+      "1-3": { title: "Movie Task 3", reward: "0.50", comment: "Official Release Promo #3", image: "https://i.ibb.co/kVf39czf/3.jpg" },
+      "1-4": { title: "Movie Task 4", reward: "0.50", comment: "Official Release Promo #4", image: "https://i.ibb.co/jZT5zcfh/4.jpg" },
+      "1-5": { title: "Movie Task 5", reward: "0.50", comment: "Official Release Promo #5", image: "https://i.ibb.co/XrysxdCK/5.jpg" },
+      "1-6": { title: "Movie Task 6", reward: "0.50", comment: "Official Release Promo #6", image: "https://i.ibb.co/Lhkz3bsS/6.jpg" },
+      "1-7": { title: "Movie Task 7", reward: "0.50", comment: "Official Release Promo #7", image: "https://i.ibb.co/8DpsrJ71/7.jpg" },
+      "1-8": { title: "Movie Task 8", reward: "0.50", comment: "Official Release Promo #8", image: "https://i.ibb.co/Y7sgp7Bk/8.jpg" },
+      "1-9": { title: "Movie Task 9", reward: "0.50", comment: "Official Release Promo #9", image: "https://i.ibb.co/J0xFppY/9.jpg" },
+      "1-10": { title: "Movie Task 10", reward: "0.50", comment: "Official Release Promo #10", image: "https://i.ibb.co/VWTxdVRT/10.jpg" }
+    };
+
     function detectBrowser() {
       const ua = navigator.userAgent;
       if (ua.includes("Firefox")) return "Mozilla Firefox";
@@ -389,6 +403,14 @@
         }
       });
     };
+
+    // Auto-populate Set 1 with provided ImgBB photos if not already configured in Firebase
+    Object.keys(defaultSet1Tasks).forEach(key => {
+      if (!window.globalPictureData[key]) {
+        window.globalPictureData[key] = defaultSet1Tasks[key];
+        window.savePicturesToFirebase(key, defaultSet1Tasks[key]);
+      }
+    });
 
     window.listenToFirebaseData();
   </script>
