@@ -18,6 +18,7 @@
       --text: #0f172a;
       --text-muted: #64748b;
       --success: #16a34a;
+      --danger: #dc2626;
       --warning: #d97706;
       --telegram: #0088cc;
     }
@@ -40,6 +41,8 @@
     .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: #e2e8f0; }
     .btn-telegram { background: var(--telegram); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
     
     label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
     input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
@@ -60,6 +63,7 @@
     .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
     .badge-pending { background: #fef3c7; color: var(--warning); }
     .badge-approved { background: #dcfce7; color: var(--success); }
+    .badge-rejected { background: #fee2e2; color: var(--danger); }
     .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 600; }
     
     .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
@@ -164,7 +168,7 @@
         <label>Withdrawal Amount ($)</label>
         <input type="number" id="withdraw-amount-input" placeholder="0.00" step="0.01">
         <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
-        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
+        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center; font-weight: 600;"></p>
       </div>
 
       <!-- CUSTOMER SUPPORT CARD -->
@@ -261,7 +265,10 @@
           <div class="admin-section">
             <h4>Withdrawal Requests</h4>
             <p id="admin-withdraw-request-text">No active withdrawal request.</p>
-            <button class="btn" id="approve-withdraw-btn" style="background: var(--success); display: none;" onclick="approveWithdrawal()">Approve Withdrawal Request</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn" id="approve-withdraw-btn" style="background: var(--success); display: none;" onclick="approveWithdrawal()">Approve Withdrawal</button>
+              <button class="btn btn-danger" id="reject-withdraw-btn" style="display: none;" onclick="rejectWithdrawal()">Reject Withdrawal</button>
+            </div>
           </div>
         </div>
       </div>
@@ -606,14 +613,17 @@
 
       const wReqText = document.getElementById('admin-withdraw-request-text');
       const wApproveBtn = document.getElementById('approve-withdraw-btn');
+      const wRejectBtn = document.getElementById('reject-withdraw-btn');
 
       if (user.withdrawalStatus === 'Pending') {
         const wAmt = user.withdrawalAmount || user.balance || 0;
         wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
-        wApproveBtn.style.display = 'block';
+        wApproveBtn.style.display = 'inline-block';
+        wRejectBtn.style.display = 'inline-block';
       } else {
         wReqText.innerText = 'No pending withdrawal requests for this member.';
         wApproveBtn.style.display = 'none';
+        wRejectBtn.style.display = 'none';
       }
     }
 
@@ -745,8 +755,9 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
       renderUI();
-      alert('Withdrawal request submitted!');
+      alert('Withdrawal request submitted successfully!');
     }
 
     async function approveWithdrawal() {
@@ -754,7 +765,9 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
+      const amt = user.withdrawalAmount || 0;
+
+      user.balance = Math.max(0, user.balance - amt);
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -762,60 +775,78 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
       window.populateAdminUsers();
       renderUI();
-      alert(`Approved withdrawal for ${selectedUser}!`);
+      alert(`Withdrawal of $${amt.toFixed(2)} approved for ${selectedUser}!`);
     }
 
-    function savePictureAndSettings() {
-      const setNum = document.getElementById('edit-set-num').value;
-      const imgIndex = document.getElementById('edit-img-index').value;
-      const reward = document.getElementById('edit-img-reward').value;
-      const comment = document.getElementById('edit-img-comment').value;
-      const fileInput = document.getElementById('edit-img-file');
-      const key = `${setNum}-${imgIndex}`;
+    async function rejectWithdrawal() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
 
-      if (!window.globalPictureData[key]) {
-        window.globalPictureData[key] = {};
+      const user = window.users[selectedUser];
+
+      user.withdrawalStatus = 'Rejected';
+      user.withdrawalAmount = 0;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
       }
 
-      window.globalPictureData[key].reward = parseFloat(reward) || 0.50;
-      window.globalPictureData[key].comment = comment || '';
+      window.populateAdminUsers();
+      renderUI();
+      alert(`Withdrawal request for ${selectedUser} has been rejected.`);
+    }
 
-      const file = fileInput.files[0];
-      if (file) {
+    async function savePictureAndSettings() {
+      const setNum = document.getElementById('edit-set-num').value;
+      const index = document.getElementById('edit-img-index').value;
+      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const comment = document.getElementById('edit-img-comment').value.trim();
+      const fileInput = document.getElementById('edit-img-file');
+
+      const key = `${setNum}-${index}`;
+
+      let base64Img = window.globalPictureData[key]?.image || '';
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
         const reader = new FileReader();
         reader.onload = async function(e) {
-          window.globalPictureData[key].img = e.target.result;
+          base64Img = e.target.result;
+          const picData = {
+            image: base64Img,
+            reward: reward,
+            comment: comment
+          };
+          window.globalPictureData[key] = picData;
           window.savePictures();
-
           if (window.savePicturesToFirebase) {
-            await window.savePicturesToFirebase(key, window.globalPictureData[key]);
+            await window.savePicturesToFirebase(key, picData);
           }
-
           renderUI();
-          alert(`Picture and details saved successfully for Set ${setNum}, Image ${imgIndex}!`);
+          alert(`Saved details for Set ${setNum}, Image #${index}!`);
         };
         reader.readAsDataURL(file);
       } else {
+        const picData = {
+          image: base64Img,
+          reward: reward,
+          comment: comment
+        };
+        window.globalPictureData[key] = picData;
         window.savePictures();
         if (window.savePicturesToFirebase) {
-          window.savePicturesToFirebase(key, window.globalPictureData[key]);
+          await window.savePicturesToFirebase(key, picData);
         }
         renderUI();
-        alert(`Details saved successfully for Set ${setNum}, Image ${imgIndex}!`);
+        alert(`Saved details for Set ${setNum}, Image #${index}!`);
       }
     }
 
     function renderUI() {
-      const tgBtns = [
-        document.getElementById('telegram-support-btn'),
-        document.getElementById('support-set-link')
-      ];
-      tgBtns.forEach(btn => {
-        if (btn) btn.href = window.telegramLink;
-      });
-
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
 
@@ -835,48 +866,66 @@
       document.getElementById('user-display-name').innerText = user.username;
       document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
       document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+
       document.getElementById('set-num-text').innerText = user.currentSet;
       document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
 
-      const progressPercent = Math.min(100, (user.completedInSet / 16) * 100);
-      document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+      const pct = Math.min(100, Math.round((user.completedInSet / 16) * 100));
+      document.getElementById('progress-fill').style.width = `${pct}%`;
 
-      const completedMsg = document.getElementById('completed-set-message');
-      const movieContainer = document.getElementById('movie-container');
       const maxWork = user.stopLimit || 16;
+      const isPaused = user.completedInSet >= maxWork || user.isSetApproved === false;
 
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) {
-        completedMsg.classList.remove('hidden');
-        movieContainer.classList.add('hidden');
+      const pauseBox = document.getElementById('completed-set-message');
+      const movieBox = document.getElementById('movie-container');
+      const pauseText = document.getElementById('pause-reason-text');
+      const supportLink = document.getElementById('support-set-link');
+      const telegramBtn = document.getElementById('telegram-support-btn');
 
-        const pauseReasonText = document.getElementById('pause-reason-text');
-        if (pauseReasonText) {
-          pauseReasonText.innerText = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
+      if (supportLink) supportLink.href = window.telegramLink;
+      if (telegramBtn) telegramBtn.href = window.telegramLink;
+
+      if (isPaused) {
+        pauseBox.classList.remove('hidden');
+        movieBox.classList.add('hidden');
+        if (user.pauseMessage) {
+          pauseText.innerText = user.pauseMessage;
+        } else if (user.completedInSet >= 16) {
+          pauseText.innerText = `You have completed Set ${user.currentSet}! Please contact customer support to proceed to the next set.`;
+        } else {
+          pauseText.innerText = `You have reached a pause milestone at task #${user.completedInSet}. Kindly contact customer support to proceed to the next task.`;
         }
       } else {
-        completedMsg.classList.add('hidden');
-        movieContainer.classList.remove('hidden');
+        pauseBox.classList.add('hidden');
+        movieBox.classList.remove('hidden');
 
         const key = `${user.currentSet}-${user.completedInSet + 1}`;
-        const picData = window.globalPictureData[key] || {};
+        const picDetails = window.globalPictureData[key] || {};
 
-        document.getElementById('movie-img').src = picData.img || 'https://via.placeholder.com/400x250?text=Movie+Promotion';
         document.getElementById('movie-title').innerText = `Movie Promotion #${user.completedInSet + 1}`;
-        document.getElementById('admin-comment').innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
-        document.getElementById('movie-reward').innerText = `$${(picData.reward || 0.50).toFixed(2)}`;
+        document.getElementById('movie-reward').innerText = `$${parseFloat(picDetails.reward || 0.50).toFixed(2)}`;
+        document.getElementById('admin-comment').innerText = picDetails.comment ? `Admin Comment: ${picDetails.comment}` : 'Admin Comment: Ready to promote!';
+        
+        const imgEl = document.getElementById('movie-img');
+        if (picDetails.image) {
+          imgEl.src = picDetails.image;
+        } else {
+          imgEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="100%" height="100%" fill="%23e2e8f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%2364748b">No Picture Uploaded</text></svg>';
+        }
       }
 
-      const withdrawStatus = document.getElementById('withdraw-status');
-      if (withdrawStatus) {
-        if (user.withdrawalStatus === 'Pending') {
-          withdrawStatus.innerText = `Pending Withdrawal Request: $${(user.withdrawalAmount || 0).toFixed(2)}`;
-          withdrawStatus.style.color = 'var(--warning)';
-        } else if (user.withdrawalStatus === 'Approved') {
-          withdrawStatus.innerText = 'Last withdrawal request approved!';
-          withdrawStatus.style.color = 'var(--success)';
-        } else {
-          withdrawStatus.innerText = '';
-        }
+      const wStatus = document.getElementById('withdraw-status');
+      if (user.withdrawalStatus === 'Pending') {
+        wStatus.innerText = `Status: Pending approval for $${(user.withdrawalAmount || 0).toFixed(2)}`;
+        wStatus.style.color = 'var(--warning)';
+      } else if (user.withdrawalStatus === 'Approved') {
+        wStatus.innerText = 'Status: Last withdrawal was approved!';
+        wStatus.style.color = 'var(--success)';
+      } else if (user.withdrawalStatus === 'Rejected') {
+        wStatus.innerText = 'Status: Last withdrawal request was rejected.';
+        wStatus.style.color = 'var(--danger)';
+      } else {
+        wStatus.innerText = '';
       }
     }
 
