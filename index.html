@@ -35,7 +35,7 @@
     h2, h3, h4 { margin-bottom: 12px; color: var(--text); }
     p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; }
     .btn:hover { background: var(--primary-hover); }
     .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: #e2e8f0; }
@@ -121,8 +121,8 @@
 
         <div class="stats-grid">
           <div class="stat-card">
-            <span>Current Set</span>
-            <div id="current-set-display">Set 1 / 3</div>
+            <span>Estimate Earnings</span>
+            <div id="estimate-earnings-display" style="color: var(--primary);">$0.00</div>
           </div>
           <div class="stat-card">
             <span>Total Earnings</span>
@@ -835,6 +835,7 @@
       document.getElementById('user-display-name').innerText = user.username;
       document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
       document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('estimate-earnings-display').innerText = `$${(user.completedInSet * 0.50).toFixed(2)}`;
       document.getElementById('set-num-text').innerText = user.currentSet;
       document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
 
