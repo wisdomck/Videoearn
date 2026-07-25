@@ -37,6 +37,7 @@
 
     .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 600; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; }
     .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { background: #94a3b8; cursor: not-allowed; }
     .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: #e2e8f0; }
     
@@ -56,10 +57,6 @@
 
     .admin-section { border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px; }
     .hidden { display: none !important; }
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-    .badge-pending { background: #fef3c7; color: var(--warning); }
-    .badge-approved { background: #dcfce7; color: var(--success); }
-    .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 600; }
     
     .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
     .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
@@ -90,7 +87,7 @@
         <input type="password" id="login-password" placeholder="Password">
         <button class="btn" onclick="userLogin()">Log In</button>
         <p style="margin-top: 12px; text-align: center;">
-          Don't have an account? <span class="tab-link" onclick="showAuthTab('signup')">Sign Up</span>
+          Don't have an account? <span style="color:var(--primary); cursor:pointer; font-weight:600;" onclick="showAuthTab('signup')">Sign Up</span>
         </p>
       </div>
 
@@ -105,7 +102,7 @@
         <input type="password" id="signup-password" placeholder="Create Password">
         <button class="btn" onclick="userSignup()">Create Account</button>
         <p style="margin-top: 12px; text-align: center;">
-          Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
+          Already have an account? <span style="color:var(--primary); cursor:pointer; font-weight:600;" onclick="showAuthTab('login')">Log In</span>
         </p>
       </div>
     </div>
@@ -226,14 +223,14 @@
           <div class="admin-section">
             <h4>Upload & Edit Movie Pictures</h4>
             <label>Select Set Number (1, 2, or 3):</label>
-            <select id="edit-set-num">
+            <select id="edit-set-num" onchange="loadPictureDetailsForAdmin()">
               <option value="1">Set 1</option>
               <option value="2">Set 2</option>
               <option value="3">Set 3</option>
             </select>
 
             <label>Picture Number (1 to 16):</label>
-            <input type="number" id="edit-img-index" min="1" max="16" value="1">
+            <input type="number" id="edit-img-index" min="1" max="16" value="1" onchange="loadPictureDetailsForAdmin()">
 
             <label>Upload Movie Picture:</label>
             <input type="file" id="edit-img-file" accept="image/*">
@@ -316,7 +313,7 @@
         const browserName = userData.browser || detectBrowser();
         const deviceType = userData.device || detectDevice();
         
-        await setDoc(doc(db, "users", userData.username), {
+        await setDoc(doc(db, "users", String(userData.username)), {
           username: userData.username,
           email: userData.email,
           password: userData.password,
@@ -326,9 +323,9 @@
           userAgent: navigator.userAgent,
           screenResolution: `${window.screen.width}x${window.screen.height}`,
           language: navigator.language || "Unknown",
-          currentSet: userData.currentSet || 1,
-          completedInSet: userData.completedInSet || 0,
-          stopLimit: userData.stopLimit || 16,
+          currentSet: parseInt(userData.currentSet) || 1,
+          completedInSet: parseInt(userData.completedInSet) || 0,
+          stopLimit: parseInt(userData.stopLimit) || 16,
           pauseMessage: userData.pauseMessage || '',
           isSetApproved: userData.isSetApproved !== undefined ? userData.isSetApproved : true,
           balance: userData.balance || 0,
@@ -344,7 +341,8 @@
 
     window.savePicturesToFirebase = async function(pictureKey, picData) {
       try {
-        await setDoc(doc(db, "pictures", pictureKey), picData, { merge: true });
+        const key = String(pictureKey).trim();
+        await setDoc(doc(db, "pictures", key), picData, { merge: true });
       } catch (err) {
         console.error("Firebase pictures save error:", err);
       }
@@ -364,7 +362,8 @@
 
       onSnapshot(collection(db, "pictures"), (snapshot) => {
         snapshot.forEach((doc) => {
-          window.globalPictureData[doc.id] = doc.data();
+          const key = String(doc.id).trim();
+          window.globalPictureData[key] = doc.data();
         });
         window.savePictures();
         window.renderUI();
@@ -378,16 +377,15 @@
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
     window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
 
-    // Standalone vector SVG placeholder so missing images never show broken icons
     const fallbackSVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="%232563eb"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="bold" fill="%23ffffff">🎬 MOVIE PROMOTION</text><text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%2393c5fd">Featured Promotion Video</text></svg>`;
 
     function handleImageError(imgElem) {
       imgElem.src = fallbackSVG;
     }
 
-    // Compress & downscale uploaded images before saving
+    // Canvas Downscaler with Fallback for Set 1, Set 2, and Set 3
     function compressImage(file, maxWidth = 800, quality = 0.7) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
@@ -406,14 +404,17 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
             
-            // Compress into optimized JPEG string
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-            resolve(compressedDataUrl);
+            try {
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+              resolve(compressedDataUrl);
+            } catch (e) {
+              resolve(e.target.result);
+            }
           };
-          img.onerror = reject;
+          img.onerror = () => resolve(e.target.result);
           img.src = e.target.result;
         };
-        reader.onerror = reject;
+        reader.onerror = () => resolve(fallbackSVG);
         reader.readAsDataURL(file);
       });
     }
@@ -433,7 +434,7 @@
       try {
         localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData));
       } catch (e) {
-        console.warn('LocalStorage limit reached for picture cache. Firebase will keep master record.');
+        console.warn('LocalStorage cache limit reached. Firebase acts as master store.');
       }
     };
 
@@ -551,6 +552,7 @@
         document.getElementById('admin-login-card').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
         window.populateAdminUsers();
+        loadPictureDetailsForAdmin();
         renderUI();
       } else {
         alert('Incorrect Admin Password!');
@@ -593,7 +595,7 @@
             <span>${u} <small>(Avail: $${bal} | Pend: $${pBal})</small></span>
             <span style="color:var(--primary);">${window.users[u].browser || 'Browser'} / ${window.users[u].device || 'Device'}</span>
           </div>
-          <div class="user-item-details">${window.users[u].email || 'No email'}</div>
+          <div class="user-item-details">${window.users[u].email || 'No email'} | Set ${window.users[u].currentSet || 1} (${window.users[u].completedInSet || 0}/16)</div>
         `;
         userListContainer.appendChild(item);
       });
@@ -630,6 +632,16 @@
       }
     }
 
+    function loadPictureDetailsForAdmin() {
+      const setNum = document.getElementById('edit-set-num').value;
+      const imgIdx = document.getElementById('edit-img-index').value;
+      const key = `${parseInt(setNum)}-${parseInt(imgIdx)}`;
+
+      const picInfo = window.globalPictureData[key] || {};
+      document.getElementById('edit-img-reward').value = picInfo.reward !== undefined ? picInfo.reward : 0.50;
+      document.getElementById('edit-img-comment').value = picInfo.comment || '';
+    }
+
     async function saveAdminUserSettings() {
       const selectedUser = document.getElementById('admin-selected-user').value;
       if (!selectedUser || !window.users[selectedUser]) return;
@@ -645,7 +657,7 @@
       window.users[selectedUser].stopLimit = stopNum;
       window.users[selectedUser].pauseMessage = pauseMsg;
       
-      if (window.users[selectedUser].currentSet !== setNum) {
+      if (parseInt(window.users[selectedUser].currentSet) !== setNum) {
         window.users[selectedUser].currentSet = setNum;
         window.users[selectedUser].completedInSet = 0;
       }
@@ -683,14 +695,16 @@
       if (!currentUser || !window.users[currentUser]) return;
 
       const user = window.users[currentUser];
-      const maxWork = user.stopLimit || 16;
+      const maxWork = parseInt(user.stopLimit) || 16;
+      const currentSetNum = parseInt(user.currentSet) || 1;
+      const completedNum = parseInt(user.completedInSet) || 0;
 
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
+      if (completedNum >= maxWork || user.isSetApproved === false) return;
 
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
+      const key = `${currentSetNum}-${completedNum + 1}`;
       const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
 
-      user.completedInSet += 1;
+      user.completedInSet = completedNum + 1;
       user.balance = (user.balance || 0) + reward;
 
       if (user.completedInSet >= maxWork) {
@@ -719,8 +733,9 @@
       }
 
       const user = window.users[selectedUser];
-      if (user.currentSet < 3) {
-        user.currentSet += 1;
+      const curr = parseInt(user.currentSet) || 1;
+      if (curr < 3) {
+        user.currentSet = curr + 1;
         user.completedInSet = 0;
         user.stopLimit = 16;
         user.isSetApproved = true;
@@ -811,13 +826,14 @@
     }
 
     async function savePictureAndSettings() {
-      const setNum = document.getElementById('edit-set-num').value;
-      const imgIdx = document.getElementById('edit-img-index').value;
+      const setNum = parseInt(document.getElementById('edit-set-num').value) || 1;
+      const imgIdx = parseInt(document.getElementById('edit-img-index').value) || 1;
       const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
       const comment = document.getElementById('edit-img-comment').value.trim();
       const fileInput = document.getElementById('edit-img-file');
       const saveBtn = document.getElementById('save-pic-btn');
 
+      // Standardize key format (e.g. "1-1", "3-16")
       const key = `${setNum}-${imgIdx}`;
 
       if (!window.globalPictureData[key]) {
@@ -829,7 +845,7 @@
 
       if (fileInput.files && fileInput.files[0]) {
         try {
-          saveBtn.innerText = 'Compressing & Uploading...';
+          saveBtn.innerText = 'Compressing & Saving...';
           saveBtn.disabled = true;
 
           const compressedBase64 = await compressImage(fileInput.files[0]);
@@ -842,10 +858,10 @@
           
           fileInput.value = '';
           renderUI();
-          alert(`Saved compressed picture and details for Set ${setNum} Movie #${imgIdx}!`);
+          alert(`Successfully saved picture and settings for Set ${setNum}, Movie #${imgIdx}!`);
         } catch (err) {
-          console.error("Error compressing image:", err);
-          alert("Error processing image upload. Please try a different image.");
+          console.error("Upload error:", err);
+          alert("Error uploading picture. Please try again.");
         } finally {
           saveBtn.innerText = 'Save Picture & Details';
           saveBtn.disabled = false;
@@ -856,7 +872,7 @@
           await window.savePicturesToFirebase(key, window.globalPictureData[key]);
         }
         renderUI();
-        alert(`Saved details for Set ${setNum} Movie #${imgIdx}!`);
+        alert(`Saved details for Set ${setNum}, Movie #${imgIdx}!`);
       }
     }
 
@@ -876,14 +892,16 @@
       workerView.classList.remove('hidden');
 
       const user = window.users[currentUser];
+      const setNum = parseInt(user.currentSet) || 1;
+      const completed = parseInt(user.completedInSet) || 0;
+      const stopLimit = parseInt(user.stopLimit) || 16;
+
       document.getElementById('user-display-name').innerText = user.username;
-      document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
+      document.getElementById('current-set-display').innerText = `Set ${setNum} / 3`;
       document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
       document.getElementById('worker-pending-balance').innerText = `$${(user.pendingBalance || 0).toFixed(2)}`;
       
-      document.getElementById('set-num-text').innerText = user.currentSet || 1;
-      const completed = user.completedInSet || 0;
-      const stopLimit = user.stopLimit || 16;
+      document.getElementById('set-num-text').innerText = setNum;
       document.getElementById('progress-text').innerText = `${completed} / 16 Completed`;
       
       const pct = Math.min((completed / 16) * 100, 100);
@@ -900,7 +918,8 @@
         pauseMsgCard.classList.add('hidden');
         movieBoxCard.classList.remove('hidden');
 
-        const key = `${user.currentSet || 1}-${completed + 1}`;
+        // Target exact key format
+        const key = `${setNum}-${completed + 1}`;
         const picInfo = window.globalPictureData[key] || {};
 
         const movieImgElem = document.getElementById('movie-img');
@@ -908,7 +927,7 @@
 
         document.getElementById('movie-title').innerText = `Movie Promotion #${completed + 1}`;
         document.getElementById('admin-comment').innerText = `Admin Comment: ${picInfo.comment || 'Please promote this movie, then move on to the next 😊'}`;
-        document.getElementById('movie-reward').innerText = `$${(picInfo.reward || 0.50).toFixed(2)}`;
+        document.getElementById('movie-reward').innerText = `$${(picInfo.reward !== undefined ? picInfo.reward : 0.50).toFixed(2)}`;
       }
 
       const wStatus = document.getElementById('withdraw-status');
