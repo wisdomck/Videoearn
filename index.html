@@ -27,7 +27,7 @@
     .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; }
 
     header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
     .nav-btn { background: #ffffff; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     .nav-btn:hover { background: #f8fafc; }
 
@@ -76,10 +76,7 @@
 
   <div class="container">
     <header>
-      <div class="logo">
-        <span style="color: var(--primary);">VideoEarn</span>
-        <span style="background-color: #E50914; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 800; letter-spacing: 0.5px;">NETFLIX</span>
-      </div>
+      <div class="logo">VideoEarn</div>
       <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
     </header>
 
@@ -281,12 +278,131 @@
     </div>
   </div>
 
-  <!-- CORE SCRIPT LOGIC -->
+  <!-- FIREBASE INTEGRATION -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+    import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGKL96cuFJpEDe8PQhwtm_Zg0LA2fOBgo",
+      authDomain: "videoearn-342ba.firebaseapp.com",
+      projectId: "videoearn-342ba",
+      storageBucket: "videoearn-342ba.firebasestorage.app",
+      messagingSenderId: "702949776076",
+      appId: "1:702949776076:web:2dfef02d203ad8ae1e0069",
+      measurementId: "G-WS6F04VFSM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      if (ua.includes("Firefox")) return "Mozilla Firefox";
+      if (ua.includes("SamsungBrowser")) return "Samsung Internet";
+      if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
+      if (ua.includes("Trident")) return "Internet Explorer";
+      if (ua.includes("Edge") || ua.includes("Edg")) return "Microsoft Edge";
+      if (ua.includes("Chrome")) return "Google Chrome";
+      if (ua.includes("Safari")) return "Apple Safari";
+      return "Unknown Browser";
+    }
+
+    function detectDevice() {
+      const ua = navigator.userAgent;
+      if (/android/i.test(ua)) return "Android Phone/Tablet";
+      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "iPhone/iPad (iOS)";
+      if (/Macintosh/.test(ua)) return "Mac Computer";
+      if (/Windows/.test(ua)) return "Windows PC";
+      if (/Linux/.test(ua)) return "Linux System";
+      return "Mobile/Desktop Device";
+    }
+
+    window.saveUserToFirebase = async function(userData) {
+      try {
+        const browserName = userData.browser || detectBrowser();
+        const deviceType = userData.device || detectDevice();
+        
+        await setDoc(doc(db, "users", userData.username), {
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+          registeredAt: userData.registeredAt || serverTimestamp(),
+          browser: browserName,
+          device: deviceType,
+          userAgent: navigator.userAgent,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          language: navigator.language || "Unknown",
+          currentSet: userData.currentSet || 1,
+          completedInSet: userData.completedInSet || 0,
+          stopLimit: userData.stopLimit || 16,
+          pauseMessage: userData.pauseMessage || '',
+          isSetApproved: userData.isSetApproved !== undefined ? userData.isSetApproved : true,
+          balance: userData.balance || 0,
+          withdrawalStatus: userData.withdrawalStatus || 'None',
+          withdrawalAmount: userData.withdrawalAmount || 0,
+          walletAddress: userData.walletAddress || ''
+        }, { merge: true });
+      } catch (err) {
+        console.error("Firebase Firestore error:", err);
+      }
+    };
+
+    window.savePicturesToFirebase = async function(pictureKey, picData) {
+      try {
+        await setDoc(doc(db, "pictures", pictureKey), picData, { merge: true });
+      } catch (err) {
+        console.error("Firebase pictures save error:", err);
+      }
+    };
+
+    window.saveTelegramToFirebase = async function(link) {
+      try {
+        await setDoc(doc(db, "app_settings", "telegram"), { link: link }, { merge: true });
+      } catch (err) {
+        console.error("Firebase Telegram save error:", err);
+      }
+    };
+
+    window.listenToFirebaseData = function() {
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.forEach((doc) => {
+          window.users[doc.id] = doc.data();
+        });
+        window.saveUsers();
+        if (window.isAdminLoggedIn) {
+          window.populateAdminUsers();
+        }
+        window.renderUI();
+      });
+
+      onSnapshot(collection(db, "pictures"), (snapshot) => {
+        snapshot.forEach((doc) => {
+          window.globalPictureData[doc.id] = doc.data();
+        });
+        window.savePictures();
+        window.renderUI();
+      });
+
+      onSnapshot(doc(db, "app_settings", "telegram"), (docSnap) => {
+        if (docSnap.exists() && docSnap.data().link) {
+          window.telegramLink = docSnap.data().link;
+          localStorage.setItem('ve_telegram_link', window.telegramLink);
+          window.renderUI();
+        }
+      });
+    };
+
+    window.listenToFirebaseData();
+  </script>
+
   <script>
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
     window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
+
     window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
-    
     let currentUser = localStorage.getItem('ve_current_user') || null;
     window.isAdminLoggedIn = false;
 
@@ -297,74 +413,6 @@
     window.savePictures = function() {
       localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData));
     };
-
-    function renderUI() {
-      const authView = document.getElementById('auth-view');
-      const workerView = document.getElementById('worker-view');
-      const adminView = document.getElementById('admin-view');
-
-      // Update Support Links
-      const supportBtns = [document.getElementById('telegram-support-btn'), document.getElementById('support-set-link')];
-      supportBtns.forEach(btn => {
-        if(btn) btn.href = window.telegramLink;
-      });
-
-      if (!document.getElementById('admin-view').classList.contains('hidden')) {
-        return; 
-      }
-
-      if (currentUser && window.users[currentUser]) {
-        authView.classList.add('hidden');
-        workerView.classList.remove('hidden');
-
-        const user = window.users[currentUser];
-        document.getElementById('user-display-name').innerText = user.username;
-        document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-        document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
-        document.getElementById('set-num-text').innerText = user.currentSet || 1;
-
-        const completed = user.completedInSet || 0;
-        const stopLimit = user.stopLimit || 16;
-        document.getElementById('progress-text').innerText = `${completed} / 16 Completed`;
-        
-        const pct = Math.min((completed / 16) * 100, 100);
-        document.getElementById('progress-fill').style.width = `${pct}%`;
-
-        // Check if user is paused/completed set limit
-        const pausedBox = document.getElementById('completed-set-message');
-        const movieBox = document.getElementById('movie-container');
-
-        if (completed >= stopLimit || user.isSetApproved === false) {
-          pausedBox.classList.remove('hidden');
-          movieBox.classList.add('hidden');
-          document.getElementById('pause-reason-text').innerText = user.pauseMessage || "You have reached a task milestone. Kindly contact customer support to proceed.";
-        } else {
-          pausedBox.classList.add('hidden');
-          movieBox.classList.remove('hidden');
-
-          const currentKey = `${user.currentSet || 1}-${completed + 1}`;
-          const picObj = window.globalPictureData[currentKey] || {};
-
-          document.getElementById('movie-img').src = picObj.image || 'https://via.placeholder.com/400x250?text=Movie+Promo';
-          document.getElementById('movie-title').innerText = `Movie Promotion #${completed + 1}`;
-          document.getElementById('admin-comment').innerText = picObj.comment ? `Admin Comment: ${picObj.comment}` : 'Admin Comment: Ready to promote!';
-          document.getElementById('movie-reward').innerText = `$${parseFloat(picObj.reward || 0.50).toFixed(2)}`;
-        }
-
-        // Withdrawal status display
-        const wStatus = document.getElementById('withdraw-status');
-        if (user.withdrawalStatus === 'Pending') {
-          wStatus.innerText = `Pending Withdrawal of $${user.withdrawalAmount.toFixed(2)} to ${user.walletAddress}`;
-          wStatus.style.color = 'var(--warning)';
-        } else {
-          wStatus.innerText = '';
-        }
-
-      } else {
-        authView.classList.remove('hidden');
-        workerView.classList.add('hidden');
-      }
-    }
 
     function showAuthTab(tab) {
       if (tab === 'signup') {
@@ -706,7 +754,7 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      user.balance = Math.max(0, (user.balance || 0) - (user.withdrawalAmount || 0));
+      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -716,168 +764,123 @@
       }
       window.populateAdminUsers();
       renderUI();
-      alert(`Withdrawal approved for ${selectedUser}!`);
+      alert(`Approved withdrawal for ${selectedUser}!`);
     }
 
-    async function savePictureAndSettings() {
+    function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
-      const index = document.getElementById('edit-img-index').value;
-      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
-      const comment = document.getElementById('edit-img-comment').value.trim();
+      const imgIndex = document.getElementById('edit-img-index').value;
+      const reward = document.getElementById('edit-img-reward').value;
+      const comment = document.getElementById('edit-img-comment').value;
       const fileInput = document.getElementById('edit-img-file');
+      const key = `${setNum}-${imgIndex}`;
 
-      const key = `${setNum}-${index}`;
-      let imageBase64 = window.globalPictureData[key]?.image || '';
+      if (!window.globalPictureData[key]) {
+        window.globalPictureData[key] = {};
+      }
 
-      const saveAction = async (imgData) => {
-        const picObj = {
-          image: imgData,
-          reward: reward,
-          comment: comment
-        };
-        window.globalPictureData[key] = picObj;
-        window.savePictures();
+      window.globalPictureData[key].reward = parseFloat(reward) || 0.50;
+      window.globalPictureData[key].comment = comment || '';
 
-        if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(key, picObj);
-        }
-        alert(`Movie #${index} for Set ${setNum} updated successfully!`);
-        renderUI();
-      };
-
-      if (fileInput.files && fileInput.files[0]) {
+      const file = fileInput.files[0];
+      if (file) {
         const reader = new FileReader();
         reader.onload = async function(e) {
-          await saveAction(e.target.result);
+          window.globalPictureData[key].img = e.target.result;
+          window.savePictures();
+
+          if (window.savePicturesToFirebase) {
+            await window.savePicturesToFirebase(key, window.globalPictureData[key]);
+          }
+
+          renderUI();
+          alert(`Picture and details saved successfully for Set ${setNum}, Image ${imgIndex}!`);
         };
-        reader.readAsDataURL(fileInput.files[0]);
+        reader.readAsDataURL(file);
       } else {
-        await saveAction(imageBase64);
+        window.savePictures();
+        if (window.savePicturesToFirebase) {
+          window.savePicturesToFirebase(key, window.globalPictureData[key]);
+        }
+        renderUI();
+        alert(`Details saved successfully for Set ${setNum}, Image ${imgIndex}!`);
       }
     }
 
-    // Initial render
+    function renderUI() {
+      const tgBtns = [
+        document.getElementById('telegram-support-btn'),
+        document.getElementById('support-set-link')
+      ];
+      tgBtns.forEach(btn => {
+        if (btn) btn.href = window.telegramLink;
+      });
+
+      const authView = document.getElementById('auth-view');
+      const workerView = document.getElementById('worker-view');
+
+      if (!currentUser || !window.users[currentUser]) {
+        if (!window.isAdminLoggedIn) {
+          authView.classList.remove('hidden');
+          workerView.classList.add('hidden');
+        }
+        return;
+      }
+
+      authView.classList.add('hidden');
+      workerView.classList.remove('hidden');
+
+      const user = window.users[currentUser];
+
+      document.getElementById('user-display-name').innerText = user.username;
+      document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('set-num-text').innerText = user.currentSet;
+      document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
+
+      const progressPercent = Math.min(100, (user.completedInSet / 16) * 100);
+      document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+
+      const completedMsg = document.getElementById('completed-set-message');
+      const movieContainer = document.getElementById('movie-container');
+      const maxWork = user.stopLimit || 16;
+
+      if (user.completedInSet >= maxWork || user.isSetApproved === false) {
+        completedMsg.classList.remove('hidden');
+        movieContainer.classList.add('hidden');
+
+        const pauseReasonText = document.getElementById('pause-reason-text');
+        if (pauseReasonText) {
+          pauseReasonText.innerText = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
+        }
+      } else {
+        completedMsg.classList.add('hidden');
+        movieContainer.classList.remove('hidden');
+
+        const key = `${user.currentSet}-${user.completedInSet + 1}`;
+        const picData = window.globalPictureData[key] || {};
+
+        document.getElementById('movie-img').src = picData.img || 'https://via.placeholder.com/400x250?text=Movie+Promotion';
+        document.getElementById('movie-title').innerText = `Movie Promotion #${user.completedInSet + 1}`;
+        document.getElementById('admin-comment').innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
+        document.getElementById('movie-reward').innerText = `$${(picData.reward || 0.50).toFixed(2)}`;
+      }
+
+      const withdrawStatus = document.getElementById('withdraw-status');
+      if (withdrawStatus) {
+        if (user.withdrawalStatus === 'Pending') {
+          withdrawStatus.innerText = `Pending Withdrawal Request: $${(user.withdrawalAmount || 0).toFixed(2)}`;
+          withdrawStatus.style.color = 'var(--warning)';
+        } else if (user.withdrawalStatus === 'Approved') {
+          withdrawStatus.innerText = 'Last withdrawal request approved!';
+          withdrawStatus.style.color = 'var(--success)';
+        } else {
+          withdrawStatus.innerText = '';
+        }
+      }
+    }
+
     renderUI();
-  </script>
-
-  <!-- FIREBASE INTEGRATION MODULE -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
-    import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAGKL96cuFJpEDe8PQhwtm_Zg0LA2fOBgo",
-      authDomain: "videoearn-342ba.firebaseapp.com",
-      projectId: "videoearn-342ba",
-      storageBucket: "videoearn-342ba.firebasestorage.app",
-      messagingSenderId: "702949776076",
-      appId: "1:702949776076:web:2dfef02d203ad8ae1e0069",
-      measurementId: "G-WS6F04VFSM"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const db = getFirestore(app);
-
-    function detectBrowser() {
-      const ua = navigator.userAgent;
-      if (ua.includes("Firefox")) return "Mozilla Firefox";
-      if (ua.includes("SamsungBrowser")) return "Samsung Internet";
-      if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
-      if (ua.includes("Trident")) return "Internet Explorer";
-      if (ua.includes("Edge") || ua.includes("Edg")) return "Microsoft Edge";
-      if (ua.includes("Chrome")) return "Google Chrome";
-      if (ua.includes("Safari")) return "Apple Safari";
-      return "Unknown Browser";
-    }
-
-    function detectDevice() {
-      const ua = navigator.userAgent;
-      if (/android/i.test(ua)) return "Android Phone/Tablet";
-      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "iPhone/iPad (iOS)";
-      if (/Macintosh/.test(ua)) return "Mac Computer";
-      if (/Windows/.test(ua)) return "Windows PC";
-      if (/Linux/.test(ua)) return "Linux System";
-      return "Mobile/Desktop Device";
-    }
-
-    window.saveUserToFirebase = async function(userData) {
-      try {
-        const browserName = userData.browser || detectBrowser();
-        const deviceType = userData.device || detectDevice();
-        
-        await setDoc(doc(db, "users", userData.username), {
-          username: userData.username,
-          email: userData.email,
-          password: userData.password,
-          registeredAt: userData.registeredAt || serverTimestamp(),
-          browser: browserName,
-          device: deviceType,
-          userAgent: navigator.userAgent,
-          screenResolution: `${window.screen.width}x${window.screen.height}`,
-          language: navigator.language || "Unknown",
-          currentSet: userData.currentSet || 1,
-          completedInSet: userData.completedInSet || 0,
-          stopLimit: userData.stopLimit || 16,
-          pauseMessage: userData.pauseMessage || '',
-          isSetApproved: userData.isSetApproved !== undefined ? userData.isSetApproved : true,
-          balance: userData.balance || 0,
-          withdrawalStatus: userData.withdrawalStatus || 'None',
-          withdrawalAmount: userData.withdrawalAmount || 0,
-          walletAddress: userData.walletAddress || ''
-        }, { merge: true });
-      } catch (err) {
-        console.error("Firebase Firestore error:", err);
-      }
-    };
-
-    window.savePicturesToFirebase = async function(pictureKey, picData) {
-      try {
-        await setDoc(doc(db, "pictures", pictureKey), picData, { merge: true });
-      } catch (err) {
-        console.error("Firebase pictures save error:", err);
-      }
-    };
-
-    window.saveTelegramToFirebase = async function(link) {
-      try {
-        await setDoc(doc(db, "app_settings", "telegram"), { link: link }, { merge: true });
-      } catch (err) {
-        console.error("Firebase Telegram save error:", err);
-      }
-    };
-
-    window.listenToFirebaseData = function() {
-      onSnapshot(collection(db, "users"), (snapshot) => {
-        snapshot.forEach((doc) => {
-          window.users[doc.id] = doc.data();
-        });
-        if (window.saveUsers) window.saveUsers();
-        if (window.isAdminLoggedIn && window.populateAdminUsers) {
-          window.populateAdminUsers();
-        }
-        if (window.renderUI) window.renderUI();
-      });
-
-      onSnapshot(collection(db, "pictures"), (snapshot) => {
-        snapshot.forEach((doc) => {
-          window.globalPictureData[doc.id] = doc.data();
-        });
-        if (window.savePictures) window.savePictures();
-        if (window.renderUI) window.renderUI();
-      });
-
-      onSnapshot(doc(db, "app_settings", "telegram"), (docSnap) => {
-        if (docSnap.exists() && docSnap.data().link) {
-          window.telegramLink = docSnap.data().link;
-          localStorage.setItem('ve_telegram_link', window.telegramLink);
-          if (window.renderUI) window.renderUI();
-        }
-      });
-    };
-
-    window.listenToFirebaseData();
   </script>
 </body>
 </html>
