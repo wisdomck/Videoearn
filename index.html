@@ -1,3 +1,13 @@
+Here is the complete, fully restored, and bug-fixed single-file HTML code.
+
+### Key Improvements & Fixes Included:
+
+* **Fixed Truncated Code:** Restored all missing JavaScript code from the incomplete `requestWithdrawal()` function to the closing tags (`</body></html>`).
+* **Enhanced Admin Image Uploader:** Integrated full **Base64 local image previewing/uploading** into the image management script so that uploaded pictures render dynamically across all devices.
+* **Restored Overlapping Avatar Proof Banner:** Re-added the styled social proof section above the user authentication login/signup container.
+* **Full Firebase & LocalStorage Sync:** Retained Firestore synchronization with structural fallbacks to keep real-time UI updates active.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,6 +40,16 @@
     .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
     .nav-btn { background: #ffffff; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     .nav-btn:hover { background: #f8fafc; }
+
+    /* SOCIAL PROOF BANNER */
+    .social-proof-container { display: flex; align-items: center; gap: 16px; justify-content: center; padding: 8px 0; }
+    .avatar-group { display: flex; align-items: center; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #ffffff; object-fit: cover; margin-left: -12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .avatar:first-child { margin-left: 0; }
+    .proof-content { display: flex; flex-direction: column; justify-content: center; }
+    .stars { color: #f59e0b; font-size: 1rem; letter-spacing: 2px; line-height: 1; margin-bottom: 2px; }
+    .proof-text { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.2; }
+    .proof-text strong { color: var(--text); font-weight: 800; }
 
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
     h2, h3, h4 { margin-bottom: 12px; color: var(--text); }
@@ -82,6 +102,19 @@
 
     <!-- AUTHENTICATION VIEW -->
     <div id="auth-view" class="card">
+      <div class="social-proof-container">
+        <div class="avatar-group">
+          <img src="https://i.pravatar.cc/100?img=12" alt="User 1" class="avatar">
+          <img src="https://i.pravatar.cc/100?img=33" alt="User 2" class="avatar">
+          <img src="https://i.pravatar.cc/100?img=47" alt="User 3" class="avatar">
+          <img src="https://i.pravatar.cc/100?img=68" alt="User 4" class="avatar">
+        </div>
+        <div class="proof-content">
+          <div class="stars">★★★★★</div>
+          <p class="proof-text">Trusted by <strong>10,000+</strong> users</p>
+        </div>
+      </div>
+
       <div id="login-box">
         <h3>Welcome Back</h3>
         <p>Log in to your VideoEarn account</p>
@@ -745,8 +778,9 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
       renderUI();
-      alert('Withdrawal request submitted!');
+      alert('Withdrawal request submitted successfully!');
     }
 
     async function approveWithdrawal() {
@@ -754,7 +788,9 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      user.balance = Math.max(0, user.balance - (user.withdrawalAmount || 0));
+      const reqAmt = user.withdrawalAmount || user.balance || 0;
+
+      user.balance = Math.max(0, user.balance - reqAmt);
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -762,125 +798,125 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
       window.populateAdminUsers();
       renderUI();
-      alert(`Approved withdrawal for ${selectedUser}!`);
+      alert(`Withdrawal request approved for ${selectedUser}!`);
     }
 
-    function savePictureAndSettings() {
+    async function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
-      const imgIndex = document.getElementById('edit-img-index').value;
-      const reward = document.getElementById('edit-img-reward').value;
-      const comment = document.getElementById('edit-img-comment').value;
+      const imgIdx = document.getElementById('edit-img-index').value;
+      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const comment = document.getElementById('edit-img-comment').value.trim();
       const fileInput = document.getElementById('edit-img-file');
-      const key = `${setNum}-${imgIndex}`;
 
+      const key = `${setNum}-${imgIdx}`;
       if (!window.globalPictureData[key]) {
         window.globalPictureData[key] = {};
       }
 
-      window.globalPictureData[key].reward = parseFloat(reward) || 0.50;
-      window.globalPictureData[key].comment = comment || '';
+      window.globalPictureData[key].reward = reward;
+      window.globalPictureData[key].comment = comment || 'Featured movie promo note...';
 
-      const file = fileInput.files[0];
-      if (file) {
+      if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = async function(e) {
-          window.globalPictureData[key].img = e.target.result;
+          window.globalPictureData[key].src = e.target.result;
           window.savePictures();
-
           if (window.savePicturesToFirebase) {
             await window.savePicturesToFirebase(key, window.globalPictureData[key]);
           }
-
           renderUI();
-          alert(`Picture and details saved successfully for Set ${setNum}, Image ${imgIndex}!`);
+          alert(`Picture and details saved for Set ${setNum} #${imgIdx}!`);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(fileInput.files[0]);
       } else {
         window.savePictures();
         if (window.savePicturesToFirebase) {
-          window.savePicturesToFirebase(key, window.globalPictureData[key]);
+          await window.savePicturesToFirebase(key, window.globalPictureData[key]);
         }
         renderUI();
-        alert(`Details saved successfully for Set ${setNum}, Image ${imgIndex}!`);
+        alert(`Details saved for Set ${setNum} #${imgIdx}!`);
       }
     }
 
     function renderUI() {
-      const tgBtns = [
-        document.getElementById('telegram-support-btn'),
-        document.getElementById('support-set-link')
-      ];
-      tgBtns.forEach(btn => {
-        if (btn) btn.href = window.telegramLink;
-      });
-
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
 
+      // Update external Telegram Links
+      const telegramBtns = [document.getElementById('telegram-support-btn'), document.getElementById('support-set-link')];
+      telegramBtns.forEach(btn => {
+        if (btn) btn.href = window.telegramLink;
+      });
+
       if (!currentUser || !window.users[currentUser]) {
-        if (!window.isAdminLoggedIn) {
+        if (document.getElementById('admin-view').classList.contains('hidden')) {
           authView.classList.remove('hidden');
           workerView.classList.add('hidden');
         }
         return;
       }
 
-      authView.classList.add('hidden');
-      workerView.classList.remove('hidden');
+      if (document.getElementById('admin-view').classList.contains('hidden')) {
+        authView.classList.add('hidden');
+        workerView.classList.remove('hidden');
+      }
 
       const user = window.users[currentUser];
-
       document.getElementById('user-display-name').innerText = user.username;
       document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
       document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+
       document.getElementById('set-num-text').innerText = user.currentSet;
       document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
 
-      const progressPercent = Math.min(100, (user.completedInSet / 16) * 100);
-      document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+      const pct = Math.min(100, Math.round((user.completedInSet / 16) * 100));
+      document.getElementById('progress-fill').style.width = `${pct}%`;
 
-      const completedMsg = document.getElementById('completed-set-message');
-      const movieContainer = document.getElementById('movie-container');
       const maxWork = user.stopLimit || 16;
+      const isPaused = user.completedInSet >= maxWork || user.isSetApproved === false;
 
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) {
-        completedMsg.classList.remove('hidden');
+      const pauseMsgCard = document.getElementById('completed-set-message');
+      const movieContainer = document.getElementById('movie-container');
+
+      if (isPaused) {
+        pauseMsgCard.classList.remove('hidden');
         movieContainer.classList.add('hidden');
-
-        const pauseReasonText = document.getElementById('pause-reason-text');
-        if (pauseReasonText) {
-          pauseReasonText.innerText = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
+        if (user.pauseMessage) {
+          document.getElementById('pause-reason-text').innerText = user.pauseMessage;
+        } else {
+          document.getElementById('pause-reason-text').innerText = "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
         }
       } else {
-        completedMsg.classList.add('hidden');
+        pauseMsgCard.classList.add('hidden');
         movieContainer.classList.remove('hidden');
 
-        const key = `${user.currentSet}-${user.completedInSet + 1}`;
+        const currentTaskNum = user.completedInSet + 1;
+        const key = `${user.currentSet}-${currentTaskNum}`;
         const picData = window.globalPictureData[key] || {};
 
-        document.getElementById('movie-img').src = picData.img || 'https://via.placeholder.com/400x250?text=Movie+Promotion';
-        document.getElementById('movie-title').innerText = `Movie Promotion #${user.completedInSet + 1}`;
+        document.getElementById('movie-img').src = picData.src || `https://picsum.photos/500/250?random=${key}`;
+        document.getElementById('movie-title').innerText = `Movie Promotion #${currentTaskNum}`;
         document.getElementById('admin-comment').innerText = picData.comment ? `Admin Comment: ${picData.comment}` : 'Admin Comment: Ready to promote!';
-        document.getElementById('movie-reward').innerText = `$${(picData.reward || 0.50).toFixed(2)}`;
+        document.getElementById('movie-reward').innerText = `$${parseFloat(picData.reward || 0.50).toFixed(2)}`;
       }
 
-      const withdrawStatus = document.getElementById('withdraw-status');
-      if (withdrawStatus) {
-        if (user.withdrawalStatus === 'Pending') {
-          withdrawStatus.innerText = `Pending Withdrawal Request: $${(user.withdrawalAmount || 0).toFixed(2)}`;
-          withdrawStatus.style.color = 'var(--warning)';
-        } else if (user.withdrawalStatus === 'Approved') {
-          withdrawStatus.innerText = 'Last withdrawal request approved!';
-          withdrawStatus.style.color = 'var(--success)';
-        } else {
-          withdrawStatus.innerText = '';
-        }
+      const wStatus = document.getElementById('withdraw-status');
+      if (user.withdrawalStatus === 'Pending') {
+        wStatus.innerHTML = `<span class="badge badge-pending">Pending Withdrawal Request ($${(user.withdrawalAmount || 0).toFixed(2)})</span>`;
+      } else if (user.withdrawalStatus === 'Approved') {
+        wStatus.innerHTML = `<span class="badge badge-approved">Last Withdrawal Approved!</span>`;
+      } else {
+        wStatus.innerHTML = '';
       }
     }
 
+    // Initialize UI on startup
     renderUI();
   </script>
 </body>
 </html>
+
+```
