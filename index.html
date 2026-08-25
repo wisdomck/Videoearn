@@ -39,10 +39,20 @@
     .nav-btn { background: #1e293b; border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: all 0.2s; }
     .nav-btn:hover { background: #334155; }
 
-    /* HERO STYLING FOR AUTH */
-    .hero-banner { text-align: center; padding: 24px 16px 12px 16px; background: radial-gradient(circle at top, rgba(112, 0, 255, 0.15) 0%, rgba(11, 15, 23, 0) 70%); }
-    .hero-title { font-size: 1.8rem; font-weight: 900; line-height: 1.2; margin-bottom: 8px; background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero-subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.4; }
+    /* VIDEO SHOWCASE & OVERLAY */
+    .hero-video-wrapper { position: relative; width: 100%; height: 260px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 8px; }
+    .hero-video { width: 100%; height: 100%; object-fit: cover; }
+    .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(11, 15, 23, 0.3) 0%, rgba(11, 15, 23, 0.95) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; text-align: left; }
+    .hero-title { font-size: 1.4rem; font-weight: 900; line-height: 1.2; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .hero-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+
+    /* FEATURED MOVIES CAROUSEL / GALLERY */
+    .movies-showcase { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; }
+    .movies-showcase::-webkit-scrollbar { height: 6px; }
+    .movies-showcase::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .movie-card-mini { flex: 0 0 120px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-align: center; }
+    .movie-card-mini img { width: 100%; height: 140px; object-fit: cover; }
+    .movie-card-mini span { display: block; padding: 6px 4px; font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* SOCIAL PROOF BANNER */
     .social-proof-container { display: flex; align-items: center; gap: 14px; justify-content: center; padding: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; }
@@ -87,8 +97,6 @@
 
     .user-list-box { background: #0b0f17; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
     .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
-    .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
-    .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
     .modal-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); animation: popIn 0.2s ease-out; }
@@ -112,9 +120,16 @@
   <div class="container">
     <!-- AUTHENTICATION VIEW -->
     <div id="auth-view">
-      <div class="hero-banner">
-        <div class="hero-title">WE PARTNER WITH BRANDS TO CREATE IMPACTFUL MOMENTS</div>
-        <div class="hero-subtitle">Explore content production, promote exclusive films, and earn daily rewards.</div>
+      <!-- VIDEO HEADER SHOWCASE -->
+      <div class="hero-video-wrapper">
+        <video class="hero-video" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop">
+          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" type="video/mp4">
+          Your browser does not support video tag.
+        </video>
+        <div class="hero-overlay">
+          <div class="hero-title">WE PARTNER WITH BRANDS TO CREATE IMPACTFUL MOMENTS</div>
+          <div class="hero-subtitle">Explore content production, promote exclusive films, and earn daily.</div>
+        </div>
       </div>
 
       <div class="card">
@@ -159,6 +174,33 @@
           </p>
         </div>
       </div>
+
+      <!-- WELL KNOWN MOVIES GALLERY -->
+      <div style="margin-top: 16px;">
+        <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: var(--text-muted);">POPULAR FEATURED MOVIES</h4>
+        <div class="movies-showcase">
+          <div class="movie-card-mini">
+            <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&auto=format&fit=crop" alt="Inception">
+            <span>Inception</span>
+          </div>
+          <div class="movie-card-mini">
+            <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop" alt="The Dark Knight">
+            <span>Dark Knight</span>
+          </div>
+          <div class="movie-card-mini">
+            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&auto=format&fit=crop" alt="Interstellar">
+            <span>Interstellar</span>
+          </div>
+          <div class="movie-card-mini">
+            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&auto=format&fit=crop" alt="Avatar">
+            <span>Avatar</span>
+          </div>
+          <div class="movie-card-mini">
+            <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&auto=format&fit=crop" alt="Oppenheimer">
+            <span>Oppenheimer</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- WORKER VIEW -->
@@ -169,7 +211,7 @@
           <button class="nav-btn" onclick="userLogout()">Logout (<span id="user-display-name">User</span>)</button>
         </div>
 
-        <!-- STATS GRID WITH PROCESSING BALANCE -->
+        <!-- STATS GRID -->
         <div class="stats-grid">
           <div class="stat-card">
             <span>Current Set</span>
@@ -461,17 +503,15 @@
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
     window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
 
-    // POPULATE INTERESTING DEFAULT MOVIES & BIOS
     const defaultMovies = [
-      { title: "Inception", img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop", bio: "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O." },
-      { title: "The Dark Knight", img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop", bio: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological tests of his ability." },
-      { title: "Interstellar", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop", bio: "When Earth becomes uninhabitable, a team of explorers undertakes the most important mission in human history: traveling beyond this galaxy to discover a future." },
-      { title: "Avatar: The Way of Water", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop", bio: "Jake Sully lives with his newfound family formed on the planet of Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri." },
+      { title: "Inception", img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop", bio: "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea." },
+      { title: "The Dark Knight", img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop", bio: "When the menace known as the Joker wreaks havoc, Batman must accept one of the greatest psychological tests of his ability." },
+      { title: "Interstellar", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop", bio: "A team of explorers undertakes the most important mission in human history: traveling beyond this galaxy." },
+      { title: "Avatar: The Way of Water", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop", bio: "Jake Sully lives with his family on Pandora. Once a familiar threat returns, Jake must protect his planet." },
       { title: "Dune: Part Two", img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop", bio: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family." },
       { title: "Oppenheimer", img: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=600&auto=format&fit=crop", bio: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb." }
     ];
 
-    // Seed defaults if empty
     [1, 2, 3].forEach(set => {
       for (let i = 1; i <= 16; i++) {
         const key = `${set}-${i}`;
@@ -639,199 +679,34 @@
       if (window.saveTelegramToFirebase) {
         await window.saveTelegramToFirebase(window.telegramLink);
       }
+      alert('Telegram Link Updated Successfully!');
       renderUI();
-      alert('Telegram Support Link updated successfully!');
-    }
-
-    window.populateAdminUsers = function() {
-      const select = document.getElementById('admin-selected-user');
-      const userListContainer = document.getElementById('all-users-list');
-      if (!select || !userListContainer) return;
-
-      select.innerHTML = '';
-      userListContainer.innerHTML = '';
-
-      const usernames = Object.keys(window.users);
-      if (usernames.length === 0) {
-        userListContainer.innerHTML = '<p style="font-size:0.8rem;">No registered members found yet.</p>';
-        return;
-      }
-
-      usernames.forEach(u => {
-        const option = document.createElement('option');
-        option.value = u;
-        option.innerText = `${u} (${window.users[u].email || 'No email'})`;
-        select.appendChild(option);
-
-        const item = document.createElement('div');
-        item.className = 'user-item';
-        const bal = typeof window.users[u].balance === 'number' ? window.users[u].balance.toFixed(2) : '0.00';
-        const pBal = typeof window.users[u].processingBalance === 'number' ? window.users[u].processingBalance.toFixed(2) : '0.00';
-        item.innerHTML = `
-          <div class="user-item-header">
-            <span>${u} <small>($${bal} | Proc: $${pBal})</small></span>
-            <span style="color:var(--primary);">${window.users[u].browser || 'Browser'} / ${window.users[u].device || 'Device'}</span>
-          </div>
-          <div class="user-item-details">${window.users[u].email || 'No email'}</div>
-        `;
-        userListContainer.appendChild(item);
-      });
-
-      loadAdminUserData();
-    };
-
-    function loadAdminUserData() {
-      const select = document.getElementById('admin-selected-user');
-      if (!select) return;
-      const selectedUser = select.value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const user = window.users[selectedUser];
-      document.getElementById('admin-user-balance').value = user.balance || 0;
-      document.getElementById('admin-stop-work-num').value = user.stopLimit || 16;
-      document.getElementById('admin-pause-message').value = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
-      document.getElementById('admin-user-set-select').value = user.currentSet || 1;
-
-      const wReqText = document.getElementById('admin-withdraw-request-text');
-      const wApproveBtn = document.getElementById('approve-withdraw-btn');
-
-      if (user.withdrawalStatus === 'Pending') {
-        const wAmt = user.withdrawalAmount || user.processingBalance || 0;
-        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
-        wApproveBtn.style.display = 'block';
-      } else {
-        wReqText.innerText = 'No pending withdrawal requests for this member.';
-        wApproveBtn.style.display = 'none';
-      }
-    }
-
-    async function saveAdminUserSettings() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
-      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
-      const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
-      const pauseMsg = document.getElementById('admin-pause-message').value.trim();
-
-      window.users[selectedUser].balance = newBal;
-      window.users[selectedUser].stopLimit = stopNum;
-      window.users[selectedUser].pauseMessage = pauseMsg;
-
-      if (window.users[selectedUser].currentSet !== setNum) {
-        window.users[selectedUser].currentSet = setNum;
-        window.users[selectedUser].completedInSet = 0;
-      }
-
-      if (window.users[selectedUser].completedInSet < stopNum) {
-        window.users[selectedUser].isSetApproved = true;
-      }
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(window.users[selectedUser]);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Updated settings for ${selectedUser}!`);
-    }
-
-    async function clearMemberPause() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      window.users[selectedUser].stopLimit = 16;
-      window.users[selectedUser].isSetApproved = true;
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(window.users[selectedUser]);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Cleared pause for ${selectedUser}! Member can now continue tasks.`);
-    }
-
-    async function approveNextSet() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const user = window.users[selectedUser];
-      if (user.currentSet < 3) {
-        user.currentSet += 1;
-        user.completedInSet = 0;
-        user.stopLimit = 16;
-        user.isSetApproved = true;
-
-        window.saveUsers();
-        if (window.saveUserToFirebase) {
-          await window.saveUserToFirebase(user);
-        }
-        window.populateAdminUsers();
-        renderUI();
-        alert(`Approved ${selectedUser} for Set ${user.currentSet}!`);
-      } else {
-        alert(`${selectedUser} is already on Set 3.`);
-      }
-    }
-
-    async function savePictureAndSettings() {
-      const setNum = document.getElementById('edit-set-num').value;
-      const imgIdx = document.getElementById('edit-img-index').value;
-      const fileInput = document.getElementById('edit-img-file');
-      const title = document.getElementById('edit-img-title').value.trim();
-      const bio = document.getElementById('edit-img-bio').value.trim();
-      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
-      const comment = document.getElementById('edit-img-comment').value.trim();
-
-      const key = `${setNum}-${imgIdx}`;
-      const existing = window.globalPictureData[key] || {};
-
-      const applySave = async (srcUrl) => {
-        const picObj = {
-          src: srcUrl || existing.src || defaultMovies[0].img,
-          title: title || existing.title || `Movie Promotion #${imgIdx}`,
-          bio: bio || existing.bio || `High engagement blockbuster promo content for Set ${setNum}.`,
-          reward: reward,
-          comment: comment || existing.comment || "Featured Movie Promotion!"
-        };
-
-        window.globalPictureData[key] = picObj;
-        window.savePictures();
-
-        if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(key, picObj);
-        }
-        renderUI();
-        alert(`Successfully saved details for Set ${setNum} Movie #${imgIdx}!`);
-      };
-
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          applySave(e.target.result);
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        applySave(null);
-      }
     }
 
     async function promoteMovie() {
       if (!currentUser || !window.users[currentUser]) return;
 
       const user = window.users[currentUser];
-      const maxWork = user.stopLimit || 16;
+      const set = user.currentSet || 1;
+      const count = user.completedInSet || 0;
+      const nextTask = count + 1;
 
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
+      if (nextTask > (user.stopLimit || 16) || !user.isSetApproved) {
+        alert("Your tasks are paused. Please contact customer support.");
+        return;
+      }
 
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
-      const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
+      const key = `${set}-${nextTask}`;
+      const picData = window.globalPictureData[key] || { reward: 0.50 };
+      const reward = parseFloat(picData.reward || 0.50);
 
-      user.completedInSet += 1;
-      user.balance = (user.balance || 0) + reward;
+      user.completedInSet = nextTask;
+      user.processingBalance = (parseFloat(user.processingBalance) || 0) + reward;
 
-      if (user.completedInSet >= maxWork) {
+      // When all 16 tasks are done, transfer processing earnings to main balance!
+      if (user.completedInSet >= 16) {
+        user.balance = (parseFloat(user.balance) || 0) + (parseFloat(user.processingBalance) || 0);
+        user.processingBalance = 0;
         user.isSetApproved = false;
       }
 
@@ -840,8 +715,9 @@
         await window.saveUserToFirebase(user);
       }
 
-      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for promoting task #${user.completedInSet}!`;
+      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} in processing earnings for completing task ${nextTask}/16!`;
       document.getElementById('promo-modal').classList.remove('hidden');
+
       renderUI();
     }
 
@@ -851,23 +727,26 @@
 
     async function requestWithdrawal() {
       if (!currentUser || !window.users[currentUser]) return;
-
       const user = window.users[currentUser];
+
       const wallet = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value);
 
       if (!wallet) {
-        alert('Please enter your Crypto Wallet Address.');
+        alert('Please enter a valid crypto wallet address.');
         return;
       }
 
-      if (amount <= 0 || amount > user.balance) {
-        alert('Invalid withdrawal amount or insufficient balance.');
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid withdrawal amount.');
         return;
       }
 
-      user.balance -= amount;
-      user.processingBalance = (user.processingBalance || 0) + amount;
+      if (amount > user.balance) {
+        alert('Insufficient available balance!');
+        return;
+      }
+
       user.withdrawalStatus = 'Pending';
       user.withdrawalAmount = amount;
       user.walletAddress = wallet;
@@ -877,9 +756,125 @@
         await window.saveUserToFirebase(user);
       }
 
-      alert('Withdrawal request submitted! Funds moved to Processing Balance.');
-      document.getElementById('withdraw-wallet-address').value = '';
-      document.getElementById('withdraw-amount-input').value = '';
+      alert('Withdrawal request submitted!');
+      renderUI();
+    }
+
+    window.populateAdminUsers = function() {
+      const select = document.getElementById('admin-selected-user');
+      const listContainer = document.getElementById('all-users-list');
+
+      select.innerHTML = '';
+      listContainer.innerHTML = '';
+
+      const usernames = Object.keys(window.users);
+      if (usernames.length === 0) {
+        listContainer.innerHTML = '<p>No registered users found.</p>';
+        return;
+      }
+
+      usernames.forEach(u => {
+        const user = window.users[u];
+
+        const option = document.createElement('option');
+        option.value = u;
+        option.innerText = `${u} (${user.email || 'No email'})`;
+        select.appendChild(option);
+
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        item.innerHTML = `
+          <div><strong>User:</strong> ${u} | <strong>Email:</strong> ${user.email || 'N/A'} | <strong>Pass:</strong> ${user.password || 'N/A'}</div>
+          <div><strong>Set:</strong> ${user.currentSet || 1} | <strong>Task:</strong> ${user.completedInSet || 0}/16 | <strong>Balance:</strong> $${(user.balance || 0).toFixed(2)} | <strong>Processing:</strong> $${(user.processingBalance || 0).toFixed(2)}</div>
+          <div><strong>Device:</strong> ${user.device || 'N/A'} | <strong>Browser:</strong> ${user.browser || 'N/A'}</div>
+        `;
+        listContainer.appendChild(item);
+      });
+
+      window.loadAdminUserData();
+    };
+
+    window.loadAdminUserData = function() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      document.getElementById('admin-user-set-select').value = user.currentSet || 1;
+      document.getElementById('admin-stop-work-num').value = user.stopLimit || 16;
+      document.getElementById('admin-pause-message').value = user.pauseMessage || '';
+      document.getElementById('admin-user-balance').value = user.balance || 0;
+
+      const reqText = document.getElementById('admin-withdraw-request-text');
+      const approveBtn = document.getElementById('approve-withdraw-btn');
+
+      if (user.withdrawalStatus === 'Pending') {
+        reqText.innerText = `User ${selectedUser} requested $${user.withdrawalAmount} to ${user.walletAddress}`;
+        approveBtn.style.display = 'block';
+      } else {
+        reqText.innerText = `No active withdrawal request. Status: ${user.withdrawalStatus || 'None'}`;
+        approveBtn.style.display = 'none';
+      }
+    };
+
+    async function saveAdminUserSettings() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      user.currentSet = parseInt(document.getElementById('admin-user-set-select').value);
+      user.stopLimit = parseInt(document.getElementById('admin-stop-work-num').value);
+      user.pauseMessage = document.getElementById('admin-pause-message').value;
+      user.balance = parseFloat(document.getElementById('admin-user-balance').value) || 0;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
+      }
+
+      alert('User settings updated successfully!');
+      window.populateAdminUsers();
+      renderUI();
+    }
+
+    async function clearMemberPause() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      user.isSetApproved = true;
+      user.stopLimit = 16;
+      user.pauseMessage = '';
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
+      }
+
+      alert(`Pause cleared for ${selectedUser}. Member can resume work.`);
+      window.populateAdminUsers();
+      renderUI();
+    }
+
+    async function approveNextSet() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      if (user.currentSet < 3) {
+        user.currentSet += 1;
+      }
+      user.completedInSet = 0;
+      user.stopLimit = 16;
+      user.isSetApproved = true;
+      user.pauseMessage = '';
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(user);
+      }
+
+      alert(`User ${selectedUser} approved for Set ${user.currentSet}!`);
+      window.populateAdminUsers();
       renderUI();
     }
 
@@ -888,7 +883,7 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      user.processingBalance = 0;
+      user.balance = Math.max(0, user.balance - user.withdrawalAmount);
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -896,9 +891,51 @@
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
+
+      alert('Withdrawal approved!');
       window.populateAdminUsers();
       renderUI();
-      alert(`Approved withdrawal for ${selectedUser}!`);
+    }
+
+    async function savePictureAndSettings() {
+      const set = document.getElementById('edit-set-num').value;
+      const index = document.getElementById('edit-img-index').value;
+      const title = document.getElementById('edit-img-title').value.trim();
+      const bio = document.getElementById('edit-img-bio').value.trim();
+      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const comment = document.getElementById('edit-img-comment').value.trim();
+      const fileInput = document.getElementById('edit-img-file');
+
+      const key = `${set}-${index}`;
+      let picData = window.globalPictureData[key] || { src: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop' };
+
+      picData.title = title || picData.title || `Movie #${index}`;
+      picData.bio = bio || picData.bio || 'Featured promo movie';
+      picData.reward = reward;
+      picData.comment = comment || 'Featured Promo!';
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          picData.src = e.target.result;
+          window.globalPictureData[key] = picData;
+          window.savePictures();
+          if (window.savePicturesToFirebase) {
+            await window.savePicturesToFirebase(key, picData);
+          }
+          alert(`Movie details updated for Set ${set} Movie ${index}!`);
+          renderUI();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        window.globalPictureData[key] = picData;
+        window.savePictures();
+        if (window.savePicturesToFirebase) {
+          await window.savePicturesToFirebase(key, picData);
+        }
+        alert(`Movie details updated for Set ${set} Movie ${index}!`);
+        renderUI();
+      }
     }
 
     function renderUI() {
@@ -913,63 +950,68 @@
         workerView.classList.remove('hidden');
 
         const user = window.users[currentUser];
-        document.getElementById('user-display-name').innerText = user.username;
-        document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
-        document.getElementById('set-num-text').innerText = user.currentSet || 1;
+        const set = user.currentSet || 1;
+        const count = user.completedInSet || 0;
+        const stopAt = user.stopLimit || 16;
 
-        const bal = typeof user.balance === 'number' ? user.balance.toFixed(2) : '0.00';
-        const pBal = typeof user.processingBalance === 'number' ? user.processingBalance.toFixed(2) : '0.00';
+        document.getElementById('user-display-name').innerText = currentUser;
+        document.getElementById('current-set-display').innerText = `Set ${set} / 3`;
+        document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+        document.getElementById('worker-processing-balance').innerText = `$${(user.processingBalance || 0).toFixed(2)}`;
 
-        document.getElementById('worker-balance').innerText = `$${bal}`;
-        document.getElementById('worker-processing-balance').innerText = `$${pBal}`;
+        document.getElementById('set-num-text').innerText = set;
+        document.getElementById('progress-text').innerText = `${count} / 16 Completed`;
+        document.getElementById('progress-fill').style.width = `${(count / 16) * 100}%`;
 
-        const completed = user.completedInSet || 0;
-        document.getElementById('progress-text').innerText = `${completed} / 16 Completed`;
-        document.getElementById('progress-fill').style.width = `${(completed / 16) * 100}%`;
-
-        // Check Pause / Complete State
-        const maxWork = user.stopLimit || 16;
-        const pausedMsgBox = document.getElementById('completed-set-message');
-        const pauseReasonText = document.getElementById('pause-reason-text');
+        const isPaused = (count >= stopAt) || !user.isSetApproved;
+        const pauseMsgBox = document.getElementById('completed-set-message');
         const movieBox = document.getElementById('movie-container');
 
-        if (completed >= maxWork || user.isSetApproved === false) {
+        if (isPaused) {
+          pauseMsgBox.classList.remove('hidden');
           movieBox.classList.add('hidden');
-          pausedMsgBox.classList.remove('hidden');
-          pauseReasonText.innerText = user.pauseMessage || "You have completed this task set! Please contact support to unlock the next set.";
+          if (user.pauseMessage) {
+            document.getElementById('pause-reason-text').innerText = user.pauseMessage;
+          } else if (count >= 16) {
+            document.getElementById('pause-reason-text').innerText = `You have completed all 16 tasks for Set ${set}! Earnings transferred to balance. Contact support to unlock the next set.`;
+          } else {
+            document.getElementById('pause-reason-text').innerText = `Task paused at #${count}. Please contact support to proceed.`;
+          }
         } else {
-          pausedMsgBox.classList.add('hidden');
+          pauseMsgBox.classList.add('hidden');
           movieBox.classList.remove('hidden');
 
-          const key = `${user.currentSet || 1}-${completed + 1}`;
-          const picData = window.globalPictureData[key] || {};
+          const nextTask = count + 1;
+          const key = `${set}-${nextTask}`;
+          const picData = window.globalPictureData[key] || {
+            src: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop',
+            title: `Featured Movie #${nextTask}`,
+            bio: 'Storyline unavailable',
+            reward: 0.50,
+            comment: 'Ready to promote!'
+          };
 
-          document.getElementById('movie-img').src = picData.src || defaultMovies[0].img;
-          document.getElementById('movie-title').innerText = picData.title || `Movie Promotion #${completed + 1}`;
-          document.getElementById('movie-bio').innerText = picData.bio || "Engaging plot storyline summary for movie promotion task.";
+          document.getElementById('movie-img').src = picData.src;
+          document.getElementById('movie-title').innerText = picData.title;
+          document.getElementById('movie-bio').innerText = picData.bio;
+          document.getElementById('movie-reward').innerText = `$${parseFloat(picData.reward || 0.50).toFixed(2)}`;
           document.getElementById('admin-comment').innerText = `Admin Comment: ${picData.comment || 'Ready to promote!'}`;
-          document.getElementById('movie-reward').innerText = `$${(picData.reward || 0.50).toFixed(2)}`;
         }
 
-        // Withdrawal status text
-        const wStatusText = document.getElementById('withdraw-status');
-        if (user.withdrawalStatus === 'Pending') {
-          wStatusText.innerHTML = `<span style="color:var(--warning);">⏳ Pending Withdrawal: $${(user.withdrawalAmount || 0).toFixed(2)}</span>`;
-        } else if (user.withdrawalStatus === 'Approved') {
-          wStatusText.innerHTML = `<span style="color:var(--success);">✅ Last Withdrawal Approved!</span>`;
+        const withdrawStatus = document.getElementById('withdraw-status');
+        if (user.withdrawalStatus && user.withdrawalStatus !== 'None') {
+          withdrawStatus.innerText = `Status: ${user.withdrawalStatus} ($${user.withdrawalAmount})`;
         } else {
-          wStatusText.innerText = '';
+          withdrawStatus.innerText = '';
         }
-
       } else {
         if (document.getElementById('admin-view').classList.contains('hidden')) {
           authView.classList.remove('hidden');
-          workerView.classList.add('hidden');
         }
+        workerView.classList.add('hidden');
       }
     }
 
-    // Initial render call
     renderUI();
   </script>
 </body>
