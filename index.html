@@ -107,6 +107,8 @@
     }
     .btn-secondary:hover { background: rgba(255,255,255,0.05); }
     .btn-telegram { background: var(--telegram); color: #fff; border-radius: 30px; }
+    .btn-danger { background: #dc2626; color: #fff; border-radius: 30px; }
+    .btn-danger:hover { background: #b91c1c; }
     
     label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
     input, select, textarea { 
@@ -121,7 +123,6 @@
     }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
 
-    /* Movie Showcases Grid */
     .featured-movies {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -169,6 +170,8 @@
     
     .user-list-box { background: #0b0d10; border: 1px solid var(--border); border-radius: 12px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
     .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
+    .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
+    .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
     .modal-box { background: var(--card-bg); border: 1px solid var(--primary); border-radius: 20px; padding: 24px; max-width: 380px; width: 100%; text-align: center; }
@@ -181,7 +184,7 @@
       <div class="logo">
         <span class="logo-badge">V</span> VideoEarn
       </div>
-      <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Access</button>
+      <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
     </header>
 
     <!-- AUTHENTICATION VIEW -->
@@ -343,15 +346,47 @@
             <input type="number" id="admin-user-balance" step="0.01">
 
             <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
-            <button class="btn" style="margin-top: 8px; background: #dc2626; color:#fff;" onclick="clearMemberPause()">Clear Pause & Resume</button>
+            <button class="btn btn-danger" style="margin-top: 8px;" onclick="clearMemberPause()">Clear Pause & Resume</button>
             <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Advance</button>
           </div>
 
           <div class="admin-section">
-            <h4>Telegram Link</h4>
+            <h4>Telegram Link Settings</h4>
             <label>Link or Username:</label>
             <input type="text" id="admin-telegram-link" placeholder="https://t.me/">
             <button class="btn btn-secondary" onclick="saveTelegramLink()">Save Link</button>
+          </div>
+
+          <!-- Upload Picture & Edit Settings -->
+          <div class="admin-section">
+            <h4>Upload & Edit Movie Pictures</h4>
+            <label>Select Set Number (1, 2, or 3):</label>
+            <select id="edit-set-num">
+              <option value="1">Set 1</option>
+              <option value="2">Set 2</option>
+              <option value="3">Set 3</option>
+            </select>
+
+            <label>Picture Number (1 to 16):</label>
+            <input type="number" id="edit-img-index" min="1" max="16" value="1">
+
+            <label>Upload Movie Picture:</label>
+            <input type="file" id="edit-img-file" accept="image/*">
+
+            <label>Reward Amount ($):</label>
+            <input type="number" id="edit-img-reward" value="0.50" step="0.01">
+
+            <label>Admin Comment:</label>
+            <input type="text" id="edit-img-comment" placeholder="Featured movie promo note...">
+
+            <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
+          </div>
+
+          <!-- Withdrawal Requests -->
+          <div class="admin-section">
+            <h4>Withdrawal Requests</h4>
+            <p id="admin-withdraw-request-text">No active withdrawal request.</p>
+            <button class="btn" id="approve-withdraw-btn" style="background: var(--success); display: none; margin-top: 8px;" onclick="approveWithdrawal()">Approve Withdrawal Request</button>
           </div>
         </div>
       </div>
@@ -368,7 +403,7 @@
     </div>
   </div>
 
-  <!-- FIREBASE INTERACTION & APPLICATION LOGIC -->
+  <!-- FIREBASE INTEGRATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
     import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
@@ -396,6 +431,22 @@
       }
     };
 
+    window.savePicturesToFirebase = async function(pictureKey, picData) {
+      try {
+        await setDoc(doc(db, "pictures", pictureKey), picData, { merge: true });
+      } catch (err) {
+        console.error("Firebase pictures save error:", err);
+      }
+    };
+
+    window.saveTelegramToFirebase = async function(link) {
+      try {
+        await setDoc(doc(db, "app_settings", "telegram"), { link: link }, { merge: true });
+      } catch (err) {
+        console.error("Firebase Telegram save error:", err);
+      }
+    };
+
     window.listenToFirebaseData = function() {
       onSnapshot(collection(db, "users"), (snapshot) => {
         snapshot.forEach((doc) => {
@@ -404,6 +455,22 @@
         window.saveUsers();
         if (window.isAdminLoggedIn) window.populateAdminUsers();
         window.renderUI();
+      });
+
+      onSnapshot(collection(db, "pictures"), (snapshot) => {
+        snapshot.forEach((doc) => {
+          window.globalPictureData[doc.id] = doc.data();
+        });
+        window.savePictures();
+        window.renderUI();
+      });
+
+      onSnapshot(doc(db, "app_settings", "telegram"), (docSnap) => {
+        if (docSnap.exists() && docSnap.data().link) {
+          window.telegramLink = docSnap.data().link;
+          localStorage.setItem('ve_telegram_link', window.telegramLink);
+          window.renderUI();
+        }
       });
     };
 
@@ -418,7 +485,8 @@
     window.isAdminLoggedIn = false;
 
     window.saveUsers = function() { localStorage.setItem('ve_users', JSON.stringify(window.users)); };
-    
+    window.savePictures = function() { localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData)); };
+
     function showAuthTab(tab) {
       if (tab === 'signup') {
         document.getElementById('login-box').classList.add('hidden');
@@ -439,7 +507,8 @@
 
       const newUser = {
         username: u, email, password: p, currentSet: 1, completedInSet: 0,
-        stopLimit: 16, pauseMessage: '', isSetApproved: true, balance: 0.00
+        stopLimit: 16, pauseMessage: '', isSetApproved: true, balance: 0.00,
+        withdrawalStatus: 'None', withdrawalAmount: 0, walletAddress: ''
       };
 
       window.users[u] = newUser;
@@ -454,7 +523,7 @@
       const id = document.getElementById('login-identifier').value.trim().toLowerCase();
       const p = document.getElementById('login-password').value.trim();
 
-      let matched = window.users[id] ? id : Object.keys(window.users).find(u => window.users[u].email === id);
+      let matched = window.users[id] ? id : Object.keys(window.users).find(u => window.users[u] && window.users[u].email === id);
 
       if (matched && window.users[matched].password === p) {
         currentUser = matched;
@@ -484,7 +553,7 @@
         toggleBtn.innerText = 'User Area';
       } else {
         adminView.classList.add('hidden');
-        toggleBtn.innerText = 'Admin Access';
+        toggleBtn.innerText = 'Admin Login';
         renderUI();
       }
     }
@@ -494,7 +563,9 @@
         window.isAdminLoggedIn = true;
         document.getElementById('admin-login-card').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
+        document.getElementById('admin-telegram-link').value = window.telegramLink;
         window.populateAdminUsers();
+        renderUI();
       } else {
         alert('Incorrect Admin Password!');
       }
@@ -506,21 +577,240 @@
       document.getElementById('admin-dashboard').classList.add('hidden');
     }
 
+    async function saveTelegramLink() {
+      const link = document.getElementById('admin-telegram-link').value.trim();
+      if (!link) return alert('Please enter a valid link.');
+      window.telegramLink = link.startsWith('http') ? link : `https://${link}`;
+      localStorage.setItem('ve_telegram_link', window.telegramLink);
+      if (window.saveTelegramToFirebase) await window.saveTelegramToFirebase(window.telegramLink);
+      renderUI();
+      alert('Telegram Link updated!');
+    }
+
+    window.populateAdminUsers = function() {
+      const select = document.getElementById('admin-selected-user');
+      const userListContainer = document.getElementById('all-users-list');
+      if (!select || !userListContainer) return;
+
+      select.innerHTML = '';
+      userListContainer.innerHTML = '';
+
+      const usernames = Object.keys(window.users);
+      if (usernames.length === 0) {
+        userListContainer.innerHTML = '<p style="font-size:0.8rem;">No registered members found yet.</p>';
+        return;
+      }
+
+      usernames.forEach(u => {
+        const option = document.createElement('option');
+        option.value = u;
+        option.innerText = `${u} (${window.users[u].email || 'No email'})`;
+        select.appendChild(option);
+
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        const bal = typeof window.users[u].balance === 'number' ? window.users[u].balance.toFixed(2) : '0.00';
+        item.innerHTML = `
+          <div class="user-item-header">
+            <span>${u} <small>($${bal})</small></span>
+          </div>
+          <div class="user-item-details">${window.users[u].email || 'No email'}</div>
+        `;
+        userListContainer.appendChild(item);
+      });
+
+      loadAdminUserData();
+    };
+
+    function loadAdminUserData() {
+      const select = document.getElementById('admin-selected-user');
+      if (!select) return;
+      const selectedUser = select.value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      document.getElementById('admin-user-balance').value = user.balance || 0;
+      document.getElementById('admin-stop-work-num').value = user.stopLimit || 16;
+      document.getElementById('admin-pause-message').value = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
+      document.getElementById('admin-user-set-select').value = user.currentSet || 1;
+
+      const wReqText = document.getElementById('admin-withdraw-request-text');
+      const wApproveBtn = document.getElementById('approve-withdraw-btn');
+
+      if (user.withdrawalStatus === 'Pending') {
+        const wAmt = user.withdrawalAmount || user.balance || 0;
+        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
+        wApproveBtn.style.display = 'block';
+      } else {
+        wReqText.innerText = 'No pending withdrawal requests for this member.';
+        wApproveBtn.style.display = 'none';
+      }
+    }
+
+    async function saveAdminUserSettings() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
+      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
+      const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
+      const pauseMsg = document.getElementById('admin-pause-message').value.trim();
+
+      window.users[selectedUser].balance = newBal;
+      window.users[selectedUser].stopLimit = stopNum;
+      window.users[selectedUser].pauseMessage = pauseMsg;
+      
+      if (window.users[selectedUser].currentSet !== setNum) {
+        window.users[selectedUser].currentSet = setNum;
+        window.users[selectedUser].completedInSet = 0;
+      }
+
+      if (window.users[selectedUser].completedInSet < stopNum) {
+        window.users[selectedUser].isSetApproved = true;
+      }
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(window.users[selectedUser]);
+      }
+      window.populateAdminUsers();
+      renderUI();
+      alert(`Updated settings for ${selectedUser}!`);
+    }
+
+    async function clearMemberPause() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      window.users[selectedUser].stopLimit = 16;
+      window.users[selectedUser].isSetApproved = true;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) {
+        await window.saveUserToFirebase(window.users[selectedUser]);
+      }
+      window.populateAdminUsers();
+      renderUI();
+      alert(`Cleared pause for ${selectedUser}! Member can now continue tasks.`);
+    }
+
+    async function approveNextSet() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return alert('Please select a member first.');
+
+      const user = window.users[selectedUser];
+      if (user.currentSet < 3) {
+        user.currentSet += 1;
+        user.completedInSet = 0;
+        user.stopLimit = 16;
+        user.isSetApproved = true;
+        window.saveUsers();
+        if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
+        window.populateAdminUsers();
+        renderUI();
+        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
+      } else {
+        alert(`${selectedUser} has already completed all 3 sets!`);
+      }
+    }
+
+    async function savePictureAndSettings() {
+      const setNum = document.getElementById('edit-set-num').value;
+      const imgIdx = document.getElementById('edit-img-index').value;
+      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
+      const comment = document.getElementById('edit-img-comment').value.trim();
+      const fileInput = document.getElementById('edit-img-file');
+
+      const key = `${setNum}-${imgIdx}`;
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          const picData = {
+            imageData: e.target.result,
+            reward: reward,
+            comment: comment
+          };
+          window.globalPictureData[key] = picData;
+          window.savePictures();
+          if (window.savePicturesToFirebase) await window.savePicturesToFirebase(key, picData);
+          alert(`Saved picture & settings for Set ${setNum}, Image #${imgIdx}`);
+          renderUI();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        const existingImg = window.globalPictureData[key]?.imageData || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600";
+        const picData = {
+          imageData: existingImg,
+          reward: reward,
+          comment: comment
+        };
+        window.globalPictureData[key] = picData;
+        window.savePictures();
+        if (window.savePicturesToFirebase) await window.savePicturesToFirebase(key, picData);
+        alert(`Saved details for Set ${setNum}, Image #${imgIdx}`);
+        renderUI();
+      }
+    }
+
+    async function requestWithdrawal() {
+      if (!currentUser || !window.users[currentUser]) return;
+      const user = window.users[currentUser];
+      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
+      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+
+      if (!wallet || amount <= 0) return alert('Please enter a valid wallet address and amount.');
+      if (amount > user.balance) return alert('Insufficient balance!');
+
+      user.withdrawalStatus = 'Pending';
+      user.withdrawalAmount = amount;
+      user.walletAddress = wallet;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
+      renderUI();
+      alert('Withdrawal request submitted! Pending admin approval.');
+    }
+
+    async function approveWithdrawal() {
+      const selectedUser = document.getElementById('admin-selected-user').value;
+      if (!selectedUser || !window.users[selectedUser]) return;
+
+      const user = window.users[selectedUser];
+      const wAmt = user.withdrawalAmount || 0;
+
+      user.balance = Math.max(0, user.balance - wAmt);
+      user.withdrawalStatus = 'Approved';
+      user.withdrawalAmount = 0;
+
+      window.saveUsers();
+      if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
+      window.populateAdminUsers();
+      renderUI();
+      alert(`Approved withdrawal of $${wAmt.toFixed(2)} for ${selectedUser}!`);
+    }
+
     async function promoteMovie() {
       if (!currentUser || !window.users[currentUser]) return;
       const user = window.users[currentUser];
+      const maxWork = user.stopLimit || 16;
 
-      if (user.completedInSet >= user.stopLimit || user.isSetApproved === false) return;
+      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
+
+      const key = `${user.currentSet}-${user.completedInSet + 1}`;
+      const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
 
       user.completedInSet += 1;
-      user.balance += 0.50;
+      user.balance = (user.balance || 0) + reward;
 
-      if (user.completedInSet >= user.stopLimit) user.isSetApproved = false;
+      if (user.completedInSet >= maxWork) {
+        user.isSetApproved = false;
+      }
 
       window.saveUsers();
       if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
 
-      document.getElementById('modal-reward-text').innerText = `You earned $0.50 for promotion #${user.completedInSet}!`;
+      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for promotion #${user.completedInSet}!`;
       document.getElementById('promo-modal').classList.remove('hidden');
     }
 
@@ -533,6 +823,9 @@
       const authView = document.getElementById('auth-view');
       const workerView = document.getElementById('worker-view');
 
+      document.getElementById('telegram-support-btn').href = window.telegramLink;
+      document.getElementById('support-set-link').href = window.telegramLink;
+
       if (currentUser && window.users[currentUser]) {
         authView.classList.add('hidden');
         workerView.classList.remove('hidden');
@@ -541,38 +834,55 @@
         document.getElementById('user-display-name').innerText = user.username;
         document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
         document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
-        document.getElementById('progress-text').innerText = `${user.completedInSet} / 16 Completed`;
-        document.getElementById('progress-fill').style.width = `${(user.completedInSet / 16) * 100}%`;
+        document.getElementById('set-num-text').innerText = user.currentSet || 1;
+        document.getElementById('progress-text').innerText = `${user.completedInSet || 0} / 16 Completed`;
+        document.getElementById('progress-fill').style.width = `${((user.completedInSet || 0) / 16) * 100}%`;
 
-        const paused = user.completedInSet >= user.stopLimit || !user.isSetApproved;
-        document.getElementById('completed-set-message').classList.toggle('hidden', !paused);
-        document.getElementById('movie-container').classList.toggle('hidden', paused);
+        const maxWork = user.stopLimit || 16;
+        const isPaused = (user.completedInSet >= maxWork) || (user.isSetApproved === false);
+
+        if (isPaused) {
+          document.getElementById('completed-set-message').classList.remove('hidden');
+          document.getElementById('movie-container').classList.add('hidden');
+          if (user.pauseMessage) {
+            document.getElementById('pause-reason-text').innerText = user.pauseMessage;
+          } else {
+            document.getElementById('pause-reason-text').innerText = "You have successfully completed this set! Kindly contact customer support to proceed to the next set.";
+          }
+        } else {
+          document.getElementById('completed-set-message').classList.add('hidden');
+          document.getElementById('movie-container').classList.remove('hidden');
+
+          const key = `${user.currentSet}-${(user.completedInSet || 0) + 1}`;
+          const currentPic = window.globalPictureData[key];
+
+          if (currentPic && currentPic.imageData) {
+            document.getElementById('movie-img').src = currentPic.imageData;
+          } else {
+            document.getElementById('movie-img').src = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600";
+          }
+
+          document.getElementById('movie-title').innerText = `Movie Promotion #${(user.completedInSet || 0) + 1}`;
+          document.getElementById('admin-comment').innerText = currentPic?.comment ? `Admin Note: ${currentPic.comment}` : "Admin Comment: Ready to promote!";
+          document.getElementById('movie-reward').innerText = `$${parseFloat(currentPic?.reward || 0.50).toFixed(2)}`;
+        }
+
+        const wStatus = document.getElementById('withdraw-status');
+        if (user.withdrawalStatus === 'Pending') {
+          wStatus.innerText = `Pending withdrawal request for $${(user.withdrawalAmount || 0).toFixed(2)}`;
+          wStatus.style.color = 'var(--warning)';
+        } else if (user.withdrawalStatus === 'Approved') {
+          wStatus.innerText = `Last withdrawal approved successfully!`;
+          wStatus.style.color = 'var(--primary)';
+        } else {
+          wStatus.innerText = '';
+        }
+
       } else {
         authView.classList.remove('hidden');
         workerView.classList.add('hidden');
       }
     }
-
-    window.populateAdminUsers = function() {
-      const select = document.getElementById('admin-selected-user');
-      const list = document.getElementById('all-users-list');
-      if (!select || !list) return;
-
-      select.innerHTML = '';
-      list.innerHTML = '';
-
-      Object.keys(window.users).forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u;
-        opt.innerText = `${u} (${window.users[u].email})`;
-        select.appendChild(opt);
-
-        const item = document.createElement('div');
-        item.className = 'user-item';
-        item.innerHTML = `<strong>${u}</strong> <span>Balance: $${window.users[u].balance.toFixed(2)}</span>`;
-        list.appendChild(item);
-      });
-    };
 
     renderUI();
   </script>
