@@ -48,7 +48,7 @@
     .progress-bar { background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
     .movie-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 12px; background: #f8fafc; }
-    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; }
+    .movie-box img { width: 100%; max-height: 280px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; background: #e2e8f0; display: block; }
     
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     .stat-card { background: #f8fafc; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
@@ -402,6 +402,15 @@
     window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
     window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
 
+    // Default movie posters if none uploaded by admin
+    const defaultMoviePosters = [
+      "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=600&q=80"
+    ];
+
     window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
     let currentUser = localStorage.getItem('ve_current_user') || null;
     window.isAdminLoggedIn = false;
@@ -689,7 +698,8 @@
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        const existingImg = window.globalPictureData[key]?.imageData || "";
+        const fallback = defaultMoviePosters[(parseInt(imgIdx) - 1) % defaultMoviePosters.length];
+        const existingImg = window.globalPictureData[key]?.imageData || fallback;
         const picData = {
           imageData: existingImg,
           reward: reward,
@@ -842,16 +852,18 @@
           document.getElementById('completed-set-message').classList.add('hidden');
           document.getElementById('movie-container').classList.remove('hidden');
 
-          const key = `${user.currentSet}-${(user.completedInSet || 0) + 1}`;
+          const taskIndex = user.completedInSet || 0;
+          const key = `${user.currentSet}-${taskIndex + 1}`;
           const currentPic = window.globalPictureData[key];
 
-          if (currentPic && currentPic.imageData) {
+          if (currentPic && currentPic.imageData && currentPic.imageData.trim() !== "") {
             document.getElementById('movie-img').src = currentPic.imageData;
           } else {
-            document.getElementById('movie-img').src = "";
+            const fallback = defaultMoviePosters[taskIndex % defaultMoviePosters.length];
+            document.getElementById('movie-img').src = fallback;
           }
 
-          document.getElementById('movie-title').innerText = `Movie Promotion #${(user.completedInSet || 0) + 1}`;
+          document.getElementById('movie-title').innerText = `Movie Promotion #${taskIndex + 1}`;
           document.getElementById('admin-comment').innerText = currentPic?.comment ? `Admin Note: ${currentPic.comment}` : "Admin Comment: Ready to promote!";
           document.getElementById('movie-reward').innerText = `$${parseFloat(currentPic?.reward || 0.50).toFixed(2)}`;
         }
